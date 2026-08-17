@@ -1,0 +1,13 @@
+name = "english-quest"
+main = "worker.js"
+compatibility_date = "2025-06-01"
+
+# 靜態檔案：index.html 照舊從根目錄提供，網址與行為完全不變
+[assets]
+directory = "./"
+binding = "ASSETS"
+
+# D1 資料庫不在這裡設定。
+# 部署完成後，到 Cloudflare 後台：
+#   Workers & Pages → english-quest → Settings → Bindings → Add
+#   類型選 D1 database，Variable name 填 DB，Database 選 eq-stats
