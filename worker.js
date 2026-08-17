@@ -21,6 +21,48 @@ export default {
       return new Response(null, { status: 204 });
     }
 
+    // ---------- 1.5 診斷頁 ----------
+    if (url.pathname === "/ping") {
+      const out = [];
+      out.push("D1 綁定：" + (env.DB ? "正常" : "沒有綁到（binding 名稱要叫 DB）"));
+
+      if (env.DB) {
+        try {
+          const ts = Date.now();
+          const day = new Date(ts + TZ_OFFSET).toISOString().slice(0, 10);
+          await env.DB.prepare(
+            "INSERT INTO events (ts, day, aid, ev, mode) VALUES (?, ?, ?, ?, ?)"
+          ).bind(ts, day, "a-pingtest", "mode", "flash").run();
+          out.push("寫入測試：成功");
+        } catch (e) {
+          out.push("寫入測試：失敗 → " + e.message);
+        }
+        try {
+          const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM events").first();
+          out.push("目前資料筆數：" + r.n);
+        } catch (e) {
+          out.push("讀取失敗 → " + e.message);
+        }
+      }
+
+      try {
+        const a = await env.ASSETS.fetch(new URL("/index.html", request.url));
+        const html = await a.text();
+        out.push("index.html 大小：" + Math.round(html.length / 1024) + " KB");
+        out.push("埋點程式碼：" + (html.indexOf("ibq_aid") >= 0 ? "有，已部署" : "沒有！部署的是舊版 index.html"));
+      } catch (e) {
+        out.push("讀不到 index.html → " + e.message);
+      }
+
+      out.push("");
+      out.push("看完請開 /admin 確認筆數有沒有增加。");
+      out.push("確認完成後這個 /ping 頁面就可以移除了。");
+
+      return new Response(out.join("\n"), {
+        headers: { "Content-Type": "text/plain; charset=utf-8" }
+      });
+    }
+
     // ---------- 2. 後台 ----------
     if (url.pathname === "/admin") {
       return new Response(DASHBOARD_HTML, {
