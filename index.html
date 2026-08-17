@@ -5535,17 +5535,14 @@ render();
       if (lastSent[k] && now - lastSent[k] < 3000) return; // 防連點重複計數
       lastSent[k] = now;
 
-      var body = JSON.stringify({ aid: aid, ev: ev, mode: mode || null });
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon(ENDPOINT, new Blob([body], { type: "application/json" }));
-      } else {
-        fetch(ENDPOINT, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: body,
-          keepalive: true
-        })["catch"](function () {});
-      }
+      // 用圖片請求送出：任何瀏覽器、任何 App 內建瀏覽器都不會被擋
+      var src = ENDPOINT + "?aid=" + encodeURIComponent(aid)
+              + "&ev=" + encodeURIComponent(ev)
+              + (mode ? "&mode=" + encodeURIComponent(mode) : "")
+              + "&_=" + now;
+      var img = new Image();
+      img.onerror = function () {};
+      img.src = src;
     } catch (e) { /* 靜默 */ }
   }
 

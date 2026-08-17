@@ -16,9 +16,23 @@ export default {
     const url = new URL(request.url);
 
     // ---------- 1. 收埋點 ----------
-    if (url.pathname === "/t" && request.method === "POST") {
-      if (env.DB) ctx.waitUntil(record(request, env));
-      return new Response(null, { status: 204 });
+    if (url.pathname === "/t") {
+      if (env.DB) {
+        if (request.method === "POST") {
+          ctx.waitUntil(record(request, env));
+        } else {
+          ctx.waitUntil(save(env, url.searchParams.get("aid"),
+                                 url.searchParams.get("ev"),
+                                 url.searchParams.get("mode")));
+        }
+      }
+      // 回傳 1x1 透明 GIF，讓 <img> 正常收尾
+      return new Response(GIF, {
+        headers: {
+          "Content-Type": "image/gif",
+          "Cache-Control": "no-store, no-cache, must-revalidate"
+        }
+      });
     }
 
     // ---------- 1.5 診斷頁 ----------
@@ -28,14 +42,12 @@ export default {
 
       if (env.DB) {
         try {
-          const ts = Date.now();
-          const day = new Date(ts + TZ_OFFSET).toISOString().slice(0, 10);
-          await env.DB.prepare(
-            "INSERT INTO events (ts, day, aid, ev, mode) VALUES (?, ?, ?, ?, ?)"
-          ).bind(ts, day, "a-pingtest", "mode", "flash").run();
-          out.push("寫入測試：成功");
+          const d = await env.DB.prepare(
+            "DELETE FROM events WHERE aid = 'a-pingtest'"
+          ).run();
+          out.push("已清除先前的測試假資料");
         } catch (e) {
-          out.push("寫入測試：失敗 → " + e.message);
+          out.push("清除測試資料失敗 → " + e.message);
         }
         try {
           const r = await env.DB.prepare("SELECT COUNT(*) AS n FROM events").first();
@@ -84,18 +96,29 @@ export default {
 
 /* ------------------------------------------------------------------ */
 
+const GIF = Uint8Array.from(
+  atob("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"),
+  function (c) { return c.charCodeAt(0); }
+);
+
 async function record(request, env) {
   try {
     const b = await request.json();
-    if (!b || typeof b.aid !== "string" || typeof b.ev !== "string") return;
+    await save(env, b && b.aid, b && b.ev, b && b.mode);
+  } catch (e) { /* 靜默 */ }
+}
+
+async function save(env, rawAid, rawEv, rawMode) {
+  try {
+    if (typeof rawAid !== "string" || typeof rawEv !== "string") return;
 
     // 只接受預期的值，其他一律丟掉
-    const aid = b.aid.slice(0, 32);
-    const ev = b.ev === "open" || b.ev === "mode" ? b.ev : null;
+    const aid = rawAid.slice(0, 32);
+    const ev = rawEv === "open" || rawEv === "mode" ? rawEv : null;
     if (!ev) return;
 
     const ALLOWED = ["flash", "quiz", "grammar", "scramble", "adventure", "badges", "bee"];
-    const mode = b.mode && ALLOWED.indexOf(b.mode) >= 0 ? b.mode : null;
+    const mode = rawMode && ALLOWED.indexOf(rawMode) >= 0 ? rawMode : null;
 
     const ts = Date.now();
     const day = new Date(ts + TZ_OFFSET).toISOString().slice(0, 10);
