@@ -3649,7 +3649,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.09.03j";
+var BUILD = "v2026.09.03k";
 
 // ------------------------------------------------------------------
 // 今日單字（新增）
@@ -3728,8 +3728,9 @@ function chalLoad() {
     if (o && o.d === chalDayStr()) CHAL.done = o;
   } catch (e) {}
 }
-function chalSave(score) {
+function chalSave(score, rank) {
   CHAL.done = { d: chalDayStr(), s: score };
+  if (typeof rank === "number") CHAL.done.r = rank;
   try { localStorage.setItem(CHAL_KEY, JSON.stringify(CHAL.done)); } catch (e) {}
 }
 
@@ -3746,7 +3747,13 @@ function chalFetchDist(score) {
       if (aid) u += "&aid=" + encodeURIComponent(aid);
     }
     fetch(u).then(function (r) { return r.json(); }).then(function (j) {
-      if (j && j.d) { CHAL.dist = j; render(); }
+      if (!j || !j.d) return;
+      CHAL.dist = j;
+      // 名次只在「第一次完成」那一刻由伺服器給，之後就固定不動。
+      if (typeof j.rank === "number" && CHAL.done && typeof CHAL.done.r !== "number") {
+        chalSave(CHAL.done.s, j.rank);
+      }
+      render();
     }).catch(function () {});
   } catch (e) {}
 }
@@ -3843,9 +3850,12 @@ function chalPanelHtml() {
     h += '<div class="res-line">全台平均 <b>' + st.avg + '</b> 分';
     if (st.beat !== null) {
       h += '<br>你贏過 <b>' + st.beat + '%</b> 的人';
-    } else {
-      h += '<br>你是今天第 <b>' + st.plays + '</b> 個完成的<br>'
+    } else if (CHAL.done && typeof CHAL.done.r === "number" && CHAL.done.r <= 20 && !r.replay) {
+      // 名次是完成當下記下來的，不會因為後面有人玩而變動
+      h += '<br>你是今天第 <b>' + CHAL.done.r + '</b> 個完成的<br>'
          + '<span style="font-size:12px;color:#B5B8C4">滿 ' + CHAL_MIN_N + ' 人才會顯示排名</span>';
+    } else {
+      h += '<br><span style="font-size:12px;color:#B5B8C4">滿 ' + CHAL_MIN_N + ' 人才會顯示排名</span>';
     }
     h += '</div>';
   } else {
@@ -6070,9 +6080,9 @@ var NEWS = [
   { pin: true, text: "\uD83D\uDD0A <b>發音沒聲音？</b>Android 請用 Chrome 開啟，iPhone 請用 Safari，發音效果最好" },
   { date: "2026/09/03", text: "\uD83C\uDFE0 <b>新增主頁</b>：所有模式集中在同一頁，不用再一個一個找" },
   { date: "2026/09/03", text: "\uD83D\uDCC5 <b>新增今日單字</b>：每天一個字，全部人看到的都一樣" },
+  { date: "2026/09/03", text: "\u26A1 <b>新增今日挑戰</b>：每天 10 題，全台灣同一份，答完看得到全台平均分" },
   { date: "2026/09/03", text: "\uD83C\uDFC6 <b>排行榜準備中</b>：闖關進度榜，要不要上榜自己決定" },
   { text: "\uD83D\uDC1D <b>拼字小蜜蜂</b>：中文從天而降，打出英文拼字把它擊落，四種難度" },
-  { text: "\uD83C\uDFC5 <b>徽章收集系統</b>：快去闖關地圖解鎖徽章" }
 ];
 function latestNewsDate() {
   for (var i = 0; i < NEWS.length; i++) {

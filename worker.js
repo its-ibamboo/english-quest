@@ -9,7 +9,7 @@
  * 隱私：只存匿名隨機 ID、模式、時間。不存 IP、不存 UA、不存任何個人資訊。
  */
 
-const BUILD = "v2026.09.03j";            // 跟 index.html 的版本號一起往上帶
+const BUILD = "v2026.09.03k";            // 跟 index.html 的版本號一起往上帶
 const TZ_OFFSET = 8 * 60 * 60 * 1000;   // 台北時間
 
 export default {
@@ -275,6 +275,7 @@ async function dailyChallenge(env, day, rawScore, aid) {
        s8 INTEGER DEFAULT 0, s9 INTEGER DEFAULT 0, s10 INTEGER DEFAULT 0)`
   ).run();
 
+  let rank = null;
   const score = parseInt(rawScore, 10);
   if (rawScore !== null && score >= 0 && score <= 10) {
     // 一人一天一次。dedupe 表只留最近 30 天，不會無限成長。
@@ -295,14 +296,20 @@ async function dailyChallenge(env, day, rawScore, aid) {
          ON CONFLICT(day) DO UPDATE SET plays = plays + 1, total = total + ?, s${score} = s${score} + 1`
       ).bind(day, score, score).run();
       await env.DB.prepare("DELETE FROM daily_plays WHERE day < date(?, '-30 days')").bind(day).run();
+      // 剛寫進去的這筆就是第幾個完成的。之後 plays 還會繼續長，
+      // 所以名次一定要在完成的當下記下來，不能事後用 plays 當名次。
+      const after = await env.DB.prepare(
+        "SELECT plays FROM daily_challenge WHERE day = ?"
+      ).bind(day).first();
+      rank = (after && after.plays) || null;
     }
   }
 
   const row = await env.DB.prepare("SELECT * FROM daily_challenge WHERE day = ?").bind(day).first();
-  if (!row) return { day: day, plays: 0, total: 0, d: new Array(11).fill(0) };
+  if (!row) return { day: day, plays: 0, total: 0, rank: rank, d: new Array(11).fill(0) };
   const d = [];
   for (let i = 0; i <= 10; i++) d.push(row["s" + i] || 0);
-  return { day: day, plays: row.plays || 0, total: row.total || 0, d: d };
+  return { day: day, plays: row.plays || 0, total: row.total || 0, rank: rank, d: d };
 }
 
 async function stats(env) {
