@@ -9,7 +9,7 @@
  * 隱私：只存匿名隨機 ID、模式、時間。不存 IP、不存 UA、不存任何個人資訊。
  */
 
-const BUILD = "v2026.09.03h";            // 跟 index.html 的版本號一起往上帶
+const BUILD = "v2026.09.03i";            // 跟 index.html 的版本號一起往上帶
 const TZ_OFFSET = 8 * 60 * 60 * 1000;   // 台北時間
 
 export default {
@@ -60,6 +60,19 @@ export default {
           "Cache-Control": "no-store, no-cache, must-revalidate"
         }
       });
+    }
+
+    // ---------- 1.4 每日挑戰 ----------
+    // 帶 score 就記一筆並回傳分佈，不帶就只查詢。
+    // 一個裝置一天只計一次；重玩不會再累加。
+    if (url.pathname === "/d") {
+      if (!env.DB) return json({ error: "no db" });
+      return json(await dailyChallenge(
+        env,
+        url.searchParams.get("day"),
+        url.searchParams.get("score"),
+        url.searchParams.get("aid")
+      ));
     }
 
     // ---------- 1.5 診斷頁 ----------
@@ -246,6 +259,50 @@ async function saveWords(env, raw) {
   }
 }
 
+// 每日挑戰。一天一列，一年 365 列，不會長大。
+// s0..s10 存各分數的人數，才能算出「你贏過幾 %」，只有平均分是不夠的。
+async function dailyChallenge(env, day, rawScore, aid) {
+  const today = new Date(Date.now() + TZ_OFFSET).toISOString().slice(0, 10);
+  if (day !== today) day = today;   // 只接受今天，避免有人回頭灌舊資料
+
+  await env.DB.prepare(
+    `CREATE TABLE IF NOT EXISTS daily_challenge (
+       day TEXT PRIMARY KEY, plays INTEGER NOT NULL DEFAULT 0, total INTEGER NOT NULL DEFAULT 0,
+       s0 INTEGER DEFAULT 0, s1 INTEGER DEFAULT 0, s2 INTEGER DEFAULT 0, s3 INTEGER DEFAULT 0,
+       s4 INTEGER DEFAULT 0, s5 INTEGER DEFAULT 0, s6 INTEGER DEFAULT 0, s7 INTEGER DEFAULT 0,
+       s8 INTEGER DEFAULT 0, s9 INTEGER DEFAULT 0, s10 INTEGER DEFAULT 0)`
+  ).run();
+
+  const score = parseInt(rawScore, 10);
+  if (rawScore !== null && score >= 0 && score <= 10) {
+    // 一人一天一次。dedupe 表只留最近 30 天，不會無限成長。
+    await env.DB.prepare(
+      `CREATE TABLE IF NOT EXISTS daily_plays (day TEXT, aid TEXT, PRIMARY KEY (day, aid))`
+    ).run();
+    const who = (typeof aid === "string" && /^[a-z0-9-]{1,40}$/.test(aid)) ? aid : null;
+    let fresh = true;
+    if (who) {
+      const r = await env.DB.prepare(
+        "INSERT OR IGNORE INTO daily_plays (day, aid) VALUES (?, ?)"
+      ).bind(day, who).run();
+      fresh = !!(r && r.meta && r.meta.changes);
+    }
+    if (fresh) {
+      await env.DB.prepare(
+        `INSERT INTO daily_challenge (day, plays, total, s${score}) VALUES (?, 1, ?, 1)
+         ON CONFLICT(day) DO UPDATE SET plays = plays + 1, total = total + ?, s${score} = s${score} + 1`
+      ).bind(day, score, score).run();
+      await env.DB.prepare("DELETE FROM daily_plays WHERE day < date(?, '-30 days')").bind(day).run();
+    }
+  }
+
+  const row = await env.DB.prepare("SELECT * FROM daily_challenge WHERE day = ?").bind(day).first();
+  if (!row) return { day: day, plays: 0, total: 0, d: new Array(11).fill(0) };
+  const d = [];
+  for (let i = 0; i <= 10; i++) d.push(row["s" + i] || 0);
+  return { day: day, plays: row.plays || 0, total: row.total || 0, d: d };
+}
+
 async function stats(env) {
   // 每天的人數再拆成「第一次來」與「以前來過」。
   // 只有總人數的話，看不出成長是新客灌進來還是舊客回來，那是兩件完全不同的事。
@@ -305,6 +362,15 @@ async function stats(env) {
   const total = await env.DB.prepare(
     `SELECT COUNT(DISTINCT aid) AS people, COUNT(*) AS rows FROM events`
   ).first();
+
+  // 每日挑戰的歷史
+  let chal = [];
+  try {
+    const cq = await env.DB.prepare(
+      "SELECT day, plays, total FROM daily_challenge ORDER BY day DESC LIMIT 14"
+    ).all();
+    chal = cq.results || [];
+  } catch (e) { chal = []; }
 
   // 難度分佈。這是判斷使用者程度唯一不用問人的訊號。
   // 只算最近 30 天，而且「主動選過難度」的人才算 —— 進站的預設值
@@ -385,6 +451,7 @@ async function stats(env) {
     modes: modes.results || [],
     modes7: modes7.results || [],
     retention: retention.results || [],
+    chal: chal,
     diffs: diffs,
     diffPeople: diffPeople,
     cohort: cohort,
@@ -515,6 +582,24 @@ fetch("/admin/data").then(function(r){return r.json()}).then(function(d){
     h+='<details><summary>更早的 '+(d.daily.length-14)+' 天</summary><div class="wrap"><table>'+HEAD;
     d.daily.slice(14).forEach(function(r){ h+=dayRow(r); });
     h+='</table></div></details>';
+  }
+
+  /* --- 每日挑戰 --- */
+  if(d.chal&&d.chal.length){
+    var c0=d.chal[0];
+    h+='<h2>每日挑戰</h2>';
+    h+='<p class="hint">全站同一份 10 題。一個裝置一天只計一次，重玩不累加。</p>';
+    h+='<div class="cards">'
+      + card(nz(c0.plays),"今天玩過","完成今日挑戰的人數","")
+      + card(c0.plays?(Math.round(c0.total/c0.plays*10)/10):"—","今天平均分","總分 ÷ 人數（滿分 10）","")
+      + card(t.people?pct(c0.plays,t.people):"—","參與率","玩過的人 ÷ 今天活躍人數","")
+      + '</div>';
+    h+='<div class="wrap"><table><tr><th>日期</th><th>人數</th><th>平均</th></tr>';
+    d.chal.forEach(function(r){
+      h+='<tr><td>'+String(r.day).slice(5)+'</td><td class="n">'+nz(r.plays)+'</td>'
+        +'<td class="n hot">'+(r.plays?(Math.round(r.total/r.plays*10)/10):"—")+'</td></tr>';
+    });
+    h+='</table></div>';
   }
 
   /* --- 難度分佈 --- */

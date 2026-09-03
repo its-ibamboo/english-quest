@@ -831,6 +831,36 @@
 
   /* ===== 主頁（新增） ===== */
   h1.title.tappable { cursor: pointer; }
+  /* ===== 每日挑戰 ===== */
+  .chal-strip { margin-top: 16px; padding-top: 14px; border-top: 1px solid #E7E5DE; }
+  .chal-done { font-size: 13px; line-height: 1.9; color: #6B7086; }
+  .chal-done b { color: #C97F00; font-family: monospace; font-size: 16px; }
+  .chal-hint { font-size: 11px; color: #B5B8C4; margin-top: 8px; font-family: monospace; }
+  .chal-big {
+    display: block; width: 100%; padding: 13px; font-size: 15px; font-weight: 700;
+    border: none; border-radius: 12px; background: #C97F00; color: #F7F5F0;
+    font-family: inherit; cursor: pointer;
+  }
+  .qhead {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px; font-family: monospace; color: #82869C; margin-bottom: 10px;
+  }
+  .qbar { height: 4px; background: #E7E5DE; border-radius: 999px; overflow: hidden; margin-bottom: 18px; }
+  .qbar > div { height: 100%; background: #C97F00; }
+  .res { background: #FFFFFF; border: 1px solid #E7E5DE; border-radius: 16px; padding: 24px 20px; text-align: center; }
+  .res-score { font-size: 46px; font-weight: 800; font-family: Georgia, serif; line-height: 1.1; }
+  .res-score small { font-size: 20px; color: #B5B8C4; font-weight: 400; }
+  .res-line { font-size: 14px; color: #6B7086; margin-top: 10px; line-height: 1.9; }
+  .res-line b { color: #C97F00; font-family: monospace; }
+  .dist { display: flex; align-items: flex-end; gap: 3px; height: 62px; margin: 20px 0 4px; }
+  .dist > div { flex: 1; background: #E7E5DE; border-radius: 2px 2px 0 0; min-height: 2px; }
+  .dist > div.me { background: #C97F00; }
+  .dist-x { display: flex; gap: 3px; font-size: 9px; color: #B5B8C4; font-family: monospace; }
+  .dist-x > div { flex: 1; text-align: center; }
+  .wrongs { margin-top: 18px; padding-top: 14px; border-top: 1px solid #E7E5DE; text-align: left; }
+  .wrongs h4 { margin: 0 0 8px; font-size: 12px; color: #82869C; letter-spacing: 1px; font-weight: 500; }
+  .wrongs div { font-size: 14px; padding: 5px 0; }
+  .wrongs span { color: #0E8F82; }
   .top-actions {
     width: 100%;
     max-width: 440px;
@@ -3619,7 +3649,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.09.03h";
+var BUILD = "v2026.09.03i";
 
 // ------------------------------------------------------------------
 // 今日單字（新增）
@@ -3653,6 +3683,181 @@ function speakDaily() {
 }
 
 // ------------------------------------------------------------------
+// 每日挑戰（新增）
+// 題目用日期當種子從 WORD_BANK 產生，全站同一天完全一樣，不需要後端。
+// 只有「全站分佈」需要連線；沒網路時照樣能玩，只是看不到平均分。
+//
+// 難度目前用 basic + advanced（跟今日單字同一個 DAILY_LEVELS）。
+// 之後要加地獄題，改 DAILY_LEVELS 就好，其他都不用動。
+// ------------------------------------------------------------------
+var CHAL_N = 10;
+var CHAL_KEY = "eq_daily";   // 新的 key，不碰既有五把
+
+function chalDayStr() {
+  return new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+}
+function chalQuestions() {
+  var pool = WORD_BANK.filter(function (w) { return DAILY_LEVELS[w.level]; });
+  var seed = taipeiDayNumber() * 7919;
+  var picked = seededShuffle(pool, seed).slice(0, CHAL_N);
+  return picked.map(function (correct, n) {
+    var usedZh = {}; usedZh[correct.zh] = true;
+    var cand = seededShuffle(pool, seed + n * 101);
+    var opts = [correct];
+    for (var i = 0; i < cand.length && opts.length < 4; i++) {
+      var c = cand[i];
+      if (c.en !== correct.en && !usedZh[c.zh]) { opts.push(c); usedZh[c.zh] = true; }
+    }
+    // 選項順序也必須固定，否則重新整理答案就跑位，看起來像壞掉
+    return { correct: correct, options: seededShuffle(opts, seed + n * 7 + 3) };
+  });
+}
+
+var CHAL = {
+  qi: 0, picked: null, answers: [], replay: false,
+  done: null,      // { d: 日期, s: 分數 }
+  last: null,      // 最近一次作答結果
+  dist: null       // 全站分佈，從伺服器來
+};
+
+function chalLoad() {
+  try {
+    var raw = localStorage.getItem(CHAL_KEY);
+    if (!raw) return;
+    var o = JSON.parse(raw);
+    if (o && o.d === chalDayStr()) CHAL.done = o;
+  } catch (e) {}
+}
+function chalSave(score) {
+  CHAL.done = { d: chalDayStr(), s: score };
+  try { localStorage.setItem(CHAL_KEY, JSON.stringify(CHAL.done)); } catch (e) {}
+}
+
+// 取分佈。帶 score 就順便回報，不帶就只是查詢。
+function chalFetchDist(score) {
+  try {
+    var u = "/d?day=" + encodeURIComponent(chalDayStr());
+    if (typeof score === "number") {
+      u += "&score=" + score;
+      // 帶上匿名 ID，伺服器才能做「一人一天只計一次」的去重。
+      // 直接讀既有的 ibq_aid，不新增 key、不改統計模組。
+      var aid = "";
+      try { aid = localStorage.getItem("ibq_aid") || ""; } catch (e) {}
+      if (aid) u += "&aid=" + encodeURIComponent(aid);
+    }
+    fetch(u).then(function (r) { return r.json(); }).then(function (j) {
+      if (j && j.d) { CHAL.dist = j; render(); }
+    }).catch(function () {});
+  } catch (e) {}
+}
+function chalStats() {
+  var j = CHAL.dist;
+  if (!j || !j.plays) return null;
+  var below = 0;
+  for (var i = 0; i < (CHAL.last ? CHAL.last.score : 0); i++) below += j.d[i];
+  return {
+    d: j.d, plays: j.plays,
+    avg: Math.round(j.total / j.plays * 10) / 10,
+    beat: Math.round(below * 100 / j.plays)
+  };
+}
+
+function startChallenge(replay) {
+  CHAL.qi = 0; CHAL.picked = null; CHAL.answers = []; CHAL.replay = !!replay;
+  setMode("daily");
+}
+function chalPick(i) {
+  if (CHAL.picked !== null) return;
+  var q = chalQuestions()[CHAL.qi];
+  var ok = q.options[i].zh === q.correct.zh;
+  CHAL.picked = i;
+  CHAL.answers.push({ q: q, ok: ok });
+  WSTAT.hit(q.correct.en, !ok);   // 順便餵答錯率統計
+  render();
+}
+function chalNext() {
+  if (CHAL.qi === CHAL_N - 1) {
+    var score = CHAL.answers.filter(function (a) { return a.ok; }).length;
+    CHAL.last = { score: score, answers: CHAL.answers, replay: CHAL.replay };
+    if (!CHAL.replay && !CHAL.done) { chalSave(score); chalFetchDist(score); }
+    else chalFetchDist();
+    try { WSTAT.flush(); } catch (e) {}
+    CHAL.qi = CHAL_N;   // 進入結果畫面
+  } else {
+    CHAL.qi++; CHAL.picked = null;
+  }
+  render();
+}
+function chalShowResult() {
+  if (!CHAL.last && CHAL.done) {
+    CHAL.last = { score: CHAL.done.s, answers: [], replay: false };
+  }
+  CHAL.qi = CHAL_N;
+  chalFetchDist();
+  setMode("daily");
+}
+
+function chalPanelHtml() {
+  var h = "";
+  if (CHAL.qi < CHAL_N) {
+    var q = chalQuestions()[CHAL.qi];
+    h += '<div class="qhead"><span>今日挑戰</span><span>' + (CHAL.qi + 1) + ' / ' + CHAL_N + '</span></div>';
+    h += '<div class="qbar"><div style="width:' + (CHAL.qi / CHAL_N * 100) + '%"></div></div>';
+    h += '<div class="card"><div class="word">' + esc(q.correct.en) + '</div>';
+    h += '<div class="word-meta">' + esc(q.correct.pos || "") + '</div></div>';
+    q.options.forEach(function (o, i) {
+      var cls = "option-btn";
+      if (CHAL.picked !== null) {
+        if (o.zh === q.correct.zh) cls += " correct";
+        else if (i === CHAL.picked) cls += " wrong";
+        else cls += " dim";
+      }
+      h += '<button class="' + cls + '" onclick="chalPick(' + i + ')">' + esc(o.zh) + '</button>';
+    });
+    if (CHAL.picked !== null) {
+      h += '<button class="chal-big" style="margin-top:12px" onclick="chalNext()">'
+         + (CHAL.qi === CHAL_N - 1 ? "看結果" : "下一題") + '</button>';
+    }
+    return h;
+  }
+
+  // 結果畫面
+  var r = CHAL.last || { score: 0, answers: [], replay: false };
+  var st = chalStats();
+  h += '<div class="res">';
+  h += '<div class="res-score">' + r.score + '<small> / ' + CHAL_N + '</small></div>';
+  if (r.replay) {
+    h += '<div class="res-line">這次是重玩，<b>不計入</b>今天的統計</div>';
+  } else if (st) {
+    h += '<div class="res-line">全台平均 <b>' + st.avg + '</b> 分<br>你贏過 <b>' + st.beat + '%</b> 的人</div>';
+  } else {
+    h += '<div class="res-line">連不上網路，看不到全台成績<br>成績已經存在你的裝置上了</div>';
+  }
+  if (st) {
+    var mx = Math.max.apply(null, st.d) || 1;
+    h += '<div class="dist">';
+    st.d.forEach(function (v, i) {
+      h += '<div class="' + (i === r.score ? "me" : "") + '" style="height:' + Math.round(v / mx * 100) + '%"></div>';
+    });
+    h += '</div><div class="dist-x">';
+    for (var i = 0; i <= 10; i++) h += '<div>' + (i % 2 === 0 ? i : "") + '</div>';
+    h += '</div>';
+    h += '<div class="chal-hint">今天有 ' + st.plays + ' 個人玩過</div>';
+  }
+  var bad = r.answers.filter(function (a) { return !a.ok; });
+  if (bad.length) {
+    h += '<div class="wrongs"><h4>答錯的字</h4>';
+    bad.forEach(function (a) {
+      h += '<div>' + esc(a.q.correct.en) + '\u3000<span>' + esc(a.q.correct.zh) + '</span></div>';
+    });
+    h += '</div>';
+  }
+  h += '</div>';
+  h += '<button class="chal-big" style="margin-top:14px;background:transparent;color:#0E8F82;border:1px solid rgba(14,143,130,0.4)" onclick="setMode(\'home\')">\u2190 回主頁</button>';
+  return h;
+}
+
+// ------------------------------------------------------------------
 // 主頁面板（新增）
 // ------------------------------------------------------------------
 function homePanelHtml() {
@@ -3672,6 +3877,23 @@ function homePanelHtml() {
       html += '  <button class="home-daily-btn" onclick="revealDaily()">看中文</button>';
     } else {
       html += '  <button class="home-daily-btn" onclick="practiceDaily()">去練這個字</button>';
+    }
+    html += '  </div>';
+
+    // 今日挑戰入口：併在同一張卡裡，不另外開一張，免得主頁又變長
+    html += '  <div class="chal-strip">';
+    if (CHAL.done) {
+      var cs = CHAL.dist && CHAL.dist.plays
+        ? '\u3000\u00B7\u3000全台平均 ' + Math.round(CHAL.dist.total / CHAL.dist.plays * 10) / 10 : '';
+      html += '    <div class="chal-done">今日挑戰\u3000<b>' + CHAL.done.s + ' / ' + CHAL_N + '</b>' + cs + '</div>';
+      html += '    <div class="home-daily-row">';
+      html += '      <button class="home-daily-btn ghost" onclick="chalShowResult()">看結果</button>';
+      html += '      <button class="home-daily-btn ghost" onclick="startChallenge(true)">再玩一次</button>';
+      html += '    </div>';
+      html += '    <div class="chal-hint">重玩不計入統計 \u00B7 每天 00:00 換新題</div>';
+    } else {
+      html += '    <button class="chal-big" onclick="startChallenge(false)">\u26A1 今日挑戰 \u00B7 ' + CHAL_N + ' 題</button>';
+      html += '    <div class="chal-hint">全台灣今天都是同一份題目</div>';
     }
     html += '  </div>';
     html += '</div>';
@@ -4352,6 +4574,8 @@ function render() {
   }
   if (state.mode === "home") {
     html += '<p class="subtitle">國中 2000 單字 \u00B7 文法 \u00B7 闖關</p>';
+  } else if (state.mode === "daily") {
+    html += '<p class="subtitle">每天 10 題 \u00B7 全台灣同一份</p>';
   } else if (state.mode === "adventure") {
     var clearedCount = Object.keys(STAGE_PROGRESS.stars).length;
     html += '<p class="subtitle">已過 ' + clearedCount + ' / ' + STAGES.length + ' 關</p>';
@@ -4390,7 +4614,7 @@ function render() {
     html += '</div>';
   }
 
-  if (state.mode !== "home" && state.mode !== "adventure" && state.mode !== "badges" && state.mode !== "bee") {
+  if (state.mode !== "home" && state.mode !== "daily" && state.mode !== "adventure" && state.mode !== "badges" && state.mode !== "bee") {
     html += '<div class="chip-row">';
     DIFFICULTIES.forEach(function (d) {
       var active = state.difficulty === d.key ? " active" : "";
@@ -4412,6 +4636,8 @@ function render() {
 
   if (state.mode === "home") {
     html += homePanelHtml();
+  } else if (state.mode === "daily") {
+    html += chalPanelHtml();
   } else if (state.mode === "bee") {
     html += BEE.panelHtml();
   } else if (state.mode === "flash") {
@@ -5867,6 +6093,8 @@ function closeNews() {
 resetWordProgress();
 resetGrammarScramble();
 evaluateBadges(true); // 補登記舊進度已達成的徽章，不彈提示
+chalLoad();
+if (CHAL.done) chalFetchDist();
 render();
 // 有沒看過的新公告就自動跳一次（跟麻將系統同一套做法）
 setTimeout(function () { if (newsUnseen()) openNews(); }, 900);
