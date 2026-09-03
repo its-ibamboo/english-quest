@@ -9,7 +9,7 @@
  * 隱私：只存匿名隨機 ID、模式、時間。不存 IP、不存 UA、不存任何個人資訊。
  */
 
-const BUILD = "v2026.09.03d";            // 跟 index.html 的版本號一起往上帶
+const BUILD = "v2026.09.03e";            // 跟 index.html 的版本號一起往上帶
 const TZ_OFFSET = 8 * 60 * 60 * 1000;   // 台北時間
 
 export default {

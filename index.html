@@ -992,6 +992,16 @@
   }
   .news-item:last-of-type { border-bottom: none; }
   .news-date { font-size: 11px; color: #B5B8C4; font-family: monospace; }
+  .news-steps {
+    display: block;
+    margin-top: 6px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #F7F5F0;
+    font-size: 12px;
+    line-height: 1.85;
+    color: #6B7086;
+  }
   .news-item b { color: #C97F00; }
   .news-close {
     width: 100%;
@@ -3609,7 +3619,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.09.03d";
+var BUILD = "v2026.09.03e";
 
 // ------------------------------------------------------------------
 // 今日單字（新增）
@@ -5809,9 +5819,8 @@ var TIP = (function () {
 // 之後要發新公告：在 NEWS 陣列最前面加一則、寫上日期即可自動彈出一次。
 // ------------------------------------------------------------------
 var NEWS = [
-  { pin: true, text: "\uD83D\uDCF1 <b>把這個網頁加到手機桌面</b>：開起來比較快，紀錄也比較不會不見" },
-  { pin: true, text: "\uD83D\uDD0A <b>Android 手機</b>建議用 Chrome 開啟並建立桌面捷徑，發音效果較佳，可參考<a href=\"https://www.threads.com/@its_ibamboo/post/DamXQ74E79A?xmt=AQG0Phvw9nKsJ8LenQx6zNGvJLX-q2yH1YsKeAiIa4qRSeIakBW6hicDghXX-8lE0vHZtLo&slof=1\" target=\"_blank\" rel=\"noopener\">這裡</a>" },
-  { pin: true, text: "\uD83C\uDF4E <b>iPhone 手機</b>請參考<a href=\"https://www.threads.com/@its_ibamboo/post/DaqE1NLE58I?xmt=AQG0Ism8Hi_mSXCWHetDLiITt6bCxfxzhV_82VOM9HcgG7T2j9D7FeFBNhAi_ZjDfUdHepnh&slof=1\" target=\"_blank\" rel=\"noopener\">這裡</a>" },
+  { pin: true, text: "\uD83D\uDCF1 <b>把它裝到手機桌面</b>：開起來比較快，沒網路也能用，紀錄也比較不會不見<br><span class=\"news-steps\">Android：Chrome 右上角 \u22EE \u2192 安裝應用程式<br>iPhone：Safari 下方分享鍵 \u2192 加入主畫面</span>" },
+  { pin: true, text: "\uD83D\uDD0A <b>發音沒聲音？</b>Android 請用 Chrome 開啟，iPhone 請用 Safari，發音效果最好" },
   { date: "2026/09/03", text: "\uD83C\uDFE0 <b>新增主頁</b>：所有模式集中在同一頁，不用再一個一個找" },
   { date: "2026/09/03", text: "\uD83D\uDCC5 <b>新增今日單字</b>：每天一個字，全部人看到的都一樣" },
   { date: "2026/09/03", text: "\uD83C\uDFC6 <b>排行榜準備中</b>：闖關進度榜，要不要上榜自己決定" },
@@ -5984,6 +5993,25 @@ setTimeout(function () { if (newsUnseen()) openNews(); }, 900);
     <button class="tip-close" id="tipClose">關閉</button>
   </div>
 </div>
+
+<!-- ==================================================================
+     Service Worker（新增）
+     · 只做離線快取，網路優先，有訊號一定是最新版
+     · /t、/h、/admin 不快取，統計與偵測維持實時
+     · 用 file:// 直接開檔案時不會註冊（瀏覽器不允許）
+     ================================================================== -->
+<script>
+(function () {
+  "use strict";
+  if (!("serviceWorker" in navigator)) return;
+  if (location.protocol !== "https:" && location.hostname !== "localhost") return;
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function () {
+      // 註冊失敗不影響任何功能，照常線上使用
+    });
+  });
+})();
+</script>
 
 <!-- ==================================================================
      複製偵測（新增）
