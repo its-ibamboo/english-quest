@@ -9,7 +9,7 @@
  * 隱私：只存匿名隨機 ID、模式、時間。不存 IP、不存 UA、不存任何個人資訊。
  */
 
-const BUILD = "v2026.09.03k";            // 跟 index.html 的版本號一起往上帶
+const BUILD = "v2026.09.03m";            // 跟 index.html 的版本號一起往上帶
 const TZ_OFFSET = 8 * 60 * 60 * 1000;   // 台北時間
 
 export default {
@@ -73,6 +73,61 @@ export default {
         url.searchParams.get("score"),
         url.searchParams.get("aid")
       ));
+    }
+
+    // ---------- 1.6 問題回報 ----------
+    // 公開端點，任何人都能打，所以：限流（同 IP 一分鐘 3 次）+ 限大小（200KB）
+    if (url.pathname === "/report" && request.method === "POST") {
+      if (!env.DB) return new Response("no db", { status: 503 });
+      const cl = Number(request.headers.get("content-length") || 0);
+      if (cl > 200000) return new Response("too big", { status: 413 });
+      const ip = request.headers.get("cf-connecting-ip") || "?";
+      if (!reportGate(ip)) return new Response("slow down", { status: 429 });
+      const body = await request.text();
+      if (body.length > 200000) return new Response("too big", { status: 413 });
+      try {
+        await addReport(env, JSON.parse(body));
+        return json({ ok: true });
+      } catch (e) {
+        return json({ ok: false }, 400);
+      }
+    }
+
+    // 檢視與刪除。這裡面是使用者打的字和他手機的截圖，
+    // 絕對不能像 /admin 那樣公開，所以另外上鎖。
+    // 密碼優先用 Cloudflare 環境變數 ADMIN_KEY，沒設才退回程式裡的預設值。
+    if (url.pathname === "/reports/login" && request.method === "POST") {
+      const pw = (await request.formData()).get("pw") || "";
+      const want = env.ADMIN_KEY || REPORTS_PW;
+      if (String(pw) !== want) {
+        return new Response(loginPage("密碼不對"), {
+          status: 401, headers: { "content-type": "text/html; charset=utf-8" } });
+      }
+      return new Response(null, { status: 302, headers: {
+        "location": "/reports",
+        "set-cookie": "rp=" + encodeURIComponent(want) +
+          "; Max-Age=2592000; Path=/; HttpOnly; Secure; SameSite=Lax"
+      }});
+    }
+
+    if (url.pathname === "/reports" || url.pathname === "/reports/del") {
+      const want = env.ADMIN_KEY || REPORTS_PW;
+      const ck = (request.headers.get("cookie") || "")
+        .split(";").map(function (x) { return x.trim(); })
+        .find(function (x) { return x.indexOf("rp=") === 0; });
+      const fromCookie = ck ? decodeURIComponent(ck.slice(3)) : "";
+      const k = url.searchParams.get("k") || fromCookie;
+      if (!want || k !== want) {
+        return new Response(loginPage(""), {
+          status: 401, headers: { "content-type": "text/html; charset=utf-8" } });
+      }
+      if (!env.DB) return new Response("no db", { status: 503 });
+      if (url.pathname === "/reports/del") {
+        await delReport(env, url.searchParams.get("id") || "");
+        return Response.redirect(url.origin + "/reports", 302);
+      }
+      return new Response(reportsPage(await listReports(env)), {
+        headers: { "content-type": "text/html; charset=utf-8" } });
     }
 
     // ---------- 1.5 診斷頁 ----------
@@ -310,6 +365,114 @@ async function dailyChallenge(env, day, rawScore, aid) {
   const d = [];
   for (let i = 0; i <= 10; i++) d.push(row["s" + i] || 0);
   return { day: day, plays: row.plays || 0, total: row.total || 0, rank: rank, d: d };
+}
+
+// 問題回報。密碼沒設環境變數時用這個。
+const REPORTS_PW = "1234";
+const REPORT_MAX = 60;          // 最多留幾筆，滿了丟掉最舊的（圖片很佔空間）
+
+const REPORT_HITS = new Map();
+function reportGate(ip) {
+  const now = Date.now();
+  const arr = (REPORT_HITS.get(ip) || []).filter(function (t) { return now - t < 60000; });
+  if (arr.length >= 3) return false;
+  arr.push(now);
+  REPORT_HITS.set(ip, arr);
+  if (REPORT_HITS.size > 500) REPORT_HITS.clear();   // 不要無限長大
+  return true;
+}
+async function ensureReports(env) {
+  await env.DB.prepare(
+    `CREATE TABLE IF NOT EXISTS reports (
+       id TEXT PRIMARY KEY, t INTEGER NOT NULL,
+       text TEXT, diag TEXT, img TEXT)`
+  ).run();
+}
+async function addReport(env, body) {
+  await ensureReports(env);
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  const img = (typeof body.img === "string" && body.img.indexOf("data:image/") === 0)
+    ? body.img.slice(0, 140000) : "";
+  await env.DB.prepare(
+    "INSERT INTO reports (id, t, text, diag, img) VALUES (?, ?, ?, ?, ?)"
+  ).bind(id, Date.now(),
+         String(body.text || "").slice(0, 500),
+         String(body.diag || "").slice(0, 4000), img).run();
+  // 只留最新的 REPORT_MAX 筆
+  await env.DB.prepare(
+    `DELETE FROM reports WHERE id NOT IN
+       (SELECT id FROM reports ORDER BY t DESC LIMIT ?)`
+  ).bind(REPORT_MAX).run();
+  return id;
+}
+async function listReports(env) {
+  try {
+    await ensureReports(env);
+    const r = await env.DB.prepare(
+      "SELECT id, t, text, diag, img FROM reports ORDER BY t DESC"
+    ).all();
+    return r.results || [];
+  } catch (e) { return []; }
+}
+async function delReport(env, id) {
+  try {
+    await ensureReports(env);
+    if (id === "*") await env.DB.prepare("DELETE FROM reports").run();
+    else if (id) await env.DB.prepare("DELETE FROM reports WHERE id = ?").bind(id).run();
+  } catch (e) {}
+}
+function esc(x) {
+  return String(x == null ? "" : x).replace(/[&<>"']/g, function (c) {
+    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+  });
+}
+function loginPage(msg) {
+  return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>問題回報</title></head>
+<body style="background:#141613;color:#E8EAE4;font-family:system-ui,-apple-system,'Noto Sans TC',sans-serif;padding:20px;max-width:360px;margin:0 auto">
+<h1 style="font-size:19px;margin-top:40px">問題回報</h1>
+${msg ? `<p style="color:#D9705E;font-size:14px">${esc(msg)}</p>` : ""}
+<form method="POST" action="/reports/login">
+  <input type="password" name="pw" placeholder="密碼" autocomplete="current-password"
+    style="width:100%;box-sizing:border-box;padding:12px;font-size:16px;border-radius:8px;
+           border:1px solid #2E322C;background:#1E211D;color:#E8EAE4;margin-top:12px">
+  <button style="width:100%;margin-top:12px;padding:12px;border:none;border-radius:8px;
+    background:#D9A441;color:#141613;font-size:16px;font-weight:700">登入</button>
+</form>
+</body></html>`;
+}
+function reportsPage(list) {
+  const rows = list.map(function (r) {
+    const when = new Date(r.t + 8 * 3600 * 1000).toISOString().replace("T", " ").slice(0, 16);
+    // 圖片不直接展開 —— 要點才載入，列表才不會因為十張圖變得又長又慢
+    const img = r.img
+      ? `<details><summary style="cursor:pointer;color:#6FBF9A">看圖片</summary>
+         <img src="${esc(r.img)}" style="max-width:100%;margin-top:8px;border-radius:6px"></details>`
+      : `<div style="opacity:.5">（沒有附圖）</div>`;
+    return `<div style="border:1px solid #2E322C;border-radius:10px;padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;opacity:.6">${esc(when)}\u3000#${esc(r.id)}</div>
+      <div style="font-size:16px;margin:8px 0;white-space:pre-wrap">${esc(r.text) || "（沒有寫文字）"}</div>
+      ${img}
+      <details style="margin-top:8px"><summary style="cursor:pointer;opacity:.7">診斷資料</summary>
+        <pre style="white-space:pre-wrap;font-size:12px;opacity:.8">${esc(r.diag)}</pre></details>
+      <form method="POST" action="/reports/del?id=${encodeURIComponent(r.id)}" style="margin-top:10px">
+        <button style="background:#D9705E;color:#fff;border:none;border-radius:6px;padding:8px 14px;font-size:14px">刪除這筆</button>
+      </form>
+    </div>`;
+  }).join("");
+  return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>問題回報</title></head>
+<body style="background:#141613;color:#E8EAE4;font-family:system-ui,-apple-system,'Noto Sans TC',sans-serif;padding:14px;max-width:720px;margin:0 auto">
+<h1 style="font-size:20px">問題回報（${list.length} 筆）</h1>
+<p style="font-size:13px;opacity:.6">最多保留 ${REPORT_MAX} 筆，滿了會自動丟掉最舊的。看完記得刪，圖片很佔空間。</p>
+${rows || '<p style="opacity:.6">目前沒有回報。</p>'}
+${list.length ? `<form method="POST" action="/reports/del?id=*" style="margin-top:20px"
+  onsubmit="return confirm('全部刪掉？不能復原。')">
+  <button style="background:#7a3a30;color:#fff;border:none;border-radius:8px;padding:12px;width:100%;font-size:15px">全部刪除</button>
+</form>` : ""}
+</body></html>`;
 }
 
 async function stats(env) {
