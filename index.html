@@ -831,6 +831,52 @@
 
   /* ===== 主頁（新增） ===== */
   h1.title.tappable { cursor: pointer; }
+  /* ===== 問題回報 ===== */
+  .rp-mask {
+    display: none; position: fixed; inset: 0; z-index: 620;
+    background: rgba(20,20,26,0.55);
+    align-items: center; justify-content: center; padding: 14px;
+  }
+  .rp-mask.open { display: flex; }
+  .rp-box {
+    background: #FFFFFF; border-radius: 16px; padding: 20px;
+    width: 100%; max-width: 380px; max-height: calc(100dvh - 28px); overflow-y: auto;
+    color: #2A2A33;
+  }
+  .rp-h { font-size: 17px; font-weight: 700; color: #C97F00; margin-bottom: 4px; }
+  .rp-note { font-size: 11.5px; color: #82869C; line-height: 1.7; }
+  .rp-text {
+    width: 100%; box-sizing: border-box; margin-top: 8px; padding: 10px;
+    font-size: 15px; border-radius: 10px; border: 1px solid #E7E5DE;
+    background: #F7F5F0; color: #2A2A33; font-family: inherit; resize: vertical;
+  }
+  .rp-text:focus { outline: none; border-color: #0E8F82; background: #fff; }
+  /* 不指定的話部分瀏覽器會用跟輸入文字一樣的深色，看起來像使用者已經打好的字 */
+  .rp-text::placeholder { color: #B5B8C4; opacity: 1; }
+  .rp-text::-webkit-input-placeholder { color: #B5B8C4; }
+  .rp-filebtn {
+    display: inline-block; padding: 9px 14px; border-radius: 10px; cursor: pointer;
+    border: 1px solid rgba(14,143,130,0.4); color: #0E8F82; font-size: 13px;
+  }
+  .rp-textbtn {
+    margin-top: 6px; background: none; border: none; color: #82869C;
+    font-size: 12px; text-decoration: underline; cursor: pointer; font-family: inherit;
+  }
+  .rp-row { display: flex; gap: 8px; margin-top: 14px; }
+  .rp-btn {
+    flex: 1; padding: 12px 8px; font-size: 15px; font-family: inherit; cursor: pointer;
+    border-radius: 10px; font-weight: 700;
+  }
+  .rp-primary { background: #C97F00; border: none; color: #F7F5F0; }
+  .rp-ghost { background: transparent; border: 1px solid #E7E5DE; color: #6B7086; }
+  .rp-btn[disabled] { opacity: 0.5; cursor: default; }
+  .rp-toast {
+    position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%);
+    background: #2A2A33; color: #F7F5F0; padding: 10px 18px; border-radius: 999px;
+    font-size: 13px; z-index: 700; opacity: 0; pointer-events: none; transition: opacity .2s;
+    max-width: 90vw; text-align: center;
+  }
+  .rp-toast.show { opacity: 1; }
   /* ===== 每日挑戰 ===== */
   .chal-strip { margin-top: 16px; padding-top: 14px; border-top: 1px solid #E7E5DE; }
   .chal-done { font-size: 13px; line-height: 1.9; color: #6B7086; }
@@ -3649,7 +3695,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.09.03k";
+var BUILD = "v2026.09.03n";
 
 // ------------------------------------------------------------------
 // 今日單字（新增）
@@ -4938,7 +4984,7 @@ function render() {
 
   html += '<div class="app-credit">單字取材自教育部課綱國中小2000字表\u30FB文法遊戲為原創設計<br>made by ibamboo</div>';
   html += '<div class="foot-links">';
-  html += '<a href="https://www.threads.com/@its_ibamboo/post/Dau5e8UEyVF" target="_blank" rel="noopener">\uD83D\uDCAC 問題回報</a>';
+  html += '<a href="javascript:void(0)" onclick="rpOpen()">\uD83D\uDCAC 問題回報</a>';
   html += '<span class="foot-sep">\u00B7</span>';
   html += '<a href="javascript:void(0)" onclick="TIP.open()">\uD83D\uDC9B 打賞箱</a>';
   html += '</div>';
@@ -6071,11 +6117,150 @@ var TIP = (function () {
 })();
 
 // ------------------------------------------------------------------
+// 問題回報（新增）
+// 原本頁尾只有一個 Threads 連結，但大部分人不會為了回報一個 bug
+// 特地跑去社群平台留言。改成直接在系統裡填。
+//
+// 真正的價值是送出時自動夾帶診斷資料 —— 版本、目前模式、進度、瀏覽器，
+// 那是靠使用者自己描述拿不到的東西。
+// 完全獨立的模組，不讀寫任何 eq_ 開頭的 key。
+// ------------------------------------------------------------------
+var RP_IMG = "";
+
+function rpToast(msg) {
+  var el = document.getElementById("rpToast");
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(el._t);
+  el._t = setTimeout(function () { el.classList.remove("show"); }, 2200);
+}
+
+// 診斷資料。只放能幫忙查問題的東西，不放使用者打的任何內容。
+function rpDiag() {
+  var L = [];
+  try { L.push("版本 " + BUILD); } catch (e) {}
+  try { L.push("模式 " + state.mode + " / 難度 " + state.difficulty); } catch (e) {}
+  try {
+    L.push("通關 " + Object.keys(STAGE_PROGRESS.stars).length + " / " + STAGES.length);
+  } catch (e) {}
+  try {
+    L.push("徽章 " + BADGE_DEFS.filter(function (b) { return !!BADGES.earned[b.id]; }).length
+           + " / " + BADGE_DEFS.length);
+  } catch (e) {}
+  try { L.push("最佳分數 " + BEST.score + " / 最長連勝 " + BEST.streak); } catch (e) {}
+  try {
+    var d = localStorage.getItem("eq_daily");
+    L.push("今日挑戰 " + (d || "尚未作答"));
+  } catch (e) {}
+  try { L.push("匿名ID " + (localStorage.getItem("ibq_aid") || "無")); } catch (e) {}
+  try {
+    var ks = [];
+    ["eq_best", "eq_mistakes", "eq_stage_progress", "eq_badges", "eq_bee_best"].forEach(function (k) {
+      try { if (localStorage.getItem(k)) ks.push(k); } catch (e) {}
+    });
+    L.push("已存在的紀錄 " + (ks.join(", ") || "（無）"));
+  } catch (e) {}
+  try { L.push("螢幕 " + screen.width + "x" + screen.height + " dpr" + (window.devicePixelRatio || 1)); } catch (e) {}
+  try { L.push("語音 " + (("speechSynthesis" in window) ? "支援" : "不支援")); } catch (e) {}
+  try { L.push("離線快取 " + (("serviceWorker" in navigator) ? "支援" : "不支援")); } catch (e) {}
+  try { L.push("網路 " + (navigator.onLine ? "連線中" : "離線")); } catch (e) {}
+  try { L.push("時間 " + new Date().toString()); } catch (e) {}
+  try { L.push("UA " + navigator.userAgent); } catch (e) {}
+  return L.join("\n");
+}
+
+// 縮圖。手機直出的截圖動輒 3~5MB，不壓的話送不上去。
+function rpShrink(file, cb) {
+  var fr = new FileReader();
+  fr.onload = function () {
+    var im = new Image();
+    im.onload = function () {
+      try {
+        var MAXW = 1000;
+        var sc = Math.min(1, MAXW / im.width);
+        var cv = document.createElement("canvas");
+        cv.width = Math.round(im.width * sc);
+        cv.height = Math.round(im.height * sc);
+        cv.getContext("2d").drawImage(im, 0, 0, cv.width, cv.height);
+        var q = 0.7, out = cv.toDataURL("image/jpeg", q);
+        while (out.length > 80000 && q > 0.3) { q -= 0.1; out = cv.toDataURL("image/jpeg", q); }
+        cb(out.length > 120000 ? "" : out);
+      } catch (e) { cb(""); }
+    };
+    im.onerror = function () { cb(""); };
+    im.src = fr.result;
+  };
+  fr.onerror = function () { cb(""); };
+  fr.readAsDataURL(file);
+}
+
+function rpOpen() {
+  var pn = document.getElementById("rpMask");
+  if (!pn) return;
+  RP_IMG = "";
+  var t = document.getElementById("rpText");
+  if (t) t.value = "";
+  var f = document.getElementById("rpFile");
+  if (f) f.value = "";
+  rpCount(); rpPreview();
+  pn.classList.add("open");
+}
+function rpClose() {
+  var pn = document.getElementById("rpMask");
+  if (pn) pn.classList.remove("open");
+}
+function rpCount() {
+  var t = document.getElementById("rpText"), c = document.getElementById("rpCount");
+  if (t && c) c.textContent = t.value.length + " / 500";
+}
+function rpPreview() {
+  var box = document.getElementById("rpPreview"), im = document.getElementById("rpImg");
+  if (!box || !im) return;
+  if (RP_IMG) { im.src = RP_IMG; box.style.display = "block"; }
+  else { im.removeAttribute("src"); box.style.display = "none"; }
+}
+function rpPickImage(input) {
+  var f = input.files && input.files[0];
+  if (!f) return;
+  rpToast("處理圖片中\u2026");
+  rpShrink(f, function (d) {
+    RP_IMG = d || "";
+    if (!d) rpToast("這張圖沒辦法處理，可以直接用文字描述");
+    rpPreview();
+  });
+}
+function rpSend(btn) {
+  var t = document.getElementById("rpText");
+  var text = t ? t.value.trim() : "";
+  if (!text && !RP_IMG) { rpToast("請寫一下遇到什麼狀況"); return; }
+  var old = btn ? btn.textContent : "";
+  if (btn) { btn.disabled = true; btn.textContent = "送出中\u2026"; }
+  var diag = "";
+  try { diag = rpDiag(); } catch (e) { diag = "(診斷資料取得失敗)"; }
+  fetch("/report", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ text: text, diag: diag, img: RP_IMG })
+  }).then(function (res) {
+    if (res.status === 429) rpToast("剛剛才送過，請稍等一下");
+    else if (res.status === 413) rpToast("內容太大了，圖片換小一點試試");
+    else if (!res.ok) rpToast("送出失敗，請稍後再試");
+    else { rpToast("已送出，謝謝你的回報！"); rpClose(); }
+  }).catch(function () {
+    rpToast("送出失敗，請檢查網路");
+  }).then(function () {
+    if (btn) { btn.disabled = false; btn.textContent = old || "送出"; }
+  });
+}
+
+// ------------------------------------------------------------------
 // 公告（新增）
 // 只用一把新的 key：eq_news_seen。既有五把鑰匙完全沒有動到。
 // 之後要發新公告：在 NEWS 陣列最前面加一則、寫上日期即可自動彈出一次。
 // ------------------------------------------------------------------
 var NEWS = [
+  { pin: true, text: "\uD83D\uDCAC <b>遇到問題？</b><a href=\"javascript:void(0)\" onclick=\"closeNews();rpOpen()\" style=\"color:#0E8F82\">點這裡回報</a>，會自動附上診斷資料，也可以加截圖" },
   { pin: true, text: "\uD83D\uDCF1 <b>把它裝到手機桌面</b>：開起來比較快，沒網路也能用，紀錄也比較不會不見<br><span class=\"news-steps\">Android：Chrome 右上角 \u22EE \u2192 安裝應用程式<br>iPhone：Safari 下方分享鍵 \u2192 加入主畫面</span>" },
   { pin: true, text: "\uD83D\uDD0A <b>發音沒聲音？</b>Android 請用 Chrome 開啟，iPhone 請用 Safari，發音效果最好" },
   { date: "2026/09/03", text: "\uD83C\uDFE0 <b>新增主頁</b>：所有模式集中在同一頁，不用再一個一個找" },
@@ -6355,6 +6540,46 @@ var WSTAT = (function () {
   } catch (e) { /* 靜默 */ }
 })();
 </script>
+
+<!-- ==================================================================
+     問題回報（新增，放在 #root 之外，render() 重建畫面時不會被清掉）
+     ================================================================== -->
+<div class="rp-mask" id="rpMask">
+  <div class="rp-box">
+    <div class="rp-h">💬 問題回報</div>
+    <div class="rp-note">遇到什麼狀況？寫下來就好，不用很詳細。</div>
+    <textarea class="rp-text" id="rpText" maxlength="500" rows="4"
+      placeholder="例如：某個字的中文好像不對、發音沒有聲音、進度不見了…"
+      oninput="rpCount()"></textarea>
+    <div class="rp-note" id="rpCount">0 / 500</div>
+
+    <div style="margin-top:10px;">
+      <label for="rpFile" class="rp-filebtn">📷 附一張截圖（可略過）</label>
+      <input type="file" id="rpFile" accept="image/*" style="display:none;"
+        onchange="rpPickImage(this)">
+      <div id="rpPreview" style="display:none;margin-top:8px;">
+        <img id="rpImg" style="max-width:100%;border-radius:8px;display:block;">
+        <button class="rp-textbtn"
+          onclick="RP_IMG='';document.getElementById('rpFile').value='';rpPreview()">移除圖片</button>
+      </div>
+    </div>
+
+    <div class="rp-note" style="margin-top:10px;">
+      送出時會一併附上版本號、目前的模式與進度、瀏覽器資訊，用來查問題。
+      不會傳送你的姓名、學校或任何個人資料。
+    </div>
+
+    <div class="rp-row">
+      <button class="rp-btn rp-ghost" onclick="rpClose()">取消</button>
+      <button class="rp-btn rp-primary" onclick="rpSend(this)">送出</button>
+    </div>
+    <div class="rp-note" style="text-align:center;margin-top:12px;">
+      也可以到 <a href="https://www.threads.com/@its_ibamboo/post/Dau5e8UEyVF"
+        target="_blank" rel="noopener" style="color:#0E8F82;">Threads 留言</a>
+    </div>
+  </div>
+</div>
+<div class="rp-toast" id="rpToast"></div>
 
 <!-- ==================================================================
      公告（新增，放在 #root 之外，render() 重建畫面時不會被清掉）
