@@ -51,15 +51,3 @@ CREATE TABLE IF NOT EXISTS daily_challenge (
 
 -- 一人一天一次的去重表。只留最近 30 天，寫入時會自動清掉更早的。
 CREATE TABLE IF NOT EXISTS daily_plays (day TEXT, aid TEXT, PRIMARY KEY (day, aid));
-
--- 問題回報。使用者在系統裡直接填，送出時自動夾帶診斷資料。
--- 只留最新 60 筆，寫入時自動刪掉更舊的（圖片很佔空間）。
--- ⚠️ 這張表的內容是使用者打的字和他手機的截圖，
---    /reports 一定要上鎖，不能像 /admin 那樣公開。
-CREATE TABLE IF NOT EXISTS reports (
-  id   TEXT PRIMARY KEY,
-  t    INTEGER NOT NULL,   -- 送出時間（毫秒）
-  text TEXT,               -- 使用者寫的內容，上限 500 字
-  diag TEXT,               -- 自動夾帶的診斷資料，上限 4000 字
-  img  TEXT                -- 截圖 data URI，前端已縮到 1000px 寬
-);
