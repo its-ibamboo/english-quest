@@ -9,7 +9,7 @@
  * 隱私：只存匿名隨機 ID、模式、時間。不存 IP、不存 UA、不存任何個人資訊。
  */
 
-const BUILD = "v2026.09.03i";            // 跟 index.html 的版本號一起往上帶
+const BUILD = "v2026.09.03j";            // 跟 index.html 的版本號一起往上帶
 const TZ_OFFSET = 8 * 60 * 60 * 1000;   // 台北時間
 
 export default {
@@ -106,7 +106,9 @@ export default {
         out.push("index.html 版本：" + (m ? m[1] : "找不到版本號（部署的是舊版）"));
         out.push("版本是否一致：" + (m && m[1] === BUILD ? "一致" : "不一致！兩個檔案要一起更新"));
         out.push("埋點程式碼：" + (html.indexOf("ibq_aid") >= 0 ? "有，已部署" : "沒有！部署的是舊版 index.html"));
-        out.push("複製偵測：" + (html.indexOf("/h?host=") >= 0 ? "有，已部署" : "沒有！部署的是舊版 index.html"));
+        out.push("複製偵測：" + (html.indexOf("var REPORT = ") >= 0 ? "有，已部署" : "沒有！部署的是舊版 index.html"));
+        out.push("每日挑戰：" + (html.indexOf("var CHAL_KEY") >= 0 ? "有，已部署" : "沒有！部署的是舊版 index.html"));
+        out.push("答錯率追蹤：" + (html.indexOf("var WSTAT") >= 0 ? "有，已部署" : "沒有！部署的是舊版 index.html"));
       } catch (e) {
         out.push("讀不到 index.html → " + e.message);
       }

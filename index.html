@@ -3649,7 +3649,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.09.03i";
+var BUILD = "v2026.09.03j";
 
 // ------------------------------------------------------------------
 // 今日單字（新增）
@@ -3750,15 +3750,26 @@ function chalFetchDist(score) {
     }).catch(function () {});
   } catch (e) {}
 }
+var CHAL_MIN_N = 10;   // 少於這個人數就不顯示百分位，太早算沒有意義
+
 function chalStats() {
   var j = CHAL.dist;
   if (!j || !j.plays) return null;
-  var below = 0;
-  for (var i = 0; i < (CHAL.last ? CHAL.last.score : 0); i++) below += j.d[i];
+  var my = CHAL.last ? CHAL.last.score : 0;
+  var below = 0, same = 0;
+  for (var i = 0; i < j.d.length; i++) {
+    if (i < my) below += j.d[i];
+    else if (i === my) same += j.d[i];
+  }
+  // 中點百分位：同分的人算一半。不然自己也被算成「沒贏過」，
+  // 第一個玩的人會看到「你贏過 0%」，那是打擊也是誤導。
+  var beat = j.plays >= CHAL_MIN_N
+    ? Math.round((below + same / 2) * 100 / j.plays)
+    : null;
   return {
     d: j.d, plays: j.plays,
     avg: Math.round(j.total / j.plays * 10) / 10,
-    beat: Math.round(below * 100 / j.plays)
+    beat: beat
   };
 }
 
@@ -3829,7 +3840,14 @@ function chalPanelHtml() {
   if (r.replay) {
     h += '<div class="res-line">這次是重玩，<b>不計入</b>今天的統計</div>';
   } else if (st) {
-    h += '<div class="res-line">全台平均 <b>' + st.avg + '</b> 分<br>你贏過 <b>' + st.beat + '%</b> 的人</div>';
+    h += '<div class="res-line">全台平均 <b>' + st.avg + '</b> 分';
+    if (st.beat !== null) {
+      h += '<br>你贏過 <b>' + st.beat + '%</b> 的人';
+    } else {
+      h += '<br>你是今天第 <b>' + st.plays + '</b> 個完成的<br>'
+         + '<span style="font-size:12px;color:#B5B8C4">滿 ' + CHAL_MIN_N + ' 人才會顯示排名</span>';
+    }
+    h += '</div>';
   } else {
     h += '<div class="res-line">連不上網路，看不到全台成績<br>成績已經存在你的裝置上了</div>';
   }
