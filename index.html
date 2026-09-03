@@ -3619,7 +3619,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.09.03e";
+var BUILD = "v2026.09.03h";
 
 // ------------------------------------------------------------------
 // 今日單字（新增）
@@ -4051,6 +4051,7 @@ function resetGrammarScramble() {
 // Actions
 // ------------------------------------------------------------------
 function setMode(m) {
+  try { WSTAT.flush(); } catch (e) {}
   if (state.mode === "adventure" && m !== "adventure") clearStageTimer();
   state.mode = m;
   render();
@@ -4136,6 +4137,7 @@ function answerQuiz(optIndex) {
   if (state.selected !== null) return;
   var opt = state.question.options[optIndex];
   state.selected = opt.en;
+  WSTAT.hit(state.question.correct.en, opt.en !== state.question.correct.en);
   if (opt.en === state.question.correct.en) {
     state.score++; state.streak++;
     updateBest();
@@ -4271,6 +4273,7 @@ function answerStageQuestion(optIndex) {
   var q = state.stageQuestions[state.stageQPos];
   var opt = q.options[optIndex];
   state.stageSelected = opt.en;
+  WSTAT.hit(q.correct.en, opt.en !== q.correct.en);
   if (opt.en !== q.correct.en) {
     state.stageHearts--;
     if (state.stageHearts <= 0) {
@@ -5927,8 +5930,22 @@ setTimeout(function () { if (newsUnseen()) openNews(); }, 900);
     };
   }
 
+  // --- 包裝 setDifficulty：原函式完全不動，只在前面加一行紀錄 ---
+  // 難度是判斷「使用者程度」唯一不打擾人的訊號。
+  // 國小生會停在基礎，程度好的會往進階跑。不必問年級。
+  if (typeof window.setDifficulty === "function") {
+    var origSetDiff = window.setDifficulty;
+    window.setDifficulty = function (d) {
+      hit("diff", d);
+      return origSetDiff.apply(this, arguments);
+    };
+  }
+
   // --- 進站時的預設模式也算一次（現在的落地頁是主頁，不是閃卡）---
   hit("mode", "home");
+
+  // --- 進站時的預設難度也記一次，當作基準線 ---
+  hit("diff", "all");
 })();
 </script>
 
@@ -5993,6 +6010,55 @@ setTimeout(function () { if (newsUnseen()) openNews(); }, 900);
     <button class="tip-close" id="tipClose">關閉</button>
   </div>
 </div>
+
+<!-- ==================================================================
+     單字答錯率追蹤（新增）
+     · 只回報單字本身與答對答錯，不含任何使用者資料
+     · 在瀏覽器裡累積，切模式 / 離開頁面時整批送一次
+     ================================================================== -->
+<script>
+var WSTAT = (function () {
+  "use strict";
+  var buf = {};      // { 單字: [出現次數, 答錯次數] }
+  var n = 0;         // 累積了幾個不同的字
+  var MAX = 60;      // 累積到這個量就先送一批，避免網址過長
+
+  function hit(en, wrong) {
+    if (typeof en !== "string" || !en) return;
+    if (!buf[en]) { buf[en] = [0, 0]; n++; }
+    buf[en][0]++;
+    if (wrong) buf[en][1]++;
+    if (n >= MAX) flush();
+  }
+
+  function flush() {
+    var keys = Object.keys(buf);
+    if (!keys.length) return;
+    var parts = [];
+    for (var i = 0; i < keys.length; i++) {
+      var v = buf[keys[i]];
+      parts.push(keys[i] + "*" + v[0] + "*" + v[1]);
+    }
+    buf = {}; n = 0;
+    try {
+      if (location.protocol !== "https:" && location.protocol !== "http:") return;
+      var img = new Image();
+      img.onerror = function () {};
+      img.src = "/w?d=" + encodeURIComponent(parts.join("~")) + "&_=" + Date.now();
+    } catch (e) { /* 靜默 */ }
+  }
+
+  // 離開頁面、切到背景時把還沒送的送出去
+  try {
+    window.addEventListener("pagehide", flush);
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === "hidden") flush();
+    });
+  } catch (e) {}
+
+  return { hit: hit, flush: flush };
+})();
+</script>
 
 <!-- ==================================================================
      Service Worker（新增）
