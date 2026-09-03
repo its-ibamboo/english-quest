@@ -9,7 +9,7 @@
  * 隱私：只存匿名隨機 ID、模式、時間。不存 IP、不存 UA、不存任何個人資訊。
  */
 
-const BUILD = "v2026.09.03n";            // 跟 index.html 的版本號一起往上帶
+const BUILD = "v2026.09.03p";            // 跟 index.html 的版本號一起往上帶
 const TZ_OFFSET = 8 * 60 * 60 * 1000;   // 台北時間
 
 export default {
@@ -608,6 +608,13 @@ async function stats(env) {
     ).first() || {};
   } catch (e) { hardWords = []; wordTotal = {}; }
 
+  // 未處理的回報筆數。只給數字，內容要密碼才看得到。
+  let reportCount = 0;
+  try {
+    const rc = await env.DB.prepare("SELECT COUNT(*) AS n FROM reports").first();
+    reportCount = (rc && rc.n) || 0;
+  } catch (e) { reportCount = 0; }
+
   // 被複製到別的網域的紀錄。表可能還不存在，查不到就當作空的。
   let copies = [];
   try {
@@ -629,6 +636,7 @@ async function stats(env) {
     cohort: cohort,
     hardWords: hardWords,
     wordTotal: wordTotal,
+    reportCount: reportCount,
     copies: copies,
     total: total || {}
   };
@@ -683,10 +691,14 @@ summary{font-size:12px;color:var(--dim);cursor:pointer;padding:6px 0}
 .golink{display:block;background:var(--card);border:1px solid var(--line);border-radius:8px;
         padding:11px 13px;margin:0 0 20px;color:var(--hot);text-decoration:none;font-size:14px}
 .golink span{display:block;color:var(--dim);font-size:11.5px;margin-top:2px}
+.golink.hot{border-color:var(--hot);background:#231f14;font-weight:600}
+.golink.quiet{background:none;border:none;padding:0;margin:0 0 18px;color:var(--dim);font-size:12.5px}
+.golink.quiet span{display:inline;font-size:12.5px;margin:0}
+.golink.quiet span:before{content:" · "}
 </style></head><body><main>
 <h1>英文任務系統</h1>
 <p class="sub">使用統計 · 匿名，不含任何個人資訊 · <span id="build">${BUILD}</span></p>
-<a href="/reports" class="golink">💬 問題回報　<span>使用者送出的回報與截圖 · 需要密碼</span></a>
+<div id="rpbox"></div>
 <div id="app" class="load">載入中…</div>
 </main>
 <script>
@@ -708,6 +720,16 @@ function cmp(v){ return (v===undefined||v===null)?"":"昨天 "+v; }
 fetch("/admin/data").then(function(r){return r.json()}).then(function(d){
   var app=document.getElementById("app");
   if(d.error){app.className="";app.textContent=d.error;return;}
+
+  // 有回報就跳出來，沒有就退成一行小字（刪光之後還是要找得到入口）
+  var rb=document.getElementById("rpbox");
+  if(rb){
+    rb.innerHTML = d.reportCount
+      ? '<a href="/reports" class="golink hot">\uD83D\uDCEC 有 '+d.reportCount+' 筆問題回報'
+        + '<span>點這裡查看與刪除 \u2192</span></a>'
+      : '<a href="/reports" class="golink quiet">\uD83D\uDCAC 問題回報'
+        + '<span>目前沒有新的回報 \u00B7 需要密碼</span></a>';
+  }
   var h="";
   var t=d.daily[0]||{}, y=d.daily[1]||null;
   var tBack=(t.people||0)-(t.fresh||0);
