@@ -95,16 +95,25 @@
   }
   .mode-tabs {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 2px;
     background: #FFFFFF;
-    padding: 4px;
+    padding: 4px 6px;
     border-radius: 999px;
     margin-bottom: 24px;
+    width: 100%;
+    max-width: 380px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
   }
+  .mode-tabs::-webkit-scrollbar { display: none; }
   .mode-tab {
-    padding: 6px 16px;
+    flex: none;
+    white-space: nowrap;
+    padding: 6px 13px;
     border-radius: 999px;
     font-size: 14px;
     font-weight: 500;
@@ -352,6 +361,16 @@
   }
   .news-list div {
     margin-bottom: 6px;
+  }
+  .build-tag {
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    margin-top: 8px;
+    font-size: 10px;
+    font-family: monospace;
+    color: #CFD2DA;
+    letter-spacing: 0.5px;
   }
   .app-credit {
     width: 100%;
@@ -809,6 +828,184 @@
   background: #E7E5DE; color: #2A2A33; font-size: 14px; font-weight: 700;
   font-family: inherit; cursor: pointer; }
 
+
+  /* ===== 主頁（新增） ===== */
+  h1.title.tappable { cursor: pointer; }
+  .top-actions {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+  }
+  .foot-links {
+    width: 100%;
+    max-width: 380px;
+    text-align: center;
+    margin-top: 10px;
+    font-size: 12px;
+  }
+  .foot-links a { color: #0E8F82; text-decoration: none; }
+  .foot-sep { color: #D8D5CD; margin: 0 8px; }
+
+  .home-daily {
+    width: 100%;
+    border-radius: 16px;
+    background: #FFFFFF;
+    border: 1px solid #E7E5DE;
+    padding: 20px;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  .home-daily-tag {
+    font-size: 11px;
+    font-family: monospace;
+    color: #C97F00;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .home-daily-en { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
+  .home-daily-meta { font-size: 12px; color: #82869C; margin-top: 2px; font-family: monospace; }
+  .home-daily-zh {
+    margin-top: 12px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #0E8F82;
+    min-height: 26px;
+  }
+  .home-daily-row { display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
+  .home-daily-btn {
+    padding: 7px 18px;
+    border-radius: 999px;
+    border: none;
+    background: #C97F00;
+    color: #F7F5F0;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .home-daily-btn.ghost {
+    background: transparent;
+    color: #0E8F82;
+    border: 1px solid rgba(14,143,130,0.4);
+  }
+  .home-sec {
+    width: 100%;
+    font-size: 12px;
+    color: #82869C;
+    letter-spacing: 2px;
+    margin: 4px 0 10px;
+    text-align: center;
+  }
+  .home-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 7px; width: 100%; }
+  .home-card {
+    background: #FFFFFF;
+    border: 1px solid #E7E5DE;
+    border-radius: 12px;
+    padding: 10px 8px;
+    text-align: left;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-family: inherit;
+    color: #2A2A33;
+  }
+  .home-card:active { background: #F1EEE7; }
+  .home-card .ic { font-size: 18px; line-height: 1.1; }
+  .home-card .lb { font-size: 13px; font-weight: 600; letter-spacing: -0.5px; }
+  .home-card .sb { font-size: 10px; color: #82869C; font-family: monospace; white-space: nowrap; }
+  .home-card.soon { opacity: 0.55; cursor: default; background: #F1EEE7; }
+  .home-card.soon .sb { color: #B5B8C4; }
+  .home-stats {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    border-radius: 12px;
+    background: #FFFFFF;
+    border: 1px solid #E7E5DE;
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+  }
+  .home-stats span { display: block; }
+  .home-stats .n { font-size: 18px; font-weight: 700; font-family: monospace; }
+  .home-stats .l { font-size: 11px; color: #82869C; margin-top: 2px; }
+
+  /* ===== 公告（新增） ===== */
+  .news-row {
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 12px;
+  }
+  .news-open {
+    position: relative;
+    background: none;
+    border: none;
+    color: #0E8F82;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+  .news-open .news-dot {
+    position: absolute;
+    top: 0;
+    right: -6px;
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: #D63A5C;
+  }
+  .news-mask {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 600;
+    background: rgba(20,20,26,0.55);
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .news-mask.open { display: flex; }
+  .news-panel {
+    background: #FFFFFF;
+    border-radius: 16px;
+    padding: 20px;
+    width: 100%;
+    max-width: 360px;
+    max-height: 82vh;
+    overflow-y: auto;
+    color: #2A2A33;
+  }
+  .news-h { font-size: 17px; font-weight: 700; color: #C97F00; margin-bottom: 14px; }
+  .news-item {
+    border-bottom: 1px solid #E7E5DE;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  .news-item:last-of-type { border-bottom: none; }
+  .news-date { font-size: 11px; color: #B5B8C4; font-family: monospace; }
+  .news-item b { color: #C97F00; }
+  .news-close {
+    width: 100%;
+    margin-top: 14px;
+    padding: 11px;
+    border: none;
+    border-radius: 10px;
+    background: #C97F00;
+    color: #F7F5F0;
+    font-weight: 700;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+  }
 </style>
 </head>
 <body>
@@ -3411,14 +3608,106 @@ var DIFFICULTIES = [
   { key: "hell", label: "地獄" },
   { key: "all", label: "全部" }
 ];
+// 版本號：改版時記得往上帶（日期 + 當天序號）
+var BUILD = "v2026.09.03d";
+
+// ------------------------------------------------------------------
+// 今日單字（新增）
+// 用「日期」當種子從 WORD_BANK 挑一個字，所以同一天所有人看到的都一樣。
+// 只讀取 WORD_BANK，不新增、不刪除、不排序，關卡內容完全不受影響。
+// ------------------------------------------------------------------
+var DAILY_LEVELS = { basic: 1, advanced: 1 };   // 地獄字不放今日單字
+function taipeiDayNumber() {
+  // 用 UTC+8 算今天是第幾天，避免使用者裝置時區不同而看到不同的字
+  var ms = Date.now() + 8 * 3600 * 1000;
+  return Math.floor(ms / 86400000);
+}
+function dailyWord() {
+  var pool = WORD_BANK.filter(function (w) { return DAILY_LEVELS[w.level]; });
+  if (!pool.length) return null;
+  // 把天數打散，避免連續幾天的字剛好排在一起
+  var n = taipeiDayNumber();
+  var h = (n * 2654435761) % 4294967296;
+  h = (h ^ (h >>> 13)) >>> 0;
+  return pool[h % pool.length];
+}
+var dailyRevealed = false;
+function revealDaily() { dailyRevealed = true; render(); }
+function practiceDaily() {
+  var w = dailyWord();
+  if (w) jumpToWord(w.en);
+}
+function speakDaily() {
+  var w = dailyWord();
+  if (w) speak(w.en);
+}
+
+// ------------------------------------------------------------------
+// 主頁面板（新增）
+// ------------------------------------------------------------------
+function homePanelHtml() {
+  var html = "";
+  var w = dailyWord();
+
+  if (w) {
+    html += '<div class="home-daily">';
+    html += '  <div class="home-daily-tag">今 日 單 字</div>';
+    html += '  <div class="home-daily-en">' + esc(w.en) + '</div>';
+    var meta = w.pos ? (esc(w.pos) + (levelLabel(w) ? ' \u00B7 ' + levelLabel(w) : '')) : (levelLabel(w) || '');
+    html += '  <div class="home-daily-meta">' + meta + '</div>';
+    html += '  <div class="home-daily-zh">' + (dailyRevealed ? esc(w.zh) : '') + '</div>';
+    html += '  <div class="home-daily-row">';
+    html += '    <button class="home-daily-btn ghost" onclick="speakDaily()">\uD83D\uDD0A 發音</button>';
+    if (!dailyRevealed) {
+      html += '  <button class="home-daily-btn" onclick="revealDaily()">看中文</button>';
+    } else {
+      html += '  <button class="home-daily-btn" onclick="practiceDaily()">去練這個字</button>';
+    }
+    html += '  </div>';
+    html += '</div>';
+  }
+
+  var cleared = Object.keys(STAGE_PROGRESS.stars).length;
+  var earned = BADGE_DEFS.filter(function (b) { return !!BADGES.earned[b.id]; }).length;
+
+  var cards = [
+    { m: "flash",     ic: "\u26A1",             lb: "閃卡",       sb: "記單字" },
+    { m: "bee",       ic: "\uD83D\uDC1D",       lb: "拼字小蜜蜂", sb: "拼字遊戲" },
+    { m: "adventure", ic: "\uD83D\uDDFA\uFE0F", lb: "闖關地圖",   sb: cleared + "/" + STAGES.length + " 關" },
+    { m: "quiz",      ic: "\uD83D\uDCDD",       lb: "單字測驗",   sb: "四選一" },
+    { m: "grammar",   ic: "\uD83D\uDCD6",       lb: "文法",       sb: GRAMMAR_BANK.length + " 題" },
+    { m: "scramble",  ic: "\uD83D\uDD00",       lb: "重組句子",   sb: SCRAMBLE_BANK.length + " 句" },
+    { m: "badges",    ic: "\uD83C\uDFC5",       lb: "徽章",       sb: earned + "/" + BADGE_DEFS.length + " 個" }
+  ];
+
+  html += '<div class="home-grid">';
+  cards.forEach(function (c) {
+    html += '<button class="home-card" onclick="setMode(\'' + c.m + '\')">';
+    html += '<span class="ic">' + c.ic + '</span>';
+    html += '<span class="lb">' + c.lb + '</span>';
+    html += '<span class="sb">' + c.sb + '</span>';
+    html += '</button>';
+  });
+  // 排行榜：還沒開放，灰色不可點
+  html += '<div class="home-card soon">';
+  html += '<span class="ic">\uD83C\uDFC6</span>';
+  html += '<span class="lb">排行榜</span>';
+  html += '<span class="sb">敬請期待</span>';
+  html += '</div>';
+  html += '</div>';
+
+  return html;
+}
+
 var MODES = [
+  { key: "home", label: "\uD83C\uDFE0 首頁" },
   { key: "flash", label: "閃卡" },
   { key: "quiz", label: "單字測驗" },
   { key: "grammar", label: "文法" },
   { key: "scramble", label: "重組句子" },
-  { key: "adventure", label: "\uD83D\uDDFA\uFE0F 闖關地圖" },
-  { key: "badges", label: "\uD83C\uDFC5 徽章" },
-  { key: "bee", label: "\uD83D\uDC1D 拼字小蜜蜂" }
+  { key: "adventure", label: "闖關地圖" },
+  { key: "badges", label: "徽章" },
+  { key: "bee", label: "拼字小蜜蜂" }
 ];
 
 var STAGE_SIZE = 20;
@@ -3509,7 +3798,7 @@ function speak(text) {
 // State
 // ------------------------------------------------------------------
 var state = {
-  mode: "flash",
+  mode: "home",
   difficulty: "all",
   score: 0,
   streak: 0,
@@ -4034,15 +4323,23 @@ function render() {
   var progressPct = (state.score % LEVEL_SIZE) / LEVEL_SIZE * 100;
 
   var html = "";
+  if (state.mode !== "home") {
   html += '<div class="hud">';
   html += '<div>\u2694\uFE0F LV.' + level + '</div>';
   html += '<div class="hud-bar"><div class="hud-bar-fill" style="width:' + progressPct + '%"></div></div>';
   html += '<div class="hud-trophy">\uD83C\uDFC6 ' + state.score + '</div>';
   html += '</div>';
   html += '<div class="best-row">\uD83E\uDD47 最佳分數 ' + BEST.score + '　\u26A1 最長連勝 ' + BEST.streak + '</div>';
+  }
 
-  html += '<h1 class="title">英文任務系統</h1>';
-  if (state.mode === "adventure") {
+  if (state.mode === "home") {
+    html += '<h1 class="title">英文任務系統</h1>';
+  } else {
+    html += '<h1 class="title tappable" onclick="setMode(\'home\')">英文任務系統</h1>';
+  }
+  if (state.mode === "home") {
+    html += '<p class="subtitle">國中 2000 單字 \u00B7 文法 \u00B7 闖關</p>';
+  } else if (state.mode === "adventure") {
     var clearedCount = Object.keys(STAGE_PROGRESS.stars).length;
     html += '<p class="subtitle">已過 ' + clearedCount + ' / ' + STAGES.length + ' 關</p>';
   } else if (state.mode === "bee") {
@@ -4055,8 +4352,9 @@ function render() {
     html += '<p class="subtitle">共 ' + totalCount + ' 字</p>';
   }
 
-  html += '<div class="search-row">';
+  html += '<div class="top-actions">';
   html += '<button class="search-toggle" onclick="toggleSearch()">\uD83D\uDD0D ' + (state.searchOpen ? "關閉搜尋" : "搜尋單字") + '</button>';
+  html += '<button class="news-open" onclick="openNews()">\uD83D\uDCE2 最新消息' + (newsUnseen() ? '<span class="news-dot"></span>' : '') + '</button>';
   html += '</div>';
   if (state.searchOpen) {
     html += '<div class="search-box">';
@@ -4079,7 +4377,7 @@ function render() {
     html += '</div>';
   }
 
-  if (state.mode !== "adventure" && state.mode !== "badges" && state.mode !== "bee") {
+  if (state.mode !== "home" && state.mode !== "adventure" && state.mode !== "badges" && state.mode !== "bee") {
     html += '<div class="chip-row">';
     DIFFICULTIES.forEach(function (d) {
       var active = state.difficulty === d.key ? " active" : "";
@@ -4088,16 +4386,20 @@ function render() {
     html += '</div>';
   }
 
-  html += '<div class="mode-tabs">';
-  MODES.forEach(function (m) {
-    var active = state.mode === m.key ? " active" : "";
-    html += '<button class="mode-tab' + active + '" onclick="setMode(\'' + m.key + '\')">' + m.label + '</button>';
-  });
-  html += '</div>';
+  if (state.mode !== "home") {
+    html += '<div class="mode-tabs">';
+    MODES.forEach(function (m) {
+      var active = state.mode === m.key ? " active" : "";
+      html += '<button class="mode-tab' + active + '" onclick="setMode(\'' + m.key + '\')">' + m.label + '</button>';
+    });
+    html += '</div>';
+  }
 
   html += '<div class="panel">';
 
-  if (state.mode === "bee") {
+  if (state.mode === "home") {
+    html += homePanelHtml();
+  } else if (state.mode === "bee") {
     html += BEE.panelHtml();
   } else if (state.mode === "flash") {
     var pool = wordPool();
@@ -4352,7 +4654,9 @@ function render() {
 
   html += '</div>'; // panel
 
-  html += '<div class="footer-stats"><span>連對 ' + state.streak + '</span><span>答錯 ' + state.wrong + '</span></div>';
+  if (state.mode === "quiz" || state.mode === "grammar" || state.mode === "scramble") {
+    html += '<div class="footer-stats"><span>連對 ' + state.streak + '</span><span>答錯 ' + state.wrong + '</span></div>';
+  }
 
   var badges = [];
   if (state.streak >= 3) badges.push("連對 3 題");
@@ -4365,18 +4669,24 @@ function render() {
     html += '</div>';
   }
 
-  html += '<details class="news-details"><summary class="news-summary">\uD83D\uDCE2 最新消息</summary>';
-  html += '<div class="news-list">';
-  html += '<div>\uD83D\uDC1D 新增「拼字小蜜蜂」小遊戲：中文從天而降，打出英文拼字把它擊落，四種難度依拼寫難易度分層。</div>';
-  html += '<div>\uD83C\uDFC5 新增徽章收集系統，快去闖關地圖解鎖徽章！</div>';
-  html += '<div>\uD83D\uDD0A Android 系統手機，建議用 Chrome 瀏覽器開啟、並建立手機桌面捷徑，發音效果較佳，可參考<a href="https://www.threads.com/@its_ibamboo/post/DamXQ74E79A?xmt=AQG0Phvw9nKsJ8LenQx6zNGvJLX-q2yH1YsKeAiIa4qRSeIakBW6hicDghXX-8lE0vHZtLo&slof=1" target="_blank" rel="noopener" style="color:#0E8F82;">這裡</a></div>';
-  html += '<div>\uD83C\uDF4E iPhone 手機請參考<a href="https://www.threads.com/@its_ibamboo/post/DaqE1NLE58I?xmt=AQG0Ism8Hi_mSXCWHetDLiITt6bCxfxzhV_82VOM9HcgG7T2j9D7FeFBNhAi_ZjDfUdHepnh&slof=1" target="_blank" rel="noopener" style="color:#0E8F82;">這裡</a></div>';
-  html += '</div></details>';
   html += '<div class="app-credit">單字取材自教育部課綱國中小2000字表\u30FB文法遊戲為原創設計<br>made by ibamboo</div>';
-  html += '<a class="report-link" href="https://www.threads.com/@its_ibamboo/post/Dau5e8UEyVF" target="_blank" rel="noopener">\uD83D\uDCAC 問題回報與建議</a>';
-  html += '<div class="tip-entry"><a href="javascript:void(0)" onclick="TIP.open()">\uD83D\uDC9B 打賞箱</a></div>';
+  html += '<div class="foot-links">';
+  html += '<a href="https://www.threads.com/@its_ibamboo/post/Dau5e8UEyVF" target="_blank" rel="noopener">\uD83D\uDCAC 問題回報</a>';
+  html += '<span class="foot-sep">\u00B7</span>';
+  html += '<a href="javascript:void(0)" onclick="TIP.open()">\uD83D\uDC9B 打賞箱</a>';
+  html += '</div>';
+  html += '<div class="build-tag" id="build-tag">' + BUILD + '</div>';
 
   document.getElementById("root").innerHTML = html;
+
+  // 分頁列是單行橫捲，把目前所在的分頁移到看得見的位置
+  try {
+    var tabsEl = document.querySelector(".mode-tabs");
+    var activeEl = tabsEl && tabsEl.querySelector(".mode-tab.active");
+    if (tabsEl && activeEl) {
+      tabsEl.scrollLeft = activeEl.offsetLeft - (tabsEl.clientWidth - activeEl.offsetWidth) / 2;
+    }
+  } catch (e) { /* 捲不動不影響任何功能 */ }
 
   if (state.mode !== "bee" && BEE.isOpen()) BEE.close();
 
@@ -5493,11 +5803,61 @@ var TIP = (function () {
   } };
 })();
 
+// ------------------------------------------------------------------
+// 公告（新增）
+// 只用一把新的 key：eq_news_seen。既有五把鑰匙完全沒有動到。
+// 之後要發新公告：在 NEWS 陣列最前面加一則、寫上日期即可自動彈出一次。
+// ------------------------------------------------------------------
+var NEWS = [
+  { pin: true, text: "\uD83D\uDCF1 <b>把這個網頁加到手機桌面</b>：開起來比較快，紀錄也比較不會不見" },
+  { pin: true, text: "\uD83D\uDD0A <b>Android 手機</b>建議用 Chrome 開啟並建立桌面捷徑，發音效果較佳，可參考<a href=\"https://www.threads.com/@its_ibamboo/post/DamXQ74E79A?xmt=AQG0Phvw9nKsJ8LenQx6zNGvJLX-q2yH1YsKeAiIa4qRSeIakBW6hicDghXX-8lE0vHZtLo&slof=1\" target=\"_blank\" rel=\"noopener\">這裡</a>" },
+  { pin: true, text: "\uD83C\uDF4E <b>iPhone 手機</b>請參考<a href=\"https://www.threads.com/@its_ibamboo/post/DaqE1NLE58I?xmt=AQG0Ism8Hi_mSXCWHetDLiITt6bCxfxzhV_82VOM9HcgG7T2j9D7FeFBNhAi_ZjDfUdHepnh&slof=1\" target=\"_blank\" rel=\"noopener\">這裡</a>" },
+  { date: "2026/09/03", text: "\uD83C\uDFE0 <b>新增主頁</b>：所有模式集中在同一頁，不用再一個一個找" },
+  { date: "2026/09/03", text: "\uD83D\uDCC5 <b>新增今日單字</b>：每天一個字，全部人看到的都一樣" },
+  { date: "2026/09/03", text: "\uD83C\uDFC6 <b>排行榜準備中</b>：闖關進度榜，要不要上榜自己決定" },
+  { text: "\uD83D\uDC1D <b>拼字小蜜蜂</b>：中文從天而降，打出英文拼字把它擊落，四種難度" },
+  { text: "\uD83C\uDFC5 <b>徽章收集系統</b>：快去闖關地圖解鎖徽章" }
+];
+function latestNewsDate() {
+  for (var i = 0; i < NEWS.length; i++) {
+    if (NEWS[i].date) return NEWS[i].date;
+  }
+  return "";
+}
+function newsUnseen() {
+  var d = latestNewsDate();
+  if (!d) return false;
+  var seen = "";
+  try { seen = localStorage.getItem("eq_news_seen") || ""; } catch (e) {}
+  return seen !== d;
+}
+function openNews() {
+  var mask = document.getElementById("newsMask");
+  if (!mask) return;
+  var body = document.getElementById("newsBody");
+  if (body) {
+    body.innerHTML = NEWS.map(function (n) {
+      return '<div class="news-item"><div class="news-date">'
+           + (n.pin ? "\uD83D\uDCCC 置頂" : (n.date ? esc(n.date) : ""))
+           + '</div><div>' + n.text + '</div></div>';
+    }).join("");
+  }
+  try { localStorage.setItem("eq_news_seen", latestNewsDate()); } catch (e) {}
+  mask.classList.add("open");
+  render();
+}
+function closeNews() {
+  var mask = document.getElementById("newsMask");
+  if (mask) mask.classList.remove("open");
+}
+
 // init
 resetWordProgress();
 resetGrammarScramble();
 evaluateBadges(true); // 補登記舊進度已達成的徽章，不彈提示
 render();
+// 有沒看過的新公告就自動跳一次（跟麻將系統同一套做法）
+setTimeout(function () { if (newsUnseen()) openNews(); }, 900);
 </script>
 <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "f6e2e017f0b44cd69a75852588b0b4e7"}'></script><!-- End Cloudflare Web Analytics -->
 <!-- ==================================================================
@@ -5558,8 +5918,8 @@ render();
     };
   }
 
-  // --- 進站時的預設模式也算一次（閃卡） ---
-  hit("mode", "flash");
+  // --- 進站時的預設模式也算一次（現在的落地頁是主頁，不是閃卡）---
+  hit("mode", "home");
 })();
 </script>
 
@@ -5622,6 +5982,38 @@ render();
     </div>
 
     <button class="tip-close" id="tipClose">關閉</button>
+  </div>
+</div>
+
+<!-- ==================================================================
+     複製偵測（新增）
+     · 只有當這份檔案被架在「不是官方網址」的地方時才會送出
+     · 只回報網域名稱，不含任何使用者資料、不含匿名 ID
+     · 在官方網址上一次請求都不會發，對正常使用者零成本
+     ================================================================== -->
+<script>
+(function () {
+  "use strict";
+  var HOME = "english-quest.boll090292.workers.dev";
+  var REPORT = "https://" + HOME + "/h";
+  try {
+    var h = (location.hostname || "").toLowerCase();
+    if (!h || h === HOME || h === "localhost" || h.indexOf("127.0.0.1") === 0) return;
+    var img = new Image();
+    img.onerror = function () {};
+    img.src = REPORT + "?host=" + encodeURIComponent(h.slice(0, 120)) + "&_=" + Date.now();
+  } catch (e) { /* 靜默 */ }
+})();
+</script>
+
+<!-- ==================================================================
+     公告（新增，放在 #root 之外，render() 重建畫面時不會被清掉）
+     ================================================================== -->
+<div class="news-mask" id="newsMask">
+  <div class="news-panel">
+    <div class="news-h">📢 最新消息</div>
+    <div id="newsBody"></div>
+    <button class="news-close" onclick="closeNews()">知道了</button>
   </div>
 </div>
 
