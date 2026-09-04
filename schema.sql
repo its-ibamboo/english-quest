@@ -63,3 +63,19 @@ CREATE TABLE IF NOT EXISTS reports (
   diag TEXT,               -- 自動夾帶的診斷資料，上限 4000 字
   img  TEXT                -- 截圖 data URI，前端已縮到 1000px 寬
 );
+
+-- 闖關排行榜。一個裝置一列，upsert，不會無限成長。
+-- 三個數字都有上限（星 321 / 關 107 / 徽章 10），Worker 端會驗，超出視為無效。
+-- 有上限就沒有炫耀價值 —— 作弊者最多跟高手同分，所以不必做別的防護。
+-- hidden=1 是後台隱藏起來的，不列入排名也不佔名次。
+-- 學生端沒有撤下鍵；要移除時由 /board/admin 處理。
+CREATE TABLE IF NOT EXISTS board (
+  aid     TEXT PRIMARY KEY,   -- 沿用 ibq_aid，不新增識別資訊
+  nick    TEXT NOT NULL,      -- 8 字上限
+  ava     TEXT,               -- 16 隻動物之一的 id
+  stars   INTEGER NOT NULL DEFAULT 0,
+  cleared INTEGER NOT NULL DEFAULT 0,
+  badges  INTEGER NOT NULL DEFAULT 0,
+  t       INTEGER NOT NULL,   -- 最後上傳時間，同分時早的排前面
+  hidden  INTEGER NOT NULL DEFAULT 0
+);

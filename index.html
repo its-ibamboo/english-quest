@@ -831,6 +831,60 @@
 
   /* ===== 主頁（新增） ===== */
   h1.title.tappable { cursor: pointer; }
+  /* ===== 闖關榜 ===== */
+  .lb-card { background: #FFFFFF; border: 1px solid #E7E5DE; border-radius: 16px; padding: 8px 12px; }
+  .lb-row { display: flex; align-items: center; gap: 9px; padding: 9px 4px;
+    border-bottom: 1px solid #F1EEE7; font-size: 14px; }
+  .lb-row:last-child { border-bottom: none; }
+  .lb-row.me { background: #FFFBF3; border-radius: 10px; }
+  .lb-rank { width: 24px; flex: none; text-align: right; font-family: Georgia, serif;
+    font-size: 14px; color: #B5B8C4; }
+  .lb-rank.top { color: #C97F00; font-weight: 700; }
+  .lb-ava { width: 30px; height: 30px; border-radius: 999px; overflow: hidden; flex: none;
+    border: 1px solid #E7E5DE; }
+  .lb-ava svg { display: block; width: 100%; height: 100%; }
+  .lb-mid { flex: 1; min-width: 0; }
+  .lb-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lb-sub { font-size: 11px; color: #82869C; font-family: monospace; margin-top: 1px; }
+  .lb-star { flex: none; text-align: right; font-family: Georgia, serif; font-size: 17px;
+    font-weight: 700; color: #C97F00; }
+  .lb-star small { font-size: 11px; color: #B5B8C4; font-weight: 400; display: block;
+    font-family: monospace; }
+  .lb-mine { margin-top: 14px; padding: 14px; border-radius: 12px; background: #F1EEE7;
+    text-align: center; font-size: 13px; color: #6B7086; line-height: 1.8; }
+  .lb-mine b { color: #C97F00; font-size: 18px; font-family: Georgia, serif; }
+  .lb-btn { width: 100%; padding: 13px; border: none; border-radius: 12px; background: #C97F00;
+    color: #F7F5F0; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer;
+    margin-top: 12px; }
+  .lb-btn.ghost { background: transparent; color: #6B7086; border: 1px solid #E7E5DE; font-weight: 500; }
+  .lb-btn[disabled] { opacity: 0.4; cursor: default; }
+  .lb-hint { font-size: 11.5px; color: #B5B8C4; text-align: center; margin-top: 10px; line-height: 1.7; }
+  .lb-mask { display: none; position: fixed; inset: 0; z-index: 610; background: rgba(20,20,26,0.55);
+    align-items: center; justify-content: center; padding: 14px; }
+  .lb-mask.open { display: flex; }
+  .lb-sheet { background: #FFFFFF; border-radius: 16px; padding: 20px; width: 100%;
+    max-width: 360px; max-height: 86vh; overflow-y: auto; }
+  .lb-sheet h3 { margin: 0 0 6px; font-size: 17px; color: #C97F00; }
+  .lb-sheet p { margin: 0; font-size: 12.5px; color: #82869C; line-height: 1.7; }
+  .lb-nick { width: 100%; padding: 12px 14px; margin-top: 12px; border-radius: 10px;
+    border: 1px solid #E7E5DE; background: #F7F5F0; font-size: 17px; text-align: center;
+    font-family: inherit; color: #2A2A33; }
+  .lb-nick::placeholder { color: #B5B8C4; opacity: 1; }
+  .lb-nick:focus { outline: none; border-color: #0E8F82; background: #fff; }
+  .lb-nrow { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+  .lb-dice { flex: none; padding: 10px 14px; border-radius: 10px;
+    border: 1px solid rgba(14,143,130,0.4); background: transparent; color: #0E8F82;
+    font-size: 13px; cursor: pointer; font-family: inherit; }
+  .lb-nhint { font-size: 11.5px; margin-top: 8px; min-height: 32px; line-height: 1.55; color: #82869C; }
+  .lb-nhint.bad { color: #D63A5C; }
+  .lb-agrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+  .lb-apick { border: 2px solid transparent; border-radius: 10px; overflow: hidden;
+    cursor: pointer; background: none; padding: 0; }
+  .lb-apick.on { border-color: #C97F00; }
+  .lb-apick svg { display: block; width: 100%; height: auto; }
+  .lb-agree { margin-top: 14px; padding: 11px 12px; border-radius: 10px; background: #F7F5F0;
+    font-size: 11.5px; line-height: 1.75; color: #6B7086; }
+  .lb-agree b { color: #2A2A33; }
   /* ===== 問題回報 ===== */
   .rp-mask {
     display: none; position: fixed; inset: 0; z-index: 620;
@@ -3695,7 +3749,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.09.03p";
+var BUILD = "v2026.09.04c";
 
 // ------------------------------------------------------------------
 // 今日單字（新增）
@@ -3994,12 +4048,11 @@ function homePanelHtml() {
     html += '<span class="sb">' + c.sb + '</span>';
     html += '</button>';
   });
-  // 排行榜：還沒開放，灰色不可點
-  html += '<div class="home-card soon">';
+  html += '<button class="home-card" onclick="lbOpenBoard()">';
   html += '<span class="ic">\uD83C\uDFC6</span>';
-  html += '<span class="lb">排行榜</span>';
-  html += '<span class="sb">敬請期待</span>';
-  html += '</div>';
+  html += '<span class="lb">闖關榜</span>';
+  html += '<span class="sb">總星數排名</span>';
+  html += '</button>';
   html += '</div>';
 
   return html;
@@ -4650,6 +4703,8 @@ function render() {
     html += '<p class="subtitle">國中 2000 單字 \u00B7 文法 \u00B7 闖關</p>';
   } else if (state.mode === "daily") {
     html += '<p class="subtitle">每天 10 題 \u00B7 全台灣同一份</p>';
+  } else if (state.mode === "board") {
+    html += '<p class="subtitle">依總星數排名 \u00B7 最多 ' + LB_MAX_STARS + ' \u2B50</p>';
   } else if (state.mode === "adventure") {
     var clearedCount = Object.keys(STAGE_PROGRESS.stars).length;
     html += '<p class="subtitle">已過 ' + clearedCount + ' / ' + STAGES.length + ' 關</p>';
@@ -4688,7 +4743,7 @@ function render() {
     html += '</div>';
   }
 
-  if (state.mode !== "home" && state.mode !== "daily" && state.mode !== "adventure" && state.mode !== "badges" && state.mode !== "bee") {
+  if (state.mode !== "home" && state.mode !== "daily" && state.mode !== "board" && state.mode !== "adventure" && state.mode !== "badges" && state.mode !== "bee") {
     html += '<div class="chip-row">';
     DIFFICULTIES.forEach(function (d) {
       var active = state.difficulty === d.key ? " active" : "";
@@ -4712,6 +4767,8 @@ function render() {
     html += homePanelHtml();
   } else if (state.mode === "daily") {
     html += chalPanelHtml();
+  } else if (state.mode === "board") {
+    html += lbPanelHtml();
   } else if (state.mode === "bee") {
     html += BEE.panelHtml();
   } else if (state.mode === "flash") {
@@ -4856,6 +4913,7 @@ function render() {
 
   if (state.mode === "adventure") {
     if (state.stageIndex === null) {
+      html += '<button class="lb-btn ghost" style="margin:0 0 14px" onclick="lbOpenBoard()">\uD83C\uDFC6 看闖關榜</button>';
       html += '<div class="stage-map">';
       var sectionLabels = { basic: "\u2600\uFE0F 基礎關卡", advanced: "\u2694\uFE0F 進階關卡", hell: "\uD83D\uDC51 地獄關卡" };
       ["basic", "advanced", "hell"].forEach(function (lvl) {
@@ -6255,19 +6313,283 @@ function rpSend(btn) {
 }
 
 // ------------------------------------------------------------------
+// 闖關排行榜（新增）
+//
+// 上傳的三個數字（總星數 321 / 通關數 107 / 徽章數 10）都有上限，
+// 作弊者最多跟高手同分，拿不到炫耀價值，所以不做防作弊。
+//
+// 手動上傳，不自動更新 —— 按下去的那一刻是一次主動的成就確認。
+// 但按鈕會顯示「更新成績 +22 ⭐」提醒回來按，不然榜很快就過期。
+//
+// 身分沿用既有的 ibq_aid（每日挑戰的去重已經在用），不新增識別資訊。
+// 只新增一把 key：eq_lb（自己的暱稱、頭像、上次上傳的成績、上次改名日期）。
+// ------------------------------------------------------------------
+const AVA_BG = '#F1EEE7';
+function _av(inner){ return '<svg viewBox="0 0 100 100"><rect width="100" height="100" fill="'+AVA_BG+'"/>'+inner+'</svg>'; }
+function _eyes(a,b,y,r){
+  return '<circle cx="'+a+'" cy="'+y+'" r="'+r+'" fill="#2b2b2b"/><circle cx="'+b+'" cy="'+y+'" r="'+r+'" fill="#2b2b2b"/>'
+       + '<circle cx="'+(a+1.3)+'" cy="'+(y-1.5)+'" r="'+(r*0.34)+'" fill="#fff"/><circle cx="'+(b+1.3)+'" cy="'+(y-1.5)+'" r="'+(r*0.34)+'" fill="#fff"/>';
+}
+const _SM = '<path d="M42 68 Q50 75 58 68" stroke="#2b2b2b" stroke-width="3" fill="none" stroke-linecap="round"/>';
+const _SN = '<path d="M50 66 L50 70 M50 70 Q44 75 40 70 M50 70 Q56 75 60 70" stroke="#2b2b2b" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
+const AVATARS = [
+ {id:'sparrow', name:'麻雀', svg:_av('<ellipse cx="50" cy="60" rx="30" ry="27" fill="#b98a5a"/><path d="M22 52 Q28 30 44 34" fill="#8e6540"/><ellipse cx="50" cy="72" rx="20" ry="14" fill="#f2e2c8"/>'+_eyes(40,60,54,5)+'<path d="M44 64 L50 71 L56 64 Z" fill="#e8a33d"/><path d="M74 56 Q86 60 78 68" fill="#8e6540"/>')},
+ {id:'cat', name:'橘貓', svg:_av('<path d="M26 36 L32 14 L46 30 Z" fill="#f0b07a"/><path d="M74 36 L68 14 L54 30 Z" fill="#f0b07a"/><circle cx="50" cy="56" r="30" fill="#f0b07a"/><path d="M36 30 Q50 26 64 30" stroke="#d9915a" stroke-width="3" fill="none"/>'+_eyes(40,60,52,5)+'<path d="M50 62 L46 66 L54 66 Z" fill="#c96a5a"/>'+_SM)},
+ {id:'panda', name:'熊貓', svg:_av('<circle cx="26" cy="30" r="12" fill="#2b2b2b"/><circle cx="74" cy="30" r="12" fill="#2b2b2b"/><circle cx="50" cy="56" r="30" fill="#fafafa"/><ellipse cx="39" cy="52" rx="10" ry="12" fill="#2b2b2b"/><ellipse cx="61" cy="52" rx="10" ry="12" fill="#2b2b2b"/><circle cx="39" cy="53" r="4" fill="#fff"/><circle cx="61" cy="53" r="4" fill="#fff"/><ellipse cx="50" cy="66" rx="6.5" ry="4.5" fill="#2b2b2b"/>')},
+ {id:'shiba', name:'柴犬', svg:_av('<path d="M24 34 L28 12 L44 28 Z" fill="#e0a05a"/><path d="M76 34 L72 12 L56 28 Z" fill="#e0a05a"/><circle cx="50" cy="56" r="30" fill="#e8b36f"/><ellipse cx="50" cy="66" rx="19" ry="15" fill="#fbf0dc"/>'+_eyes(39,61,50,5)+'<ellipse cx="50" cy="62" rx="5" ry="3.6" fill="#2b2b2b"/>'+_SN)},
+ {id:'rabbit', name:'兔子', svg:_av('<ellipse cx="38" cy="24" rx="8" ry="20" fill="#f7f2ea"/><ellipse cx="62" cy="24" rx="8" ry="20" fill="#f7f2ea"/><ellipse cx="38" cy="26" rx="4" ry="14" fill="#f3c0c9"/><ellipse cx="62" cy="26" rx="4" ry="14" fill="#f3c0c9"/><circle cx="50" cy="58" r="28" fill="#f7f2ea"/>'+_eyes(40,60,54,5)+'<path d="M50 64 L46 68 L54 68 Z" fill="#e88a9a"/>'+_SN)},
+ {id:'frog', name:'青蛙', svg:_av('<circle cx="32" cy="30" r="13" fill="#8fd4a8"/><circle cx="68" cy="30" r="13" fill="#8fd4a8"/><circle cx="32" cy="30" r="6" fill="#fff"/><circle cx="68" cy="30" r="6" fill="#fff"/><circle cx="32" cy="31" r="3.2" fill="#2b2b2b"/><circle cx="68" cy="31" r="3.2" fill="#2b2b2b"/><ellipse cx="50" cy="62" rx="30" ry="26" fill="#8fd4a8"/><ellipse cx="50" cy="72" rx="20" ry="12" fill="#d8f0e0"/><path d="M34 64 Q50 76 66 64" stroke="#3e8c5f" stroke-width="3.4" fill="none" stroke-linecap="round"/>')},
+ {id:'tiger', name:'老虎', svg:_av('<path d="M26 34 L32 16 L46 30 Z" fill="#e89a3c"/><path d="M74 34 L68 16 L54 30 Z" fill="#e89a3c"/><circle cx="50" cy="56" r="30" fill="#f0a94a"/><path d="M34 32 L38 42 M50 28 L50 40 M66 32 L62 42" stroke="#3a2a18" stroke-width="3.4" stroke-linecap="round"/><ellipse cx="50" cy="66" rx="18" ry="14" fill="#fbeedc"/>'+_eyes(39,61,52,5)+'<path d="M50 62 L45 67 L55 67 Z" fill="#c1543a"/>'+_SN)},
+ {id:'pig', name:'小豬', svg:_av('<path d="M28 32 L26 16 L42 26 Z" fill="#f4b8c4"/><path d="M72 32 L74 16 L58 26 Z" fill="#f4b8c4"/><circle cx="50" cy="58" r="29" fill="#f9c9d3"/>'+_eyes(39,61,52,4.6)+'<ellipse cx="50" cy="68" rx="11" ry="8" fill="#eda2b2"/><circle cx="46" cy="68" r="2.4" fill="#c9758a"/><circle cx="54" cy="68" r="2.4" fill="#c9758a"/>')},
+ {id:'owl', name:'貓頭鷹', svg:_av('<circle cx="50" cy="56" r="30" fill="#a98a6a"/><path d="M24 34 L34 22 L40 34 Z" fill="#a98a6a"/><path d="M76 34 L66 22 L60 34 Z" fill="#a98a6a"/><circle cx="38" cy="52" r="13" fill="#f5ead8"/><circle cx="62" cy="52" r="13" fill="#f5ead8"/><circle cx="38" cy="52" r="6" fill="#2b2b2b"/><circle cx="62" cy="52" r="6" fill="#2b2b2b"/><circle cx="40" cy="50" r="2" fill="#fff"/><circle cx="64" cy="50" r="2" fill="#fff"/><path d="M44 68 L50 76 L56 68 Z" fill="#e8a33d"/>')},
+ {id:'penguin', name:'企鵝', svg:_av('<ellipse cx="50" cy="58" rx="29" ry="30" fill="#33383f"/><ellipse cx="50" cy="64" rx="20" ry="23" fill="#fafafa"/>'+_eyes(41,59,48,4.6)+'<path d="M44 60 L50 68 L56 60 Z" fill="#e8a33d"/>')},
+ {id:'fox', name:'狐狸', svg:_av('<path d="M22 36 L28 12 L46 28 Z" fill="#e07b45"/><path d="M78 36 L72 12 L54 28 Z" fill="#e07b45"/><circle cx="50" cy="56" r="30" fill="#ea8f5c"/><ellipse cx="50" cy="68" rx="22" ry="16" fill="#fbf0e4"/>'+_eyes(39,61,50,5)+'<ellipse cx="50" cy="64" rx="5" ry="3.6" fill="#2b2b2b"/>'+_SN)},
+ {id:'sheep', name:'綿羊', svg:_av('<circle cx="30" cy="36" r="12" fill="#f7f4ee"/><circle cx="70" cy="36" r="12" fill="#f7f4ee"/><circle cx="36" cy="24" r="11" fill="#f7f4ee"/><circle cx="64" cy="24" r="11" fill="#f7f4ee"/><circle cx="50" cy="20" r="11" fill="#f7f4ee"/><circle cx="50" cy="58" r="26" fill="#efe6d8"/>'+_eyes(41,59,54,4.6)+'<ellipse cx="50" cy="66" rx="5" ry="3.4" fill="#2b2b2b"/>'+_SM)},
+ {id:'cow', name:'牛', svg:_av('<ellipse cx="24" cy="30" rx="12" ry="8" fill="#d9d2c6" transform="rotate(-30 24 30)"/><ellipse cx="76" cy="30" rx="12" ry="8" fill="#d9d2c6" transform="rotate(30 76 30)"/><circle cx="50" cy="58" r="29" fill="#f1ece2"/><ellipse cx="36" cy="40" rx="10" ry="7" fill="#8c8377"/>'+_eyes(40,60,52,4.8)+'<ellipse cx="50" cy="70" rx="14" ry="10" fill="#e6b8bd"/><circle cx="45" cy="70" r="2.4" fill="#a97b82"/><circle cx="55" cy="70" r="2.4" fill="#a97b82"/>')},
+ {id:'mouse', name:'老鼠', svg:_av('<circle cx="26" cy="32" r="14" fill="#c9c2b8"/><circle cx="74" cy="32" r="14" fill="#c9c2b8"/><circle cx="26" cy="32" r="8" fill="#eec9cd"/><circle cx="74" cy="32" r="8" fill="#eec9cd"/><circle cx="50" cy="58" r="27" fill="#d5cec4"/>'+_eyes(41,59,54,4.6)+'<circle cx="50" cy="66" r="3.6" fill="#2b2b2b"/>'+_SM)},
+ {id:'koi', name:'錦鯉', svg:_av('<ellipse cx="50" cy="56" rx="30" ry="26" fill="#f5f2ec"/><path d="M20 56 Q36 34 52 40 Q40 52 44 62 Z" fill="#e0664a"/><path d="M78 60 Q64 74 50 68 Q62 60 60 50 Z" fill="#3a3a3a"/>'+_eyes(40,62,50,5)+'<path d="M42 70 Q50 76 58 70" stroke="#2b2b2b" stroke-width="2.6" fill="none" stroke-linecap="round"/>')},
+ {id:'monkey', name:'猴子', svg:_av('<circle cx="24" cy="52" r="12" fill="#b98a5a"/><circle cx="76" cy="52" r="12" fill="#b98a5a"/><circle cx="24" cy="52" r="6.5" fill="#e6c9a8"/><circle cx="76" cy="52" r="6.5" fill="#e6c9a8"/><circle cx="50" cy="56" r="28" fill="#b98a5a"/><ellipse cx="50" cy="62" rx="21" ry="20" fill="#e6c9a8"/>'+_eyes(41,59,52,4.8)+'<ellipse cx="50" cy="64" rx="4" ry="3" fill="#8e6540"/>'+_SM)},
+];
+function avaById(id){
+  for(const a of AVATARS) if(a.id===id) return a;
+  return null;
+}
+/* 用暱稱算出固定的一隻動物：同一個名字，每個人看到的都一樣，不必傳資料。 */
+function avaByName(name){
+  const s = String(name||'');
+  let hsh = 2166136261;
+  for(let i=0;i<s.length;i++){
+    hsh ^= s.charCodeAt(i);
+    hsh = Math.imul(hsh, 16777619) >>> 0;
+  }
+  // 收尾混淆：頭像只有 16 種，若不打散，中文短名字會大量集中在同幾隻。
+  hsh ^= hsh >>> 15; hsh = Math.imul(hsh, 2246822507) >>> 0;
+  hsh ^= hsh >>> 13; hsh = Math.imul(hsh, 3266489909) >>> 0;
+  hsh ^= hsh >>> 16;
+  return AVATARS[(hsh >>> 0) % AVATARS.length];
+}
+
+
+var LB_KEY = "eq_lb";
+var LB_MAX_STARS = 0;   // 由 STAGES 算出來，載入後填
+var LB = {
+  me: null,      // { nick, ava, stars, cleared, badges, renamed }
+  board: null,   // 伺服器回來的榜
+  rank: null,
+  loading: false,
+  editing: false // true = 改名模式（已經在榜上）
+};
+
+function lbMyStats() {
+  var stars = 0, cleared = 0;
+  try {
+    Object.keys(STAGE_PROGRESS.stars).forEach(function (k) {
+      stars += STAGE_PROGRESS.stars[k] || 0;
+      cleared++;
+    });
+  } catch (e) {}
+  var badges = 0;
+  try {
+    badges = BADGE_DEFS.filter(function (b) { return !!BADGES.earned[b.id]; }).length;
+  } catch (e) {}
+  return { stars: stars, cleared: cleared, badges: badges };
+}
+function lbLoad() {
+  try {
+    var raw = localStorage.getItem(LB_KEY);
+    if (raw) LB.me = JSON.parse(raw);
+  } catch (e) {}
+  try { LB_MAX_STARS = STAGES.length * 3; } catch (e) { LB_MAX_STARS = 321; }
+}
+function lbSave() {
+  try { localStorage.setItem(LB_KEY, JSON.stringify(LB.me)); } catch (e) {}
+}
+function lbAid() {
+  try { return localStorage.getItem("ibq_aid") || ""; } catch (e) { return ""; }
+}
+function lbToday() {
+  return new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+}
+function lbCanRename() {
+  return !LB.me || LB.me.renamed !== lbToday();
+}
+
+// 隨機暱稱：形容詞 + 麻將那 16 隻動物
+var LB_ADJ = ["勇敢的", "認真的", "閃電", "無敵", "安靜的", "好奇的", "開心的", "幸運的",
+              "神祕的", "溫柔的", "暴走", "冷靜的", "飛天", "超級", "傳說中的", "愛睡的"];
+function lbRandomNick() {
+  var a = LB_ADJ[Math.floor(Math.random() * LB_ADJ.length)];
+  var an = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+  return { text: (a + an.name).slice(0, 8), ava: an.id };
+}
+
+// 不擋髒話（中文諧音、注音、拆字擋不完，維護成本高又擋不住），
+// 靠「只顯示前 20 名」+ 後台改成匿名玩家。
+// 這裡只擋一件事：把名字欄位當成聯絡方式廣播給未成年人。
+function lbCheckNick(v) {
+  v = (v || "").trim();
+  if (!v) return { ok: false, msg: "" };
+  if (v.length > 8) return { ok: false, msg: "太長了，最多 8 個字" };
+  if (/[@＠]/.test(v)) return { ok: false, msg: "名字裡不能有 @" };
+  if (/[a-zA-Z0-9_.]{6,}/.test(v)) return { ok: false, msg: "看起來像帳號或聯絡方式，換一個吧" };
+  if (/(加我|私訊|密我|賴|來找我|聯絡)/.test(v)) return { ok: false, msg: "名字裡不要放聯絡方式喔" };
+  return { ok: true, msg: "" };
+}
+
+function lbFetch(payload) {
+  LB.loading = true;
+  var u = "/lb?aid=" + encodeURIComponent(lbAid());
+  if (payload) {
+    u += "&nick=" + encodeURIComponent(payload.nick)
+       + "&ava=" + encodeURIComponent(payload.ava)
+       + "&stars=" + payload.stars + "&cleared=" + payload.cleared + "&badges=" + payload.badges;
+  }
+  fetch(u).then(function (r) { return r.json(); }).then(function (j) {
+    LB.loading = false;
+    if (j && j.top) { LB.board = j.top; LB.rank = (typeof j.rank === "number") ? j.rank : null; }
+    render();
+  }).catch(function () { LB.loading = false; render(); });
+}
+
+function lbOpenBoard() { setMode("board"); if (!LB.board) lbFetch(null); }
+
+function lbOpenForm(editing) {
+  LB.editing = !!editing;
+  if (editing && !lbCanRename()) { rpToast("今天已經改過名字了，明天再試"); return; }
+  var pn = document.getElementById("lbMask");
+  if (!pn) return;
+  var r = lbRandomNick();
+  LB_PENDING = (LB.me && LB.me.ava) || r.ava;
+  var inp = document.getElementById("lbNick");
+  if (inp) inp.value = (LB.me && LB.me.nick) || "";
+  document.getElementById("lbTitle").textContent = editing ? "\u270F\uFE0F 改名字" : "\uD83D\uDDFA\uFE0F 上傳到闖關榜";
+  document.getElementById("lbOk").textContent = editing ? "儲存" : "確定上榜";
+  document.getElementById("lbAgree").style.display = editing ? "none" : "block";
+  lbDrawAvatars(); lbValidate();
+  pn.classList.add("open");
+}
+function lbCloseForm() {
+  var pn = document.getElementById("lbMask");
+  if (pn) pn.classList.remove("open");
+}
+var LB_PENDING = "";
+function lbDrawAvatars() {
+  var g = document.getElementById("lbAgrid");
+  if (!g) return;
+  g.innerHTML = AVATARS.map(function (a) {
+    return '<button class="lb-apick' + (a.id === LB_PENDING ? " on" : "") + '" data-id="' + a.id + '">' + a.svg + '</button>';
+  }).join("");
+  Array.prototype.forEach.call(g.querySelectorAll(".lb-apick"), function (b) {
+    b.onclick = function () { LB_PENDING = b.getAttribute("data-id"); lbDrawAvatars(); };
+  });
+}
+function lbValidate() {
+  var inp = document.getElementById("lbNick");
+  var v = inp ? inp.value : "";
+  var r = lbCheckNick(v);
+  var h = document.getElementById("lbNhint");
+  if (h) {
+    h.textContent = r.msg || (v.trim() ? "" : "可以自己打，也可以按骰子隨機產生");
+    h.className = "lb-nhint" + (r.msg ? " bad" : "");
+  }
+  var ok = document.getElementById("lbOk");
+  if (ok) ok.disabled = !r.ok;
+}
+function lbDice() {
+  var r = lbRandomNick();
+  var inp = document.getElementById("lbNick");
+  if (inp) inp.value = r.text;
+  LB_PENDING = r.ava;
+  lbDrawAvatars(); lbValidate();
+}
+function lbSubmit() {
+  var inp = document.getElementById("lbNick");
+  var nick = inp ? inp.value.trim() : "";
+  if (!lbCheckNick(nick).ok) return;
+  var st = lbMyStats();
+  LB.me = LB.me || {};
+  LB.me.nick = nick;
+  LB.me.ava = LB_PENDING;
+  LB.me.stars = st.stars; LB.me.cleared = st.cleared; LB.me.badges = st.badges;
+  if (LB.editing) LB.me.renamed = lbToday();
+  lbSave(); lbCloseForm();
+  lbFetch({ nick: nick, ava: LB_PENDING, stars: st.stars, cleared: st.cleared, badges: st.badges });
+  rpToast(LB.editing ? "已更新名字" : "已上榜！");
+}
+function lbUpdateScore() {
+  var st = lbMyStats();
+  LB.me.stars = st.stars; LB.me.cleared = st.cleared; LB.me.badges = st.badges;
+  lbSave();
+  lbFetch({ nick: LB.me.nick, ava: LB.me.ava, stars: st.stars, cleared: st.cleared, badges: st.badges });
+  rpToast("成績已更新");
+}
+
+function lbPanelHtml() {
+  var st = lbMyStats(), h = "";
+
+  if (LB.board === null) {
+    h += '<div class="lb-mine">' + (LB.loading ? "載入中\u2026" : "連不上伺服器，稍後再試") + '</div>';
+    h += '<div class="lb-hint">排行榜需要網路連線</div>';
+    return h;
+  }
+
+  h += '<div class="lb-card">';
+  if (!LB.board.length) {
+    h += '<div class="lb-row"><span class="lb-mid" style="text-align:center;color:#82869C;padding:14px 0">還沒有人上榜，你可以是第一個</span></div>';
+  }
+  LB.board.forEach(function (x, i) {
+    var mine = LB.me && x.nick === LB.me.nick && x.stars === LB.me.stars;
+    h += '<div class="lb-row' + (mine ? " me" : "") + '">';
+    h += '<span class="lb-rank' + (i < 3 ? " top" : "") + '">' + (i + 1) + '</span>';
+    h += '<span class="lb-ava">' + ((avaById(x.ava) || AVATARS[0]).svg) + '</span>';
+    h += '<span class="lb-mid"><span class="lb-name">' + esc(x.nick) + (mine ? " （你）" : "") + '</span>';
+    h += '<span class="lb-sub">通關 ' + x.cleared + ' \u00B7 徽章 ' + x.badges + '</span></span>';
+    h += '<span class="lb-star">' + x.stars + '<small>\u2B50 / ' + LB_MAX_STARS + '</small></span>';
+    h += '</div>';
+  });
+  h += '</div>';
+
+  if (LB.me && LB.me.nick) {
+    var gained = st.stars - (LB.me.stars || 0);
+    h += '<div class="lb-mine">';
+    if (LB.rank) {
+      h += '你目前第 <b>' + LB.rank + '</b> 名';
+      if (LB.rank > 20) h += '<br><span style="font-size:11.5px">前 20 名才會顯示在榜上</span>';
+    } else {
+      h += '榜上成績 <b>' + (LB.me.stars || 0) + '</b> \u2B50';
+    }
+    h += '</div>';
+    if (gained > 0) {
+      h += '<button class="lb-btn" onclick="lbUpdateScore()">更新成績 +' + gained + ' \u2B50</button>';
+    } else {
+      h += '<button class="lb-btn ghost" disabled>成績已是最新</button>';
+    }
+    h += '<button class="lb-btn ghost" onclick="lbOpenForm(true)">\u270F\uFE0F 改名字'
+       + (lbCanRename() ? "" : "（今天已改過）") + '</button>';
+  } else {
+    var st2 = st;
+    h += '<div class="lb-mine">你有 <b>' + st2.stars + '</b> \u2B50（通關 ' + st2.cleared
+       + ' \u00B7 徽章 ' + st2.badges + '）</div>';
+    if (st2.stars > 0) {
+      h += '<button class="lb-btn" onclick="lbOpenForm(false)">\uD83D\uDDFA\uFE0F 上傳到闖關榜</button>';
+      h += '<div class="lb-hint">要不要上榜自己決定</div>';
+    } else {
+      h += '<div class="lb-hint">先去闖關地圖過幾關，拿到星星就能上榜</div>';
+    }
+  }
+  return h;
+}
+
+// ------------------------------------------------------------------
 // 公告（新增）
 // 只用一把新的 key：eq_news_seen。既有五把鑰匙完全沒有動到。
 // 之後要發新公告：在 NEWS 陣列最前面加一則、寫上日期即可自動彈出一次。
 // ------------------------------------------------------------------
 var NEWS = [
   { pin: true, text: "\uD83D\uDCAC <b>遇到問題？</b><a href=\"javascript:void(0)\" onclick=\"closeNews();rpOpen()\" style=\"color:#0E8F82\">點這裡回報</a>，會自動附上診斷資料，也可以加截圖" },
-  { pin: true, text: "\uD83D\uDCF1 <b>把它裝到手機桌面</b>：開起來比較快，沒網路也能用，紀錄也比較不會不見<br><span class=\"news-steps\">Android：Chrome 右上角 \u22EE \u2192 安裝應用程式<br>iPhone：Safari 下方分享鍵 \u2192 加入主畫面</span>" },
-  { pin: true, text: "\uD83D\uDD0A <b>發音沒聲音？</b>Android 請用 Chrome 開啟，iPhone 請用 Safari，發音效果最好" },
-  { date: "2026/09/03", text: "\uD83C\uDFE0 <b>新增主頁</b>：所有模式集中在同一頁，不用再一個一個找" },
-  { date: "2026/09/03", text: "\uD83D\uDCC5 <b>新增今日單字</b>：每天一個字，全部人看到的都一樣" },
-  { date: "2026/09/03", text: "\u26A1 <b>新增今日挑戰</b>：每天 10 題，全台灣同一份，答完看得到全台平均分" },
-  { date: "2026/09/03", text: "\uD83C\uDFC6 <b>排行榜準備中</b>：闖關進度榜，要不要上榜自己決定" },
-  { text: "\uD83D\uDC1D <b>拼字小蜜蜂</b>：中文從天而降，打出英文拼字把它擊落，四種難度" },
+  { pin: true, text: "\uD83D\uDCF1 <b>把它裝到手機桌面</b>：開起來比較快，沒網路也能用，發音也比較正常<br><span class=\"news-steps\">Android：用 Chrome 開啟 \u2192 右上角 \u22EE \u2192 安裝應用程式<br>iPhone：用 Safari 開啟 \u2192 下方分享鍵 \u2192 加入主畫面</span>" },
+  { date: "2026/09/04", text: "\uD83C\uDFC6 <b>闖關榜開放了</b>：依總星數排名，要不要上榜自己決定" },
+  { date: "2026/09/03", text: "\u26A1 <b>新增今日挑戰</b>：每天 10 題，全台灣同一份，答完看得到全台平均分" }
 ];
 function latestNewsDate() {
   for (var i = 0; i < NEWS.length; i++) {
@@ -6306,6 +6628,7 @@ function closeNews() {
 resetWordProgress();
 resetGrammarScramble();
 evaluateBadges(true); // 補登記舊進度已達成的徽章，不彈提示
+lbLoad();
 chalLoad();
 if (CHAL.done) chalFetchDist();
 render();
@@ -6540,6 +6863,31 @@ var WSTAT = (function () {
   } catch (e) { /* 靜默 */ }
 })();
 </script>
+
+<!-- ==================================================================
+     闖關榜表單（新增，放在 #root 之外，render() 重建畫面時不會被清掉）
+     ================================================================== -->
+<div class="lb-mask" id="lbMask">
+  <div class="lb-sheet">
+    <h3 id="lbTitle">上傳到闖關榜</h3>
+    <p>取一個名字，同學才認得出榜上是你。</p>
+    <input class="lb-nick" id="lbNick" maxlength="8" placeholder="輸入暱稱"
+      autocomplete="off" spellcheck="false" oninput="lbValidate()">
+    <div class="lb-nrow">
+      <button class="lb-dice" onclick="lbDice()">🎲 幫我隨機取</button>
+      <span style="font-size:11px;color:#B5B8C4;">最多 8 個字</span>
+    </div>
+    <div class="lb-nhint" id="lbNhint"></div>
+    <div style="font-size:12px;color:#82869C;">選一隻代表你的動物</div>
+    <div class="lb-agrid" id="lbAgrid"></div>
+    <div class="lb-agree" id="lbAgree">
+      🔒 上榜後會公開你的<b>暱稱、動物、星數、通關數、徽章數</b>。<br>
+      名字和動物之後可以修改，一天一次。
+    </div>
+    <button class="lb-btn" id="lbOk" onclick="lbSubmit()">確定上榜</button>
+    <button class="lb-btn ghost" onclick="lbCloseForm()">先不要</button>
+  </div>
+</div>
 
 <!-- ==================================================================
      問題回報（新增，放在 #root 之外，render() 重建畫面時不會被清掉）

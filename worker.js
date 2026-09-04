@@ -9,7 +9,7 @@
  * 隱私：只存匿名隨機 ID、模式、時間。不存 IP、不存 UA、不存任何個人資訊。
  */
 
-const BUILD = "v2026.09.03p";            // 跟 index.html 的版本號一起往上帶
+const BUILD = "v2026.09.04c";            // 跟 index.html 的版本號一起往上帶
 const TZ_OFFSET = 8 * 60 * 60 * 1000;   // 台北時間
 
 export default {
@@ -110,6 +110,39 @@ export default {
       }});
     }
 
+    // 排行榜管理。跟 /reports 共用同一把密碼。
+    // 學生端沒有撤下鍵，真的有人要求移除時由這裡處理。
+    if (url.pathname === "/board/admin") {
+      const want = env.ADMIN_KEY || REPORTS_PW;
+      const ck = (request.headers.get("cookie") || "")
+        .split(";").map(function (x) { return x.trim(); })
+        .find(function (x) { return x.indexOf("rp=") === 0; });
+      const k = url.searchParams.get("k") || (ck ? decodeURIComponent(ck.slice(3)) : "");
+      if (!want || k !== want) {
+        return new Response(loginPage(""), {
+          status: 401, headers: { "content-type": "text/html; charset=utf-8" } });
+      }
+      if (!env.DB) return new Response("no db", { status: 503 });
+      const act = url.searchParams.get("act"), id = url.searchParams.get("aid") || "";
+      if (act && id) {
+        await ensureBoard(env);
+        if (act === "anon") {
+          await env.DB.prepare("UPDATE board SET nick = '匿名玩家', ava = '' WHERE aid = ?").bind(id).run();
+        } else if (act === "hide") {
+          await env.DB.prepare("UPDATE board SET hidden = 1 WHERE aid = ?").bind(id).run();
+        } else if (act === "show") {
+          await env.DB.prepare("UPDATE board SET hidden = 0 WHERE aid = ?").bind(id).run();
+        }
+        return Response.redirect(url.origin + "/board/admin", 302);
+      }
+      await ensureBoard(env);
+      const all = await env.DB.prepare(
+        "SELECT aid, nick, ava, stars, cleared, badges, hidden FROM board ORDER BY stars DESC LIMIT 200"
+      ).all();
+      return new Response(boardAdminPage(all.results || []), {
+        headers: { "content-type": "text/html; charset=utf-8" } });
+    }
+
     if (url.pathname === "/reports" || url.pathname === "/reports/del") {
       const want = env.ADMIN_KEY || REPORTS_PW;
       const ck = (request.headers.get("cookie") || "")
@@ -128,6 +161,13 @@ export default {
       }
       return new Response(reportsPage(await listReports(env)), {
         headers: { "content-type": "text/html; charset=utf-8" } });
+    }
+
+    // ---------- 1.7 闖關榜 ----------
+    // 帶 nick 就寫入/更新，不帶就只查詢。
+    if (url.pathname === "/lb") {
+      if (!env.DB) return json({ top: [], rank: null });
+      return json(await leaderboard(env, url.searchParams));
     }
 
     // ---------- 1.5 診斷頁 ----------
@@ -426,6 +466,33 @@ function esc(x) {
     return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
   });
 }
+function boardAdminPage(list) {
+  const rows = list.map(function (r) {
+    return `<tr>
+      <td>${esc(r.nick)}${r.hidden ? ' <span style="color:#D9705E">（已隱藏）</span>' : ""}</td>
+      <td style="text-align:right">${r.stars} ⭐</td>
+      <td style="text-align:right">${r.cleared}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <a href="/board/admin?act=anon&aid=${encodeURIComponent(r.aid)}"
+           style="color:#D9A441">改匿名</a>　
+        <a href="/board/admin?act=${r.hidden ? "show" : "hide"}&aid=${encodeURIComponent(r.aid)}"
+           style="color:#D9705E">${r.hidden ? "取消隱藏" : "隱藏"}</a>
+      </td></tr>`;
+  }).join("");
+  return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>闖關榜管理</title></head>
+<body style="background:#141613;color:#E8EAE4;font-family:system-ui,-apple-system,'Noto Sans TC',sans-serif;padding:14px;max-width:720px;margin:0 auto">
+<h1 style="font-size:20px">闖關榜管理（${list.length} 人）</h1>
+<p style="font-size:13px;opacity:.6">學生端沒有撤下鍵。有人要求移除時，用「隱藏」；名字不妥時用「改匿名」。隱藏之後不列入排名，也不佔名次。</p>
+<table style="width:100%;border-collapse:collapse;font-size:14px">
+<tr style="opacity:.6;font-size:12px"><th style="text-align:left">暱稱</th><th style="text-align:right">星</th><th style="text-align:right">通關</th><th></th></tr>
+${rows || '<tr><td colspan="4" style="opacity:.6;padding:14px 0">還沒有人上榜。</td></tr>'}
+</table>
+<p style="margin-top:20px"><a href="/admin" style="color:#D9A441">← 回統計頁</a></p>
+</body></html>`;
+}
+
 function loginPage(msg) {
   return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -473,6 +540,68 @@ ${list.length ? `<form method="POST" action="/reports/del?id=*" style="margin-to
   <button style="background:#7a3a30;color:#fff;border:none;border-radius:8px;padding:12px;width:100%;font-size:15px">全部刪除</button>
 </form>` : ""}
 </body></html>`;
+}
+
+// 闖關榜。一個裝置一列，upsert，不會無限成長。
+// 三個數字都有上限（星 321 / 關 107 / 徽章 10），超出就當作無效 ——
+// 有上限就沒有炫耀價值，作弊者最多跟高手同分，所以不必再做別的防護。
+const LB_LIMIT = { stars: 321, cleared: 107, badges: 10 };
+const LB_NICK_BAD = /[@＠]|[a-zA-Z0-9_.]{6,}|加我|私訊|密我|賴|來找我|聯絡/;
+
+async function ensureBoard(env) {
+  await env.DB.prepare(
+    `CREATE TABLE IF NOT EXISTS board (
+       aid TEXT PRIMARY KEY, nick TEXT NOT NULL, ava TEXT,
+       stars INTEGER NOT NULL DEFAULT 0,
+       cleared INTEGER NOT NULL DEFAULT 0,
+       badges INTEGER NOT NULL DEFAULT 0,
+       t INTEGER NOT NULL, hidden INTEGER NOT NULL DEFAULT 0)`
+  ).run();
+}
+function lbInt(v, max) {
+  const n = parseInt(v, 10);
+  return (n >= 0 && n <= max) ? n : null;
+}
+async function leaderboard(env, q) {
+  await ensureBoard(env);
+  const aid = q.get("aid") || "";
+  const nick = (q.get("nick") || "").trim().slice(0, 8);
+
+  if (aid && /^[a-z0-9-]{1,40}$/.test(aid) && nick && !LB_NICK_BAD.test(nick)) {
+    const stars = lbInt(q.get("stars"), LB_LIMIT.stars);
+    const cleared = lbInt(q.get("cleared"), LB_LIMIT.cleared);
+    const badges = lbInt(q.get("badges"), LB_LIMIT.badges);
+    const ava = (q.get("ava") || "").slice(0, 20).replace(/[^a-z]/g, "");
+    if (stars !== null && cleared !== null && badges !== null) {
+      await env.DB.prepare(
+        `INSERT INTO board (aid, nick, ava, stars, cleared, badges, t) VALUES (?,?,?,?,?,?,?)
+         ON CONFLICT(aid) DO UPDATE SET nick=?2, ava=?3, stars=?4, cleared=?5, badges=?6, t=?7`
+      ).bind(aid, nick, ava, stars, cleared, badges, Date.now()).run();
+    }
+  }
+
+  // 前 20 名。hidden=1 是後台隱藏起來的，不列入也不佔名次。
+  const top = await env.DB.prepare(
+    `SELECT nick, ava, stars, cleared, badges FROM board
+      WHERE hidden = 0 ORDER BY stars DESC, cleared DESC, t ASC LIMIT 20`
+  ).all();
+
+  // 自己的名次：算出「分數比我高的人數 + 1」，不必把整張榜撈下來。
+  let rank = null;
+  if (aid) {
+    const me = await env.DB.prepare(
+      "SELECT stars, cleared, t FROM board WHERE aid = ? AND hidden = 0"
+    ).bind(aid).first();
+    if (me) {
+      const r = await env.DB.prepare(
+        `SELECT COUNT(*) AS n FROM board WHERE hidden = 0 AND (
+           stars > ?1 OR (stars = ?1 AND cleared > ?2)
+           OR (stars = ?1 AND cleared = ?2 AND t < ?3))`
+      ).bind(me.stars, me.cleared, me.t).first();
+      rank = ((r && r.n) || 0) + 1;
+    }
+  }
+  return { top: top.results || [], rank: rank };
 }
 
 async function stats(env) {
@@ -699,6 +828,7 @@ summary{font-size:12px;color:var(--dim);cursor:pointer;padding:6px 0}
 <h1>英文任務系統</h1>
 <p class="sub">使用統計 · 匿名，不含任何個人資訊 · <span id="build">${BUILD}</span></p>
 <div id="rpbox"></div>
+<div id="bdbox"></div>
 <div id="app" class="load">載入中…</div>
 </main>
 <script>
@@ -722,6 +852,11 @@ fetch("/admin/data").then(function(r){return r.json()}).then(function(d){
   if(d.error){app.className="";app.textContent=d.error;return;}
 
   // 有回報就跳出來，沒有就退成一行小字（刪光之後還是要找得到入口）
+  var bb=document.getElementById("bdbox");
+  if(bb){
+    bb.innerHTML = '<a href="/board/admin" class="golink quiet">\uD83C\uDFC6 闖關榜管理'
+      + '<span>改匿名或隱藏 \u00B7 需要密碼</span></a>';
+  }
   var rb=document.getElementById("rpbox");
   if(rb){
     rb.innerHTML = d.reportCount
