@@ -997,6 +997,16 @@
     margin-bottom: 8px;
   }
   .home-daily-en { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
+  /* 每日一句：句子比單字長，字級要壓小，否則長句會爆版 */
+  .home-daily-sent {
+    font-size: 21px; font-weight: 700; line-height: 1.5;
+    letter-spacing: -0.2px; word-break: break-word;
+  }
+  .home-daily-blank {
+    display: inline-block; width: 80px;
+    border-bottom: 2.5px solid #C97F00; vertical-align: baseline;
+  }
+  .home-daily-fill { color: #C97F00; }
   .home-daily-meta { font-size: 12px; color: #82869C; margin-top: 2px; font-family: monospace; }
   .home-daily-zh {
     margin-top: 12px;
@@ -1200,7 +1210,7 @@ var WORD_BANK = [
   { en: "appear", zh: "出現", pos: "", level: "basic" },
   { en: "apple", zh: "蘋果", pos: "", level: "basic" },
   { en: "April", zh: "四月", pos: "", level: "basic" },
-  { en: "arm", zh: "手臂,武裝", pos: "", level: "basic" },
+  { en: "arm", zh: "手臂；武裝", pos: "", level: "basic" },
   { en: "around", zh: "在…四周", pos: "", level: "basic" },
   { en: "arrive", zh: "到達", pos: "", level: "basic" },
   { en: "art", zh: "美術", pos: "", level: "basic" },
@@ -1320,16 +1330,16 @@ var WORD_BANK = [
   { en: "case", zh: "情形", pos: "", level: "basic" },
   { en: "castle", zh: "城堡", pos: "", level: "basic" },
   { en: "cat", zh: "貓", pos: "", level: "basic" },
-  { en: "catch", zh: "接住,抓住；趕上", pos: "", level: "basic" },
+  { en: "catch", zh: "接住；抓住；趕上", pos: "", level: "basic" },
   { en: "celebrate", zh: "慶祝", pos: "", level: "basic" },
   { en: "cellphone", zh: "手機", pos: "", level: "basic" },
-  { en: "cent", zh: "〈一〉分錢", pos: "", level: "basic" },
+  { en: "cent", zh: "一分錢", pos: "", level: "basic" },
   { en: "center", zh: "中心", pos: "", level: "basic" },
   { en: "centimeter", zh: "公分", pos: "", level: "basic" },
   { en: "chair", zh: "椅子", pos: "", level: "basic" },
   { en: "chalk", zh: "粉筆", pos: "", level: "basic" },
   { en: "chance", zh: "機會", pos: "", level: "basic" },
-  { en: "change", zh: "交換,零錢", pos: "", level: "basic" },
+  { en: "change", zh: "交換；零錢", pos: "", level: "basic" },
   { en: "cheap", zh: "便宜的", pos: "", level: "basic" },
   { en: "cheat", zh: "欺騙", pos: "", level: "basic" },
   { en: "check", zh: "檢查", pos: "", level: "basic" },
@@ -1339,7 +1349,7 @@ var WORD_BANK = [
   { en: "chicken", zh: "雞肉", pos: "", level: "basic" },
   { en: "child", zh: "小孩", pos: "", level: "basic" },
   { en: "China", zh: "中國", pos: "", level: "basic" },
-  { en: "Chinese", zh: "中國人,中文", pos: "", level: "basic" },
+  { en: "Chinese", zh: "中國人；中文", pos: "", level: "basic" },
   { en: "chocolate", zh: "巧克力", pos: "", level: "basic" },
   { en: "choose", zh: "選擇", pos: "", level: "basic" },
   { en: "chopsticks", zh: "筷子", pos: "", level: "basic" },
@@ -1376,7 +1386,7 @@ var WORD_BANK = [
   { en: "cook", zh: "煮飯", pos: "", level: "basic" },
   { en: "cookie", zh: "餅乾", pos: "", level: "basic" },
   { en: "cool", zh: "涼爽的", pos: "", level: "basic" },
-  { en: "copy", zh: "抄寫,複製", pos: "", level: "basic" },
+  { en: "copy", zh: "抄寫；複製", pos: "", level: "basic" },
   { en: "corner", zh: "角落", pos: "", level: "basic" },
   { en: "correct", zh: "正確的", pos: "", level: "basic" },
   { en: "cost", zh: "價值", pos: "", level: "basic" },
@@ -1384,8 +1394,8 @@ var WORD_BANK = [
   { en: "count", zh: "計算", pos: "", level: "basic" },
   { en: "country", zh: "鄉村", pos: "", level: "basic" },
   { en: "course", zh: "課程", pos: "", level: "basic" },
-  { en: "cousin", zh: "堂,表兄弟姊妹", pos: "", level: "basic" },
-  { en: "cover", zh: "覆蓋,封面,掩護", pos: "", level: "basic" },
+  { en: "cousin", zh: "堂；表兄弟姊妹", pos: "", level: "basic" },
+  { en: "cover", zh: "覆蓋；封面；掩護", pos: "", level: "basic" },
   { en: "cow", zh: "母牛", pos: "", level: "basic" },
   { en: "cowboy", zh: "牛仔", pos: "", level: "basic" },
   { en: "crazy", zh: "瘋狂的", pos: "", level: "basic" },
@@ -1416,7 +1426,7 @@ var WORD_BANK = [
   { en: "dining room", zh: "飯廳", pos: "", level: "basic" },
   { en: "dinner", zh: "晚餐", pos: "", level: "basic" },
   { en: "dirty", zh: "骯髒的", pos: "", level: "basic" },
-  { en: "dish", zh: "盤子,菜餚", pos: "", level: "basic" },
+  { en: "dish", zh: "盤子；菜餚", pos: "", level: "basic" },
   { en: "do", zh: "做", pos: "", level: "basic" },
   { en: "doctor", zh: "醫生", pos: "", level: "basic" },
   { en: "dodgeball", zh: "躲避球", pos: "", level: "basic" },
@@ -1426,11 +1436,11 @@ var WORD_BANK = [
   { en: "door", zh: "門", pos: "", level: "basic" },
   { en: "dot", zh: "點", pos: "", level: "basic" },
   { en: "down", zh: "向下", pos: "", level: "basic" },
-  { en: "dozen", zh: "〈一〉打", pos: "", level: "basic" },
+  { en: "dozen", zh: "一打", pos: "", level: "basic" },
   { en: "dragon", zh: "龍", pos: "", level: "basic" },
   { en: "draw", zh: "畫", pos: "", level: "basic" },
   { en: "drawer", zh: "抽屜", pos: "", level: "basic" },
-  { en: "dream", zh: "〈做〉夢", pos: "", level: "basic" },
+  { en: "dream", zh: "做夢", pos: "", level: "basic" },
   { en: "dress", zh: "洋裝", pos: "", level: "basic" },
   { en: "drink", zh: "喝", pos: "", level: "basic" },
   { en: "drive", zh: "駕駛", pos: "", level: "basic" },
@@ -1439,9 +1449,9 @@ var WORD_BANK = [
   { en: "drum", zh: "鼓", pos: "", level: "basic" },
   { en: "dry", zh: "乾的", pos: "", level: "basic" },
   { en: "duck", zh: "鴨", pos: "", level: "basic" },
-  { en: "dumpling", zh: "包餡食物,餃子", pos: "", level: "basic" },
+  { en: "dumpling", zh: "包餡食物；餃子", pos: "", level: "basic" },
   { en: "during", zh: "在…期間", pos: "", level: "basic" },
-  { en: "each", zh: "每一〈的〉", pos: "", level: "basic" },
+  { en: "each", zh: "每一的", pos: "", level: "basic" },
   { en: "ear", zh: "耳朵", pos: "", level: "basic" },
   { en: "early", zh: "早的", pos: "", level: "basic" },
   { en: "earth", zh: "地球", pos: "", level: "basic" },
@@ -1486,14 +1496,14 @@ var WORD_BANK = [
   { en: "expensive", zh: "昂貴的", pos: "", level: "basic" },
   { en: "experience", zh: "經驗", pos: "", level: "basic" },
   { en: "eye", zh: "眼睛", pos: "", level: "basic" },
-  { en: "face", zh: "臉孔,面對", pos: "", level: "basic" },
+  { en: "face", zh: "臉孔；面對", pos: "", level: "basic" },
   { en: "fact", zh: "事實", pos: "", level: "basic" },
   { en: "factory", zh: "工廠", pos: "", level: "basic" },
   { en: "fail", zh: "失敗", pos: "", level: "basic" },
   { en: "fall", zh: "秋天；跌倒", pos: "", level: "basic" },
   { en: "family", zh: "家庭", pos: "", level: "basic" },
   { en: "famous", zh: "有名的", pos: "", level: "basic" },
-  { en: "fan", zh: "扇子,擁護者", pos: "", level: "basic" },
+  { en: "fan", zh: "扇子；擁護者", pos: "", level: "basic" },
   { en: "far", zh: "遠的", pos: "", level: "basic" },
   { en: "farm", zh: "農田", pos: "", level: "basic" },
   { en: "farmer", zh: "農夫", pos: "", level: "basic" },
@@ -1518,7 +1528,7 @@ var WORD_BANK = [
   { en: "fine", zh: "很好的", pos: "", level: "basic" },
   { en: "finger", zh: "手指", pos: "", level: "basic" },
   { en: "finish", zh: "完成", pos: "", level: "basic" },
-  { en: "fire", zh: "火焰,開火", pos: "", level: "basic" },
+  { en: "fire", zh: "火焰；開火", pos: "", level: "basic" },
   { en: "first", zh: "第一(的)", pos: "", level: "basic" },
   { en: "fish", zh: "魚", pos: "", level: "basic" },
   { en: "fisherman", zh: "漁夫", pos: "", level: "basic" },
@@ -1528,7 +1538,7 @@ var WORD_BANK = [
   { en: "flower", zh: "花朵", pos: "", level: "basic" },
   { en: "flute", zh: "笛", pos: "", level: "basic" },
   { en: "fly", zh: "飛；蒼蠅", pos: "", level: "basic" },
-  { en: "follow", zh: "遵循,跟隨", pos: "", level: "basic" },
+  { en: "follow", zh: "遵循；跟隨", pos: "", level: "basic" },
   { en: "food", zh: "食物", pos: "", level: "basic" },
   { en: "foot", zh: "腳", pos: "", level: "basic" },
   { en: "for", zh: "為了", pos: "", level: "basic" },
@@ -1542,7 +1552,7 @@ var WORD_BANK = [
   { en: "fourteenth", zh: "第十四(的)", pos: "", level: "basic" },
   { en: "fourth", zh: "第四(的)", pos: "", level: "basic" },
   { en: "fox", zh: "狐狸", pos: "", level: "basic" },
-  { en: "free", zh: "空閒的,免費", pos: "", level: "basic" },
+  { en: "free", zh: "空閒的；免費", pos: "", level: "basic" },
   { en: "French fries", zh: "炸薯條", pos: "", level: "basic" },
   { en: "fresh", zh: "新鮮的", pos: "", level: "basic" },
   { en: "Friday", zh: "星期五", pos: "", level: "basic" },
@@ -1558,19 +1568,19 @@ var WORD_BANK = [
   { en: "fun", zh: "樂趣", pos: "", level: "basic" },
   { en: "funny", zh: "好笑的", pos: "", level: "basic" },
   { en: "future", zh: "未來", pos: "", level: "basic" },
-  { en: "game", zh: "比賽,遊戲", pos: "", level: "basic" },
+  { en: "game", zh: "比賽；遊戲", pos: "", level: "basic" },
   { en: "garbage", zh: "垃圾", pos: "", level: "basic" },
   { en: "garden", zh: "花園", pos: "", level: "basic" },
   { en: "gas", zh: "瓦斯", pos: "", level: "basic" },
   { en: "gate", zh: "大門", pos: "", level: "basic" },
   { en: "get", zh: "得到", pos: "", level: "basic" },
   { en: "ghost", zh: "鬼", pos: "", level: "basic" },
-  { en: "giant", zh: "巨大的,巨人", pos: "", level: "basic" },
+  { en: "giant", zh: "巨大的；巨人", pos: "", level: "basic" },
   { en: "gift", zh: "禮物", pos: "", level: "basic" },
   { en: "girl", zh: "女孩", pos: "", level: "basic" },
   { en: "give", zh: "給予", pos: "", level: "basic" },
   { en: "glad", zh: "高興的", pos: "", level: "basic" },
-  { en: "glass", zh: "玻璃,玻璃杯", pos: "", level: "basic" },
+  { en: "glass", zh: "玻璃；玻璃杯", pos: "", level: "basic" },
   { en: "glasses", zh: "眼鏡", pos: "", level: "basic" },
   { en: "glove", zh: "手套", pos: "", level: "basic" },
   { en: "glue", zh: "膠水", pos: "", level: "basic" },
@@ -1579,7 +1589,7 @@ var WORD_BANK = [
   { en: "good", zh: "好的", pos: "", level: "basic" },
   { en: "goodbye", zh: "再見", pos: "", level: "basic" },
   { en: "goose", zh: "鵝", pos: "", level: "basic" },
-  { en: "grade", zh: "成績,年級", pos: "", level: "basic" },
+  { en: "grade", zh: "成績；年級", pos: "", level: "basic" },
   { en: "gram", zh: "公克", pos: "", level: "basic" },
   { en: "grandfather", zh: "祖父", pos: "", level: "basic" },
   { en: "grandmother", zh: "祖母", pos: "", level: "basic" },
@@ -1607,7 +1617,7 @@ var WORD_BANK = [
   { en: "hang", zh: "懸掛", pos: "", level: "basic" },
   { en: "happen", zh: "發生", pos: "", level: "basic" },
   { en: "happy", zh: "快樂的", pos: "", level: "basic" },
-  { en: "hard", zh: "困難的,硬的", pos: "", level: "basic" },
+  { en: "hard", zh: "困難的；硬的", pos: "", level: "basic" },
   { en: "hard-working", zh: "努力工作的", pos: "", level: "basic" },
   { en: "hat", zh: "帽子", pos: "", level: "basic" },
   { en: "hate", zh: "討厭", pos: "", level: "basic" },
@@ -1619,7 +1629,7 @@ var WORD_BANK = [
   { en: "healthy", zh: "健康的", pos: "", level: "basic" },
   { en: "hear", zh: "聽", pos: "", level: "basic" },
   { en: "heart", zh: "心", pos: "", level: "basic" },
-  { en: "heat", zh: "熱度,加熱", pos: "", level: "basic" },
+  { en: "heat", zh: "熱度；加熱", pos: "", level: "basic" },
   { en: "heavy", zh: "重的", pos: "", level: "basic" },
   { en: "hello", zh: "喂", pos: "", level: "basic" },
   { en: "help", zh: "幫忙", pos: "", level: "basic" },
@@ -1658,7 +1668,7 @@ var WORD_BANK = [
   { en: "hungry", zh: "飢餓的", pos: "", level: "basic" },
   { en: "hunt", zh: "打獵", pos: "", level: "basic" },
   { en: "hurry", zh: "趕忙", pos: "", level: "basic" },
-  { en: "hurt", zh: "受傷,疼痛", pos: "", level: "basic" },
+  { en: "hurt", zh: "受傷；疼痛", pos: "", level: "basic" },
   { en: "husband", zh: "丈夫", pos: "", level: "basic" },
   { en: "I", zh: "我", pos: "", level: "basic" },
   { en: "ice", zh: "冰", pos: "", level: "basic" },
@@ -1672,7 +1682,7 @@ var WORD_BANK = [
   { en: "interest", zh: "興趣；使…感興趣", pos: "", level: "basic" },
   { en: "interested", zh: "感興趣的", pos: "", level: "basic" },
   { en: "interesting", zh: "有趣的", pos: "", level: "basic" },
-  { en: "interview", zh: "訪問,面試", pos: "", level: "basic" },
+  { en: "interview", zh: "訪問；面試", pos: "", level: "basic" },
   { en: "Internet", zh: "網路", pos: "", level: "basic" },
   { en: "into", zh: "到…之內", pos: "", level: "basic" },
   { en: "invite", zh: "邀請", pos: "", level: "basic" },
@@ -1690,7 +1700,7 @@ var WORD_BANK = [
   { en: "jump", zh: "跳躍", pos: "", level: "basic" },
   { en: "June", zh: "六月", pos: "", level: "basic" },
   { en: "junior high school", zh: "國中", pos: "", level: "basic" },
-  { en: "just", zh: "只是,剛才", pos: "", level: "basic" },
+  { en: "just", zh: "只是；剛才", pos: "", level: "basic" },
   { en: "kangaroo", zh: "袋鼠", pos: "", level: "basic" },
   { en: "keep", zh: "保持", pos: "", level: "basic" },
   { en: "key", zh: "鑰匙", pos: "", level: "basic" },
@@ -1698,7 +1708,7 @@ var WORD_BANK = [
   { en: "kid", zh: "小孩", pos: "", level: "basic" },
   { en: "kill", zh: "殺", pos: "", level: "basic" },
   { en: "kilogram", zh: "公斤", pos: "", level: "basic" },
-  { en: "kind", zh: "親切的,和善的；種類", pos: "", level: "basic" },
+  { en: "kind", zh: "親切的；和善的；種類", pos: "", level: "basic" },
   { en: "king", zh: "國王", pos: "", level: "basic" },
   { en: "kiss", zh: "吻", pos: "", level: "basic" },
   { en: "kitchen", zh: "廚房", pos: "", level: "basic" },
@@ -1724,7 +1734,7 @@ var WORD_BANK = [
   { en: "lead", zh: "引導", pos: "", level: "basic" },
   { en: "leader", zh: "領導者", pos: "", level: "basic" },
   { en: "learn", zh: "學習", pos: "", level: "basic" },
-  { en: "least", zh: "最少〈的〉", pos: "", level: "basic" },
+  { en: "least", zh: "最少的", pos: "", level: "basic" },
   { en: "leave", zh: "離開", pos: "", level: "basic" },
   { en: "left", zh: "左邊；離開(leave過去式)", pos: "", level: "basic" },
   { en: "leg", zh: "腿", pos: "", level: "basic" },
@@ -1739,15 +1749,15 @@ var WORD_BANK = [
   { en: "lid", zh: "蓋子", pos: "", level: "basic" },
   { en: "lie", zh: "說謊", pos: "", level: "basic" },
   { en: "life", zh: "生活", pos: "", level: "basic" },
-  { en: "light", zh: "燈光,輕的", pos: "", level: "basic" },
+  { en: "light", zh: "燈光；輕的", pos: "", level: "basic" },
   { en: "like", zh: "喜歡", pos: "", level: "basic" },
-  { en: "line", zh: "隊伍,線條", pos: "", level: "basic" },
+  { en: "line", zh: "隊伍；線條", pos: "", level: "basic" },
   { en: "lion", zh: "獅子", pos: "", level: "basic" },
   { en: "lip", zh: "嘴唇", pos: "", level: "basic" },
-  { en: "list", zh: "表,名單", pos: "", level: "basic" },
+  { en: "list", zh: "表；名單", pos: "", level: "basic" },
   { en: "listen", zh: "聽", pos: "", level: "basic" },
   { en: "little", zh: "小的", pos: "", level: "basic" },
-  { en: "live", zh: "住,活的,實況", pos: "", level: "basic" },
+  { en: "live", zh: "住；活的；實況", pos: "", level: "basic" },
   { en: "living room", zh: "客廳", pos: "", level: "basic" },
   { en: "lonely", zh: "寂寞的", pos: "", level: "basic" },
   { en: "long", zh: "長的", pos: "", level: "basic" },
@@ -1761,7 +1771,7 @@ var WORD_BANK = [
   { en: "lunch", zh: "午餐", pos: "", level: "basic" },
   { en: "machine", zh: "機器", pos: "", level: "basic" },
   { en: "mad", zh: "瘋狂的", pos: "", level: "basic" },
-  { en: "magic", zh: "神奇的,魔術", pos: "", level: "basic" },
+  { en: "magic", zh: "神奇的；魔術", pos: "", level: "basic" },
   { en: "mail", zh: "信件", pos: "", level: "basic" },
   { en: "mailman", zh: "郵差", pos: "", level: "basic" },
   { en: "make", zh: "製作", pos: "", level: "basic" },
@@ -1783,11 +1793,11 @@ var WORD_BANK = [
   { en: "mean", zh: "意指", pos: "", level: "basic" },
   { en: "meat", zh: "肉", pos: "", level: "basic" },
   { en: "medicine", zh: "藥", pos: "", level: "basic" },
-  { en: "medium", zh: "中號〈的〉", pos: "", level: "basic" },
+  { en: "medium", zh: "中號的", pos: "", level: "basic" },
   { en: "meet", zh: "遇見", pos: "", level: "basic" },
   { en: "meeting", zh: "會議", pos: "", level: "basic" },
-  { en: "menu", zh: "菜單,選單", pos: "", level: "basic" },
-  { en: "mile", zh: "英里,哩", pos: "", level: "basic" },
+  { en: "menu", zh: "菜單；選單", pos: "", level: "basic" },
+  { en: "mile", zh: "英里；哩", pos: "", level: "basic" },
   { en: "milk", zh: "牛奶", pos: "", level: "basic" },
   { en: "million", zh: "百萬", pos: "", level: "basic" },
   { en: "mind", zh: "介意", pos: "", level: "basic" },
@@ -1830,7 +1840,7 @@ var WORD_BANK = [
   { en: "neighbor", zh: "鄰居", pos: "", level: "basic" },
   { en: "never", zh: "從不", pos: "", level: "basic" },
   { en: "new", zh: "新的", pos: "", level: "basic" },
-  { en: "news", zh: "消息,新聞", pos: "", level: "basic" },
+  { en: "news", zh: "消息；新聞", pos: "", level: "basic" },
   { en: "next", zh: "下一個", pos: "", level: "basic" },
   { en: "nice", zh: "好的", pos: "", level: "basic" },
   { en: "night", zh: "晚上", pos: "", level: "basic" },
@@ -1839,7 +1849,7 @@ var WORD_BANK = [
   { en: "nineteenth", zh: "第十九", pos: "", level: "basic" },
   { en: "ninety", zh: "九十", pos: "", level: "basic" },
   { en: "ninth", zh: "第九", pos: "", level: "basic" },
-  { en: "no", zh: "沒有,不是", pos: "", level: "basic" },
+  { en: "no", zh: "沒有；不是", pos: "", level: "basic" },
   { en: "nobody", zh: "沒有人", pos: "", level: "basic" },
   { en: "nod", zh: "點頭", pos: "", level: "basic" },
   { en: "noise", zh: "噪音", pos: "", level: "basic" },
@@ -1847,10 +1857,10 @@ var WORD_BANK = [
   { en: "noon", zh: "中午", pos: "", level: "basic" },
   { en: "north", zh: "北方", pos: "", level: "basic" },
   { en: "nose", zh: "鼻子", pos: "", level: "basic" },
-  { en: "not", zh: "不,不是", pos: "", level: "basic" },
+  { en: "not", zh: "不；不是", pos: "", level: "basic" },
   { en: "note", zh: "筆記", pos: "", level: "basic" },
-  { en: "notebook", zh: "筆記本,筆電", pos: "", level: "basic" },
-  { en: "nothing", zh: "沒東西,沒事", pos: "", level: "basic" },
+  { en: "notebook", zh: "筆記本；筆電", pos: "", level: "basic" },
+  { en: "nothing", zh: "沒東西；沒事", pos: "", level: "basic" },
   { en: "notice", zh: "注意到", pos: "", level: "basic" },
   { en: "November", zh: "十一月", pos: "", level: "basic" },
   { en: "now", zh: "現在", pos: "", level: "basic" },
@@ -1858,7 +1868,7 @@ var WORD_BANK = [
   { en: "nurse", zh: "護士", pos: "", level: "basic" },
   { en: "o'clock", zh: "點鐘", pos: "", level: "basic" },
   { en: "October", zh: "十月", pos: "", level: "basic" },
-  { en: "of", zh: "...的", pos: "", level: "basic" },
+  { en: "of", zh: "…的", pos: "", level: "basic" },
   { en: "off", zh: "自…離開；關掉", pos: "", level: "basic" },
   { en: "office", zh: "辦公室", pos: "", level: "basic" },
   { en: "officer", zh: "官員", pos: "", level: "basic" },
@@ -1870,10 +1880,10 @@ var WORD_BANK = [
   { en: "once", zh: "一次", pos: "", level: "basic" },
   { en: "one", zh: "一", pos: "", level: "basic" },
   { en: "only", zh: "只有", pos: "", level: "basic" },
-  { en: "open", zh: "打開,開放", pos: "", level: "basic" },
+  { en: "open", zh: "打開；開放", pos: "", level: "basic" },
   { en: "or", zh: "或", pos: "", level: "basic" },
   { en: "orange", zh: "柳橙", pos: "", level: "basic" },
-  { en: "order", zh: "點餐,秩序", pos: "", level: "basic" },
+  { en: "order", zh: "點餐；秩序", pos: "", level: "basic" },
   { en: "other", zh: "其他的", pos: "", level: "basic" },
   { en: "out", zh: "在外", pos: "", level: "basic" },
   { en: "outside", zh: "在…外部", pos: "", level: "basic" },
@@ -1894,14 +1904,14 @@ var WORD_BANK = [
   { en: "party", zh: "派對", pos: "", level: "basic" },
   { en: "pass", zh: "通過", pos: "", level: "basic" },
   { en: "past", zh: "經過", pos: "", level: "basic" },
-  { en: "paste", zh: "黏貼,漿糊", pos: "", level: "basic" },
+  { en: "paste", zh: "黏貼；漿糊", pos: "", level: "basic" },
   { en: "pay", zh: "付錢", pos: "", level: "basic" },
   { en: "PE", zh: "體育", pos: "", level: "basic" },
   { en: "peach", zh: "桃子", pos: "", level: "basic" },
   { en: "pear", zh: "梨子", pos: "", level: "basic" },
   { en: "pen", zh: "筆", pos: "", level: "basic" },
   { en: "pencil", zh: "鉛筆", pos: "", level: "basic" },
-  { en: "people", zh: "人們,人民", pos: "", level: "basic" },
+  { en: "people", zh: "人們；人民", pos: "", level: "basic" },
   { en: "perhaps", zh: "或許", pos: "", level: "basic" },
   { en: "person", zh: "人", pos: "", level: "basic" },
   { en: "pet", zh: "寵物", pos: "", level: "basic" },
@@ -1909,7 +1919,7 @@ var WORD_BANK = [
   { en: "piano", zh: "鋼琴", pos: "", level: "basic" },
   { en: "pick", zh: "撿拾", pos: "", level: "basic" },
   { en: "picnic", zh: "野餐", pos: "", level: "basic" },
-  { en: "picture", zh: "圖片,照片", pos: "", level: "basic" },
+  { en: "picture", zh: "圖片；照片", pos: "", level: "basic" },
   { en: "pie", zh: "派", pos: "", level: "basic" },
   { en: "piece", zh: "片", pos: "", level: "basic" },
   { en: "pig", zh: "豬", pos: "", level: "basic" },
@@ -1923,44 +1933,44 @@ var WORD_BANK = [
   { en: "plant", zh: "植物；種植", pos: "", level: "basic" },
   { en: "plate", zh: "盤子", pos: "", level: "basic" },
   { en: "play", zh: "玩", pos: "", level: "basic" },
-  { en: "player", zh: "球員,玩家", pos: "", level: "basic" },
+  { en: "player", zh: "球員；玩家", pos: "", level: "basic" },
   { en: "playground", zh: "操場", pos: "", level: "basic" },
-  { en: "pleasure", zh: "樂趣,使高興", pos: "", level: "basic" },
+  { en: "pleasure", zh: "樂趣；使高興", pos: "", level: "basic" },
   { en: "please", zh: "請", pos: "", level: "basic" },
   { en: "p.m.", zh: "下午", pos: "", level: "basic" },
   { en: "pocket", zh: "口袋", pos: "", level: "basic" },
-  { en: "point", zh: "指著,得分", pos: "", level: "basic" },
+  { en: "point", zh: "指著；得分", pos: "", level: "basic" },
   { en: "police", zh: "警察", pos: "", level: "basic" },
   { en: "polite", zh: "有禮貌的", pos: "", level: "basic" },
   { en: "pond", zh: "池塘", pos: "", level: "basic" },
   { en: "pool", zh: "游泳池", pos: "", level: "basic" },
-  { en: "poor", zh: "貧困的,可憐的", pos: "", level: "basic" },
+  { en: "poor", zh: "貧困的；可憐的", pos: "", level: "basic" },
   { en: "popcorn", zh: "爆米花", pos: "", level: "basic" },
   { en: "popular", zh: "受歡迎的", pos: "", level: "basic" },
   { en: "pork", zh: "豬肉", pos: "", level: "basic" },
   { en: "possible", zh: "可能的", pos: "", level: "basic" },
   { en: "post office", zh: "郵局", pos: "", level: "basic" },
   { en: "postcard", zh: "明信片", pos: "", level: "basic" },
-  { en: "pot", zh: "罐,壺,鍋子", pos: "", level: "basic" },
+  { en: "pot", zh: "罐；壺；鍋子", pos: "", level: "basic" },
   { en: "pound", zh: "磅", pos: "", level: "basic" },
   { en: "practice", zh: "練習", pos: "", level: "basic" },
   { en: "pray", zh: "祈禱", pos: "", level: "basic" },
   { en: "prepare", zh: "準備", pos: "", level: "basic" },
   { en: "present", zh: "禮物；現在(式)的", pos: "", level: "basic" },
-  { en: "pretty", zh: "漂亮的,非常", pos: "", level: "basic" },
+  { en: "pretty", zh: "漂亮的；非常", pos: "", level: "basic" },
   { en: "price", zh: "價格", pos: "", level: "basic" },
   { en: "princess", zh: "公主", pos: "", level: "basic" },
-  { en: "prize", zh: "獎品,獎金", pos: "", level: "basic" },
+  { en: "prize", zh: "獎品；獎金", pos: "", level: "basic" },
   { en: "problem", zh: "問題", pos: "", level: "basic" },
   { en: "program", zh: "節目", pos: "", level: "basic" },
   { en: "proud", zh: "驕傲的", pos: "", level: "basic" },
-  { en: "public", zh: "公立的,公眾的", pos: "", level: "basic" },
+  { en: "public", zh: "公立的；公眾的", pos: "", level: "basic" },
   { en: "pull", zh: "拉", pos: "", level: "basic" },
   { en: "pumpkin", zh: "南瓜", pos: "", level: "basic" },
   { en: "purple", zh: "紫色的", pos: "", level: "basic" },
   { en: "push", zh: "推", pos: "", level: "basic" },
   { en: "put", zh: "放", pos: "", level: "basic" },
-  { en: "quarter", zh: "15分鐘,1/4", pos: "", level: "basic" },
+  { en: "quarter", zh: "15分鐘；1/4", pos: "", level: "basic" },
   { en: "queen", zh: "皇后", pos: "", level: "basic" },
   { en: "question", zh: "問題", pos: "", level: "basic" },
   { en: "quick", zh: "迅速的", pos: "", level: "basic" },
@@ -1974,8 +1984,8 @@ var WORD_BANK = [
   { en: "rain", zh: "下雨", pos: "", level: "basic" },
   { en: "rainbow", zh: "彩虹", pos: "", level: "basic" },
   { en: "rainy", zh: "下雨的", pos: "", level: "basic" },
-  { en: "raise", zh: "舉起,養育", pos: "", level: "basic" },
-  { en: "rat", zh: "(大)老鼠,鼠輩", pos: "", level: "basic" },
+  { en: "raise", zh: "舉起；養育", pos: "", level: "basic" },
+  { en: "rat", zh: "(大)老鼠；鼠輩", pos: "", level: "basic" },
   { en: "read", zh: "讀", pos: "", level: "basic" },
   { en: "ready", zh: "準備好的", pos: "", level: "basic" },
   { en: "real", zh: "真的", pos: "", level: "basic" },
@@ -1993,7 +2003,7 @@ var WORD_BANK = [
   { en: "rich", zh: "有錢的", pos: "", level: "basic" },
   { en: "ride", zh: "騎", pos: "", level: "basic" },
   { en: "right", zh: "右邊；對的", pos: "", level: "basic" },
-  { en: "ring", zh: "戒指；打電話,響", pos: "", level: "basic" },
+  { en: "ring", zh: "戒指；打電話；響", pos: "", level: "basic" },
   { en: "river", zh: "河", pos: "", level: "basic" },
   { en: "road", zh: "道路", pos: "", level: "basic" },
   { en: "robot", zh: "機器人", pos: "", level: "basic" },
@@ -2020,7 +2030,7 @@ var WORD_BANK = [
   { en: "sandwich", zh: "三明治", pos: "", level: "basic" },
   { en: "Saturday", zh: "星期六", pos: "", level: "basic" },
   { en: "sacred", zh: "神聖的", pos: "", level: "basic" },
-  { en: "save", zh: "節省,挽救", pos: "", level: "basic" },
+  { en: "save", zh: "節省；挽救", pos: "", level: "basic" },
   { en: "say", zh: "說", pos: "", level: "basic" },
   { en: "school", zh: "學校", pos: "", level: "basic" },
   { en: "science", zh: "科學", pos: "", level: "basic" },
@@ -2049,7 +2059,7 @@ var WORD_BANK = [
   { en: "seventy", zh: "七十", pos: "", level: "basic" },
   { en: "several", zh: "幾個的", pos: "", level: "basic" },
   { en: "shake", zh: "搖動", pos: "", level: "basic" },
-  { en: "shall", zh: "將會,好嗎?", pos: "", level: "basic" },
+  { en: "shall", zh: "將會；好嗎？", pos: "", level: "basic" },
   { en: "shape", zh: "形狀", pos: "", level: "basic" },
   { en: "share", zh: "分享", pos: "", level: "basic" },
   { en: "shark", zh: "鯊魚", pos: "", level: "basic" },
@@ -2065,10 +2075,10 @@ var WORD_BANK = [
   { en: "should", zh: "應該", pos: "", level: "basic" },
   { en: "shoulder", zh: "肩膀", pos: "", level: "basic" },
   { en: "shout", zh: "喊叫", pos: "", level: "basic" },
-  { en: "show", zh: "指示,表演", pos: "", level: "basic" },
+  { en: "show", zh: "指示；表演", pos: "", level: "basic" },
   { en: "shy", zh: "害羞的", pos: "", level: "basic" },
   { en: "sick", zh: "生病的", pos: "", level: "basic" },
-  { en: "side", zh: "旁邊,邊,面", pos: "", level: "basic" },
+  { en: "side", zh: "旁邊；邊；面", pos: "", level: "basic" },
   { en: "sidewalk", zh: "人行道", pos: "", level: "basic" },
   { en: "sight", zh: "視力", pos: "", level: "basic" },
   { en: "sign", zh: "標誌", pos: "", level: "basic" },
@@ -2081,22 +2091,22 @@ var WORD_BANK = [
   { en: "sit", zh: "坐", pos: "", level: "basic" },
   { en: "six", zh: "六", pos: "", level: "basic" },
   { en: "sixteen", zh: "十六", pos: "", level: "basic" },
-  { en: "sixteenth", zh: "第十六〈的〉", pos: "", level: "basic" },
-  { en: "sixth", zh: "第六〈的〉", pos: "", level: "basic" },
+  { en: "sixteenth", zh: "第十六的", pos: "", level: "basic" },
+  { en: "sixth", zh: "第六的", pos: "", level: "basic" },
   { en: "sixty", zh: "六十", pos: "", level: "basic" },
   { en: "size", zh: "尺寸", pos: "", level: "basic" },
   { en: "skate", zh: "溜冰", pos: "", level: "basic" },
   { en: "skirt", zh: "裙子", pos: "", level: "basic" },
   { en: "sky", zh: "天空", pos: "", level: "basic" },
   { en: "sleep", zh: "睡覺", pos: "", level: "basic" },
-  { en: "slide", zh: "滑坡,滑動", pos: "", level: "basic" },
+  { en: "slide", zh: "滑坡；滑動", pos: "", level: "basic" },
   { en: "slim", zh: "苗條的", pos: "", level: "basic" },
   { en: "slow", zh: "慢的", pos: "", level: "basic" },
   { en: "small", zh: "小的", pos: "", level: "basic" },
   { en: "smart", zh: "聰明的", pos: "", level: "basic" },
   { en: "smell", zh: "聞起來", pos: "", level: "basic" },
   { en: "smile", zh: "微笑", pos: "", level: "basic" },
-  { en: "smoke", zh: "煙霧,抽菸", pos: "", level: "basic" },
+  { en: "smoke", zh: "煙霧；抽菸", pos: "", level: "basic" },
   { en: "snack", zh: "點心", pos: "", level: "basic" },
   { en: "snake", zh: "蛇", pos: "", level: "basic" },
   { en: "snow", zh: "下雪", pos: "", level: "basic" },
@@ -2114,10 +2124,10 @@ var WORD_BANK = [
   { en: "somewhere", zh: "某處", pos: "", level: "basic" },
   { en: "son", zh: "兒子", pos: "", level: "basic" },
   { en: "song", zh: "歌曲", pos: "", level: "basic" },
-  { en: "soon", zh: "不久,即將", pos: "", level: "basic" },
+  { en: "soon", zh: "不久；即將", pos: "", level: "basic" },
   { en: "sore", zh: "疼痛的", pos: "", level: "basic" },
-  { en: "sorry", zh: "抱歉〈的〉", pos: "", level: "basic" },
-  { en: "sound", zh: "聲音,聽起來", pos: "", level: "basic" },
+  { en: "sorry", zh: "抱歉的", pos: "", level: "basic" },
+  { en: "sound", zh: "聲音；聽起來", pos: "", level: "basic" },
   { en: "soup", zh: "湯", pos: "", level: "basic" },
   { en: "south", zh: "南方", pos: "", level: "basic" },
   { en: "space", zh: "空間", pos: "", level: "basic" },
@@ -2125,7 +2135,7 @@ var WORD_BANK = [
   { en: "speak", zh: "說", pos: "", level: "basic" },
   { en: "special", zh: "特別的", pos: "", level: "basic" },
   { en: "spell", zh: "拼字", pos: "", level: "basic" },
-  { en: "spend", zh: "花(錢,時間)", pos: "", level: "basic" },
+  { en: "spend", zh: "花(錢、時間)", pos: "", level: "basic" },
   { en: "spider", zh: "蜘蛛", pos: "", level: "basic" },
   { en: "spoon", zh: "湯匙", pos: "", level: "basic" },
   { en: "sport", zh: "運動", pos: "", level: "basic" },
@@ -2136,7 +2146,7 @@ var WORD_BANK = [
   { en: "stand", zh: "站立", pos: "", level: "basic" },
   { en: "star", zh: "星星；明星", pos: "", level: "basic" },
   { en: "start", zh: "開始", pos: "", level: "basic" },
-  { en: "station", zh: "車站,站,局", pos: "", level: "basic" },
+  { en: "station", zh: "車站；站；局", pos: "", level: "basic" },
   { en: "stay", zh: "停留", pos: "", level: "basic" },
   { en: "steak", zh: "(牛)排", pos: "", level: "basic" },
   { en: "still", zh: "仍然", pos: "", level: "basic" },
@@ -2151,7 +2161,7 @@ var WORD_BANK = [
   { en: "street", zh: "街道", pos: "", level: "basic" },
   { en: "strong", zh: "強壯的", pos: "", level: "basic" },
   { en: "student", zh: "學生", pos: "", level: "basic" },
-  { en: "study", zh: "研讀,學習", pos: "", level: "basic" },
+  { en: "study", zh: "研讀；學習", pos: "", level: "basic" },
   { en: "stupid", zh: "笨的", pos: "", level: "basic" },
   { en: "subject", zh: "科目", pos: "", level: "basic" },
   { en: "successful", zh: "成功的", pos: "", level: "basic" },
@@ -2168,7 +2178,7 @@ var WORD_BANK = [
   { en: "sweater", zh: "毛衣", pos: "", level: "basic" },
   { en: "sweet", zh: "甜的", pos: "", level: "basic" },
   { en: "swim", zh: "游泳", pos: "", level: "basic" },
-  { en: "swing", zh: "鞦韆,搖擺", pos: "", level: "basic" },
+  { en: "swing", zh: "鞦韆；搖擺", pos: "", level: "basic" },
   { en: "table", zh: "桌子", pos: "", level: "basic" },
   { en: "tail", zh: "尾巴", pos: "", level: "basic" },
   { en: "Taiwan", zh: "臺灣", pos: "", level: "basic" },
@@ -2189,9 +2199,9 @@ var WORD_BANK = [
   { en: "temple", zh: "寺廟", pos: "", level: "basic" },
   { en: "ten", zh: "十", pos: "", level: "basic" },
   { en: "tennis", zh: "網球", pos: "", level: "basic" },
-  { en: "tenth", zh: "第十〈的〉", pos: "", level: "basic" },
+  { en: "tenth", zh: "第十的", pos: "", level: "basic" },
   { en: "terrible", zh: "可怕的", pos: "", level: "basic" },
-  { en: "test", zh: "考試,測試", pos: "", level: "basic" },
+  { en: "test", zh: "考試；測試", pos: "", level: "basic" },
   { en: "than", zh: "比…", pos: "", level: "basic" },
   { en: "thank", zh: "謝謝", pos: "", level: "basic" },
   { en: "that", zh: "那個", pos: "", level: "basic" },
@@ -2204,8 +2214,8 @@ var WORD_BANK = [
   { en: "thick", zh: "厚的", pos: "", level: "basic" },
   { en: "thin", zh: "瘦的", pos: "", level: "basic" },
   { en: "thing", zh: "事情", pos: "", level: "basic" },
-  { en: "think", zh: "想,思考", pos: "", level: "basic" },
-  { en: "third", zh: "第三〈的〉", pos: "", level: "basic" },
+  { en: "think", zh: "想；思考", pos: "", level: "basic" },
+  { en: "third", zh: "第三的", pos: "", level: "basic" },
   { en: "thirsty", zh: "口渴的", pos: "", level: "basic" },
   { en: "thirteen", zh: "十三", pos: "", level: "basic" },
   { en: "thirteenth", zh: "第十三", pos: "", level: "basic" },
@@ -2221,18 +2231,18 @@ var WORD_BANK = [
   { en: "ticket", zh: "票券", pos: "", level: "basic" },
   { en: "tidy", zh: "整潔的", pos: "", level: "basic" },
   { en: "tiger", zh: "老虎", pos: "", level: "basic" },
-  { en: "tie", zh: "領帶,捆,繫", pos: "", level: "basic" },
+  { en: "tie", zh: "領帶；捆；繫", pos: "", level: "basic" },
   { en: "time", zh: "時間", pos: "", level: "basic" },
   { en: "tired", zh: "疲倦的", pos: "", level: "basic" },
   { en: "to", zh: "到", pos: "", level: "basic" },
-  { en: "toast", zh: "土司,烘烤", pos: "", level: "basic" },
+  { en: "toast", zh: "土司；烘烤", pos: "", level: "basic" },
   { en: "today", zh: "今天", pos: "", level: "basic" },
   { en: "toe", zh: "腳趾", pos: "", level: "basic" },
   { en: "together", zh: "一起", pos: "", level: "basic" },
   { en: "tomato", zh: "番茄", pos: "", level: "basic" },
   { en: "tomorrow", zh: "明天", pos: "", level: "basic" },
   { en: "tonight", zh: "今晚", pos: "", level: "basic" },
-  { en: "too", zh: "也,太...", pos: "", level: "basic" },
+  { en: "too", zh: "也；太…", pos: "", level: "basic" },
   { en: "tooth", zh: "牙齒", pos: "", level: "basic" },
   { en: "top", zh: "頂端", pos: "", level: "basic" },
   { en: "total", zh: "總計", pos: "", level: "basic" },
@@ -2243,7 +2253,7 @@ var WORD_BANK = [
   { en: "traffic", zh: "交通", pos: "", level: "basic" },
   { en: "train", zh: "火車；訓練", pos: "", level: "basic" },
   { en: "trash", zh: "垃圾", pos: "", level: "basic" },
-  { en: "treat", zh: "請客,對待", pos: "", level: "basic" },
+  { en: "treat", zh: "請客；對待", pos: "", level: "basic" },
   { en: "tree", zh: "樹", pos: "", level: "basic" },
   { en: "trick", zh: "惡作劇", pos: "", level: "basic" },
   { en: "trip", zh: "(短程)旅行", pos: "", level: "basic" },
@@ -2252,10 +2262,10 @@ var WORD_BANK = [
   { en: "true", zh: "真實的", pos: "", level: "basic" },
   { en: "try", zh: "嘗試", pos: "", level: "basic" },
   { en: "T-shirt", zh: "T恤", pos: "", level: "basic" },
-  { en: "tub", zh: "浴缸,洗澡", pos: "", level: "basic" },
+  { en: "tub", zh: "浴缸；洗澡", pos: "", level: "basic" },
   { en: "Tuesday", zh: "星期二", pos: "", level: "basic" },
   { en: "turkey", zh: "火雞", pos: "", level: "basic" },
-  { en: "turn", zh: "轉動,轉彎", pos: "", level: "basic" },
+  { en: "turn", zh: "轉動；轉彎", pos: "", level: "basic" },
   { en: "turtle", zh: "烏龜", pos: "", level: "basic" },
   { en: "twelfth", zh: "第十二(的)", pos: "", level: "basic" },
   { en: "twelve", zh: "十二", pos: "", level: "basic" },
@@ -2299,7 +2309,7 @@ var WORD_BANK = [
   { en: "water", zh: "水", pos: "", level: "basic" },
   { en: "watermelon", zh: "西瓜", pos: "", level: "basic" },
   { en: "wave", zh: "波浪；揮手", pos: "", level: "basic" },
-  { en: "way", zh: "道路,方法", pos: "", level: "basic" },
+  { en: "way", zh: "道路；方法", pos: "", level: "basic" },
   { en: "we", zh: "我們", pos: "", level: "basic" },
   { en: "weak", zh: "弱的", pos: "", level: "basic" },
   { en: "wear", zh: "穿", pos: "", level: "basic" },
@@ -2322,7 +2332,7 @@ var WORD_BANK = [
   { en: "whose", zh: "誰的", pos: "", level: "basic" },
   { en: "why", zh: "為什麼", pos: "", level: "basic" },
   { en: "wife", zh: "妻子", pos: "", level: "basic" },
-  { en: "will", zh: "將會...", pos: "", level: "basic" },
+  { en: "will", zh: "將會…", pos: "", level: "basic" },
   { en: "win", zh: "贏", pos: "", level: "basic" },
   { en: "wind", zh: "風", pos: "", level: "basic" },
   { en: "window", zh: "窗戶", pos: "", level: "basic" },
@@ -2369,7 +2379,7 @@ var WORD_BANK = [
   { en: "advise", zh: "勸告", pos: "v.", level: "advanced" },
   { en: "affect", zh: "影響", pos: "v.", level: "advanced" },
   { en: "against", zh: "反對", pos: "prep.", level: "advanced" },
-  { en: "aim", zh: "瞄準；對準；目標；目的", pos: "v.", level: "advanced" },
+  { en: "aim", zh: "瞄準；目標", pos: "v.", level: "advanced" },
   { en: "air conditioner", zh: "冷氣機", pos: "n.", level: "advanced" },
   { en: "airlines", zh: "航線；航空公司", pos: "n.", level: "advanced" },
   { en: "alarm", zh: "警鈴；警報；驚慌", pos: "n.", level: "advanced" },
@@ -2382,7 +2392,7 @@ var WORD_BANK = [
   { en: "alphabet", zh: "字母", pos: "n.", level: "advanced" },
   { en: "altogether", zh: "完全地；總共", pos: "adv.", level: "advanced" },
   { en: "ambulance", zh: "救護車", pos: "n.", level: "advanced" },
-  { en: "among", zh: "在...之中", pos: "prep.", level: "advanced" },
+  { en: "among", zh: "在…之中", pos: "prep.", level: "advanced" },
   { en: "amount", zh: "總數", pos: "n.", level: "advanced" },
   { en: "ancient", zh: "古代的", pos: "adj.", level: "advanced" },
   { en: "angel", zh: "天使", pos: "n.", level: "advanced" },
@@ -2405,7 +2415,7 @@ var WORD_BANK = [
   { en: "avoid", zh: "避免", pos: "v.", level: "advanced" },
   { en: "baby sitter", zh: "替人看小孩者", pos: "n.", level: "advanced" },
   { en: "backpack", zh: "背包", pos: "n.", level: "advanced" },
-  { en: "backward", zh: "向後的；落後的；向後地；落後地", pos: "adj.", level: "advanced" },
+  { en: "backward", zh: "向後的；落後的", pos: "adj.", level: "advanced" },
   { en: "balloon", zh: "汽球", pos: "n.", level: "advanced" },
   { en: "barber", zh: "男理髮師", pos: "n.", level: "advanced" },
   { en: "bark", zh: "狗叫；吠聲", pos: "v.", level: "advanced" },
@@ -2418,8 +2428,8 @@ var WORD_BANK = [
   { en: "beer", zh: "啤酒", pos: "n.", level: "advanced" },
   { en: "beginner", zh: "新手", pos: "n.", level: "advanced" },
   { en: "behave", zh: "舉動；守規矩", pos: "v.", level: "advanced" },
-  { en: "besides", zh: "並且；除...之外", pos: "adv.", level: "advanced" },
-  { en: "beyond", zh: "在更遠處；越出；晚於；在...那一邊", pos: "adv.", level: "advanced" },
+  { en: "besides", zh: "並且；除…之外", pos: "adv.", level: "advanced" },
+  { en: "beyond", zh: "越過；在…那一邊", pos: "adv.", level: "advanced" },
   { en: "bill", zh: "記入帳；帳單；鈔票", pos: "v.", level: "advanced" },
   { en: "biology", zh: "生物學", pos: "n.", level: "advanced" },
   { en: "bitter", zh: "苦的；嚴酷的", pos: "adj.", level: "advanced" },
@@ -2428,7 +2438,7 @@ var WORD_BANK = [
   { en: "bless", zh: "祝福；保佑", pos: "v.", level: "advanced" },
   { en: "blood", zh: "血", pos: "n.", level: "advanced" },
   { en: "blouse", zh: "女裝短上衣", pos: "n.", level: "advanced" },
-  { en: "board", zh: "上車；上船；木板；膳食；車上；船上；董事會", pos: "v.", level: "advanced" },
+  { en: "board", zh: "上車(船)；木板；董事會", pos: "v.", level: "advanced" },
   { en: "bomb", zh: "炸彈", pos: "n.", level: "advanced" },
   { en: "bone", zh: "骨頭", pos: "n.", level: "advanced" },
   { en: "bookcase", zh: "書架", pos: "n.", level: "advanced" },
@@ -2469,7 +2479,7 @@ var WORD_BANK = [
   { en: "certain", zh: "肯定的", pos: "adj.", level: "advanced" },
   { en: "channel", zh: "管道；頻道", pos: "n.", level: "advanced" },
   { en: "character", zh: "特性；角色；(中文)字", pos: "n.", level: "advanced" },
-  { en: "charge", zh: "索價；充電；費用；充電", pos: "v.", level: "advanced" },
+  { en: "charge", zh: "索價；充電；費用", pos: "v.", level: "advanced" },
   { en: "chart", zh: "圖表", pos: "n.", level: "advanced" },
   { en: "chase", zh: "追", pos: "v.", level: "advanced" },
   { en: "chemistry", zh: "化學", pos: "n.", level: "advanced" },
@@ -2545,11 +2555,11 @@ var WORD_BANK = [
   { en: "deep", zh: "深的", pos: "adj.", level: "advanced" },
   { en: "deer", zh: "鹿", pos: "n.", level: "advanced" },
   { en: "degree", zh: "程度", pos: "n.", level: "advanced" },
-  { en: "deliver", zh: "遞送；發表；講；給……接生", pos: "v.", level: "advanced" },
+  { en: "deliver", zh: "遞送；發表", pos: "v.", level: "advanced" },
   { en: "department", zh: "部門", pos: "n.", level: "advanced" },
   { en: "depend", zh: "依賴", pos: "v.", level: "advanced" },
   { en: "describe", zh: "描述", pos: "v.", level: "advanced" },
-  { en: "desert", zh: "遺棄；離棄；逃跑；沙漠；(常複數)賞罰；(尤指)懲罰", pos: "v.", level: "advanced" },
+  { en: "desert", zh: "沙漠；遺棄", pos: "v.", level: "advanced" },
   { en: "design", zh: "設計；圖案；設計", pos: "v.", level: "advanced" },
   { en: "desire", zh: "渴望", pos: "n.", level: "advanced" },
   { en: "dessert", zh: "餐後甜點", pos: "n.", level: "advanced" },
@@ -2624,7 +2634,7 @@ var WORD_BANK = [
   { en: "express", zh: "表示", pos: "v.", level: "advanced" },
   { en: "extra", zh: "額外的；附加的人物或錢；號外", pos: "adj.", level: "advanced" },
   { en: "fair", zh: "公平的；美好的", pos: "adj.", level: "advanced" },
-  { en: "FALSE", zh: "假的", pos: "adj.", level: "advanced" },
+  { en: "false", zh: "假的", pos: "adj.", level: "advanced" },
   { en: "fancy", zh: "花俏的；特級的", pos: "adj.", level: "advanced" },
   { en: "fantastic", zh: "奇妙的", pos: "adj.", level: "advanced" },
   { en: "fashionable", zh: "時尚的", pos: "adj.", level: "advanced" },
@@ -2660,7 +2670,7 @@ var WORD_BANK = [
   { en: "freezer", zh: "冰箱的冷凍部；冷凍箱", pos: "n.", level: "advanced" },
   { en: "freezing", zh: "冰凍的；極冷的", pos: "adj.", level: "advanced" },
   { en: "friendship", zh: "友誼", pos: "n.", level: "advanced" },
-  { en: "frighten", zh: "害怕；吃驚", pos: "v.", level: "advanced" },
+  { en: "frighten", zh: "使害怕；嚇", pos: "v.", level: "advanced" },
   { en: "furniture", zh: "傢俱", pos: "n.", level: "advanced" },
   { en: "gain", zh: "得到；增進", pos: "v.", level: "advanced" },
   { en: "garage", zh: "車庫", pos: "n.", level: "advanced" },
@@ -2740,7 +2750,7 @@ var WORD_BANK = [
   { en: "invent", zh: "發明", pos: "v.", level: "advanced" },
   { en: "invitation", zh: "邀請", pos: "n.", level: "advanced" },
   { en: "iron", zh: "熨燙；鐵；熨斗", pos: "v.", level: "advanced" },
-  { en: "jam", zh: "擠；夾傷；果醬；擁塞", pos: "v.", level: "advanced" },
+  { en: "jam", zh: "果醬；擁塞", pos: "v.", level: "advanced" },
   { en: "jazz", zh: "爵士樂", pos: "n.", level: "advanced" },
   { en: "jealous", zh: "嫉妒的", pos: "adj.", level: "advanced" },
   { en: "jeep", zh: "吉普車", pos: "n.", level: "advanced" },
@@ -2801,7 +2811,7 @@ var WORD_BANK = [
   { en: "microwave", zh: "微波爐", pos: "n.", level: "advanced" },
   { en: "middle", zh: "中間的；中央", pos: "adj.", level: "advanced" },
   { en: "midnight", zh: "午夜", pos: "n.", level: "advanced" },
-  { en: "minor", zh: "較小的；較次要的；未成年者；副科", pos: "adj.", level: "advanced" },
+  { en: "minor", zh: "較次要的；未成年者", pos: "adj.", level: "advanced" },
   { en: "minus", zh: "減（去）；負號", pos: "prep.", level: "advanced" },
   { en: "mirror", zh: "鏡子", pos: "n.", level: "advanced" },
   { en: "mix", zh: "混合", pos: "v.", level: "advanced" },
@@ -2820,7 +2830,7 @@ var WORD_BANK = [
   { en: "necklace", zh: "項鍊", pos: "n.", level: "advanced" },
   { en: "needle", zh: "針", pos: "n.", level: "advanced" },
   { en: "negative", zh: "否定的；負面的", pos: "adj.", level: "advanced" },
-  { en: "neither", zh: "兩者都不；也不；也不；兩者都不", pos: "adj.", level: "advanced" },
+  { en: "neither", zh: "兩者都不；也不", pos: "adj.", level: "advanced" },
   { en: "nephew", zh: "侄子；外甥", pos: "n.", level: "advanced" },
   { en: "nervous", zh: "緊張的", pos: "adj.", level: "advanced" },
   { en: "nest", zh: "巢", pos: "n.", level: "advanced" },
@@ -2896,7 +2906,7 @@ var WORD_BANK = [
   { en: "priest", zh: "牧師；神父", pos: "n.", level: "advanced" },
   { en: "primary", zh: "主要的；初級的", pos: "adj.", level: "advanced" },
   { en: "principal", zh: "(中小學)校長", pos: "n.", level: "advanced" },
-  { en: "principle", zh: "主義；真諦", pos: "n.", level: "advanced" },
+  { en: "principle", zh: "原則", pos: "n.", level: "advanced" },
   { en: "print", zh: "印刷；用印刷體寫", pos: "v.", level: "advanced" },
   { en: "printer", zh: "印表機；印刷業者", pos: "n.", level: "advanced" },
   { en: "private", zh: "私人的", pos: "adj.", level: "advanced" },
@@ -2906,10 +2916,10 @@ var WORD_BANK = [
   { en: "progress", zh: "進步", pos: "n.", level: "advanced" },
   { en: "project", zh: "計畫", pos: "n.", level: "advanced" },
   { en: "promise", zh: "答應", pos: "v.", level: "advanced" },
-  { en: "pronounce", zh: "發...音", pos: "v.", level: "advanced" },
+  { en: "pronounce", zh: "發…音", pos: "v.", level: "advanced" },
   { en: "protect", zh: "保護", pos: "v.", level: "advanced" },
   { en: "provide", zh: "供應", pos: "v.", level: "advanced" },
-  { en: "pump", zh: "跳動；使用唧筒；唧筒；打氣機；抽水機", pos: "v.", level: "advanced" },
+  { en: "pump", zh: "打氣機；抽水機", pos: "v.", level: "advanced" },
   { en: "punish", zh: "處罰", pos: "v.", level: "advanced" },
   { en: "purpose", zh: "目的", pos: "n.", level: "advanced" },
   { en: "purse", zh: "錢包", pos: "n.", level: "advanced" },
@@ -2922,7 +2932,7 @@ var WORD_BANK = [
   { en: "realize", zh: "認知；實現", pos: "v.", level: "advanced" },
   { en: "reason", zh: "理由", pos: "n.", level: "advanced" },
   { en: "receive", zh: "收到", pos: "v.", level: "advanced" },
-  { en: "record", zh: "記錄；錄音；記錄；唱片", pos: "v.", level: "advanced" },
+  { en: "record", zh: "記錄；唱片", pos: "v.", level: "advanced" },
   { en: "recover", zh: "尋回；恢復", pos: "v.", level: "advanced" },
   { en: "rectangle", zh: "長方形", pos: "n.", level: "advanced" },
   { en: "recycle", zh: "回收", pos: "v.", level: "advanced" },
@@ -2960,7 +2970,7 @@ var WORD_BANK = [
   { en: "scene", zh: "景色；場面", pos: "n.", level: "advanced" },
   { en: "scenery", zh: "風景", pos: "n.", level: "advanced" },
   { en: "scientist", zh: "科學家", pos: "n.", level: "advanced" },
-  { en: "score", zh: "得分；得分；二十；刻痕；樂譜", pos: "v.", level: "advanced" },
+  { en: "score", zh: "得分；分數", pos: "v.", level: "advanced" },
   { en: "seafood", zh: "海產食品", pos: "n.", level: "advanced" },
   { en: "search", zh: "搜尋；搜查", pos: "v.", level: "advanced" },
   { en: "secondary", zh: "第二的；次要的", pos: "adj.", level: "advanced" },
@@ -2979,7 +2989,7 @@ var WORD_BANK = [
   { en: "shelf", zh: "架子", pos: "n.", level: "advanced" },
   { en: "shoot", zh: "注射；射擊；拍攝", pos: "v.", level: "advanced" },
   { en: "shore", zh: "岸邊", pos: "n.", level: "advanced" },
-  { en: "shower", zh: "傾注；洗淋浴；陣雨；淋浴", pos: "v.", level: "advanced" },
+  { en: "shower", zh: "淋浴；陣雨", pos: "v.", level: "advanced" },
   { en: "shrimp", zh: "蝦子", pos: "n.", level: "advanced" },
   { en: "shut", zh: "關閉", pos: "v.", level: "advanced" },
   { en: "silence", zh: "寂靜", pos: "n.", level: "advanced" },
@@ -2988,7 +2998,7 @@ var WORD_BANK = [
   { en: "silver", zh: "銀的；銀白的；銀", pos: "adj.", level: "advanced" },
   { en: "similar", zh: "相似的", pos: "adj.", level: "advanced" },
   { en: "sincere", zh: "誠懇的", pos: "adj.", level: "advanced" },
-  { en: "single", zh: "單一的；獨身的；單的；一壘安打", pos: "adj.", level: "advanced" },
+  { en: "single", zh: "單一的；獨身的", pos: "adj.", level: "advanced" },
   { en: "sink", zh: "沉下；陷於；洗物槽", pos: "v.", level: "advanced" },
   { en: "ski", zh: "滑雪；滑雪屐", pos: "v.", level: "advanced" },
   { en: "skill", zh: "技能", pos: "n.", level: "advanced" },
@@ -3016,7 +3026,7 @@ var WORD_BANK = [
   { en: "speech", zh: "言論；演講", pos: "n.", level: "advanced" },
   { en: "speed", zh: "速度", pos: "n.", level: "advanced" },
   { en: "spirit", zh: "精神", pos: "n.", level: "advanced" },
-  { en: "spot", zh: "沾污；察出；斑點；場所", pos: "v.", level: "advanced" },
+  { en: "spot", zh: "斑點；場所", pos: "v.", level: "advanced" },
   { en: "spread", zh: "展開；散布", pos: "v.", level: "advanced" },
   { en: "state", zh: "陳述；狀態；美國的州", pos: "v.", level: "advanced" },
   { en: "stationery", zh: "文具", pos: "n.", level: "advanced" },
@@ -3030,7 +3040,7 @@ var WORD_BANK = [
   { en: "stormy", zh: "暴風雨的", pos: "adj.", level: "advanced" },
   { en: "stove", zh: "爐灶", pos: "n.", level: "advanced" },
   { en: "stream", zh: "流；蜂擁而進；溪流", pos: "v.", level: "advanced" },
-  { en: "strike", zh: "打擊；(鐘)敲響；攻擊；罷工", pos: "v.", level: "advanced" },
+  { en: "strike", zh: "打擊；罷工", pos: "v.", level: "advanced" },
   { en: "style", zh: "時尚；風格；文體", pos: "n.", level: "advanced" },
   { en: "subway", zh: "地鐵", pos: "n.", level: "advanced" },
   { en: "succeed", zh: "成功", pos: "v.", level: "advanced" },
@@ -3042,7 +3052,7 @@ var WORD_BANK = [
   { en: "super", zh: "超級的", pos: "adj.", level: "advanced" },
   { en: "supper", zh: "晚餐", pos: "n.", level: "advanced" },
   { en: "support", zh: "支持；支持", pos: "v.", level: "advanced" },
-  { en: "survive", zh: "在...之後仍然活著", pos: "v.", level: "advanced" },
+  { en: "survive", zh: "在…之後仍然活著", pos: "v.", level: "advanced" },
   { en: "swallow", zh: "吞嚥；吞嚥；燕子", pos: "v.", level: "advanced" },
   { en: "swan", zh: "天鵝", pos: "n.", level: "advanced" },
   { en: "sweep", zh: "掃；掃除", pos: "v.", level: "advanced" },
@@ -3069,7 +3079,7 @@ var WORD_BANK = [
   { en: "thunder", zh: "雷", pos: "n.", level: "advanced" },
   { en: "till", zh: "直到", pos: "prep.", level: "advanced" },
   { en: "tiny", zh: "微小的", pos: "adj.", level: "advanced" },
-  { en: "tip", zh: "給小費；使傾斜；尖端；小費", pos: "v.", level: "advanced" },
+  { en: "tip", zh: "小費；尖端", pos: "v.", level: "advanced" },
   { en: "title", zh: "標題；頭銜", pos: "n.", level: "advanced" },
   { en: "tofu", zh: "豆腐", pos: "n.", level: "advanced" },
   { en: "toilet", zh: "馬桶", pos: "n.", level: "advanced" },
@@ -3094,13 +3104,13 @@ var WORD_BANK = [
   { en: "tube", zh: "管子", pos: "n.", level: "advanced" },
   { en: "tunnel", zh: "隧道", pos: "n.", level: "advanced" },
   { en: "ugly", zh: "醜的", pos: "adj.", level: "advanced" },
-  { en: "underline", zh: "劃線於...之下；強調；底線", pos: "v.", level: "advanced" },
+  { en: "underline", zh: "劃線於…之下；強調；底線", pos: "v.", level: "advanced" },
   { en: "underpass", zh: "地下通道", pos: "n.", level: "advanced" },
   { en: "underwear", zh: "內衣", pos: "n.", level: "advanced" },
   { en: "unique", zh: "獨特的", pos: "adj.", level: "advanced" },
   { en: "universe", zh: "宇宙", pos: "n.", level: "advanced" },
   { en: "university", zh: "大學", pos: "n.", level: "advanced" },
-  { en: "upon", zh: "在...之上", pos: "prep.", level: "advanced" },
+  { en: "upon", zh: "在…之上", pos: "prep.", level: "advanced" },
   { en: "upper", zh: "較高的", pos: "adj.", level: "advanced" },
   { en: "upstairs", zh: "樓上的；樓上地；樓上", pos: "adj.", level: "advanced" },
   { en: "usual", zh: "例常的", pos: "adj.", level: "advanced" },
@@ -3124,7 +3134,7 @@ var WORD_BANK = [
   { en: "weekday", zh: "工作日", pos: "n.", level: "advanced" },
   { en: "weight", zh: "重量", pos: "n.", level: "advanced" },
   { en: "wheel", zh: "輪子", pos: "n.", level: "advanced" },
-  { en: "while", zh: "當...的時候；一會兒", pos: "conj.", level: "advanced" },
+  { en: "while", zh: "當…的時候；一會兒", pos: "conj.", level: "advanced" },
   { en: "whole", zh: "完整的", pos: "adj.", level: "advanced" },
   { en: "wide", zh: "寬的；廣泛的", pos: "adj.", level: "advanced" },
   { en: "wild", zh: "野生的；無法無天的", pos: "adj.", level: "advanced" },
@@ -3209,7 +3219,7 @@ var WORD_BANK = [
   { en: "runner", zh: "跑者", pos: "n.", level: "advanced" },
   { en: "over there", zh: "在那邊", pos: "phr.", level: "advanced" },
   { en: "take care of", zh: "照顧", pos: "phr.", level: "advanced" },
-  { en: "play the role of", zh: "扮演……的角色", pos: "phr.", level: "advanced" },
+  { en: "play the role of", zh: "扮演…的角色", pos: "phr.", level: "advanced" },
   { en: "pancake", zh: "鬆餅", pos: "n.", level: "advanced" },
   { en: "how many", zh: "多少（個）", pos: "phr.", level: "advanced" },
   { en: "of course", zh: "當然", pos: "phr.", level: "advanced" },
@@ -3223,7 +3233,7 @@ var WORD_BANK = [
   { en: "buy/bought", zh: "買", pos: "v.", level: "advanced" },
   { en: "lead/led", zh: "領導", pos: "v.", level: "advanced" },
   { en: "suitcase", zh: "（旅行用的）手提箱", pos: "n.", level: "advanced" },
-  { en: "throw/threw...away", zh: "扔掉……", pos: "v.", level: "advanced" },
+  { en: "throw/threw...away", zh: "扔掉…", pos: "v.", level: "advanced" },
   { en: "plastic", zh: "塑膠的；塑膠", pos: "adj./n.", level: "advanced" },
   { en: "one of a kind", zh: "獨一無二", pos: "phr.", level: "advanced" },
   { en: "keep/kept", zh: "保留；保持", pos: "v.", level: "advanced" },
@@ -3280,6 +3290,18 @@ var WORD_BANK = [
   { en: "unanimous", zh: "全體一致的", pos: "adj.", level: "hell" },
   { en: "underlying", zh: "潛在的；根本的", pos: "adj.", level: "hell" }
 ];
+
+// ------------------------------------------------------------------
+// 例句庫 EX_BANK（新增）
+// key = WORD_BANK 的 en。值 = [挖空模板, 被挖掉的字, 中文翻譯]。
+// 模板裡的 \u0000 就是空格的位置，事先算好，執行時不做變化形猜測。
+// DAILY_SKIP 的字沒有模板（第一欄空字串），因為挖掉 and / the 沒有意義。
+// 只讀不寫，完全不碰 WORD_BANK 與任何 localStorage。
+// ------------------------------------------------------------------
+var EX_BANK = {"dead":["The bird on the road is \u0000.","dead","路上那隻鳥死了。"],"movie":["We watched a funny \u0000 last night.","movie","我們昨晚看了一部好笑的電影。"],"temple":["My grandmother goes to the \u0000 every morning.","temple","我奶奶每天早上去寺廟。"],"third":["She won \u0000 place in the race.","third","她在賽跑中得到第三名。"],"comb":["I cannot find my \u0000.","comb","我找不到我的梳子。"],"headache":["I have a bad \u0000 today.","headache","我今天頭很痛。"],"water":["Please drink more \u0000 every day.","water","請每天多喝水。"],"Saturday":["We play basketball every \u0000.","Saturday","我們每個星期六打籃球。"],"wish":["I \u0000 you a happy birthday.","wish","我祝你生日快樂。"],"vegetable":["My little brother never eats \u0000.","vegetables","我弟弟從來不吃蔬菜。"],"surf":["They \u0000 at the beach in summer.","surf","他們夏天在海邊衝浪。"],"short":["Her hair is very \u0000 now.","short","她現在頭髮很短。"],"hotel":["We stayed at a small \u0000.","hotel","我們住在一間小旅館。"],"about":["This book is \u0000 animals.","about","這本書是關於動物的。"],"cellphone":["I left my \u0000 at home.","cellphone","我把手機忘在家裡了。"],"course":["He is taking an English \u0000.","course","他正在上英文課程。"],"listen":["\u0000 to your teacher carefully.","Listen","仔細聽老師說話。"],"clothes":["She is washing her \u0000.","clothes","她正在洗衣服。"],"sister":["My \u0000 is two years older than me.","sister","我姊姊比我大兩歲。"],"along":["We walked \u0000 the river.","along","我們沿著河邊走。"],"sure":["Are you \u0000 about the answer?","sure","你確定這個答案嗎？"],"moon":["The \u0000 is bright tonight.","moon","今晚月亮很亮。"],"green":["She is wearing a \u0000 skirt.","green","她穿著一件綠色的裙子。"],"railroad":["The old \u0000 is not used now.","railroad","那條舊鐵路現在沒有在用了。"],"interview":["My father has a job \u0000 today.","interview","我爸爸今天有工作面試。"],"only":["","I have only ten dollars.","我只有十塊錢。"],"paper":["Please give me a piece of \u0000.","paper","請給我一張紙。"],"p.m.":["","The meeting starts at three p.m.","會議下午三點開始。"],"thirteenth":["Today is the \u0000 of May.","thirteenth","今天是五月十三日。"],"card":["I made a \u0000 for my mother.","card","我為媽媽做了一張卡片。"],"number":["Please write down your telephone \u0000.","number","請寫下你的電話號碼。"],"chocolate":["She gave me a box of \u0000.","chocolate","她給了我一盒巧克力。"],"wave":["The \u0000 are very big today.","waves","今天的浪很大。"],"twelve":["There are \u0000 students in my class.","twelve","我們班上有十二個學生。"],"lovely":["What a \u0000 little dog!","lovely","好可愛的小狗！"],"little":["A \u0000 boy is crying outside.","little","一個小男孩在外面哭。"],"smart":["My sister is \u0000 and kind.","smart","我姊姊又聰明又善良。"],"east":["The sun comes up in the \u0000.","east","太陽從東方升起。"],"worry":["Do not \u0000 about the test.","worry","不要擔心考試。"],"million":["This city has over two \u0000 people.","million","這座城市有超過兩百萬人。"],"August":["School starts in \u0000.","August","學校八月開學。"],"pig":["The farmer keeps ten \u0000.","pigs","那個農夫養了十隻豬。"],"people":["Many \u0000 came to the show.","people","很多人來看表演。"],"snowy":["It was a cold and \u0000 morning.","snowy","那是一個寒冷又下雪的早晨。"],"say":["She did not \u0000 a word.","say","她一句話也沒說。"],"chopsticks":["He can use \u0000 very well.","chopsticks","他筷子用得很好。"],"rainy":["I do not like \u0000 days.","rainy","我不喜歡下雨天。"],"want":["I \u0000 a glass of milk.","want","我想要一杯牛奶。"],"taxi":["Let us take a \u0000 to the station.","taxi","我們搭計程車去車站吧。"],"dangerous":["Swimming in this river is \u0000.","dangerous","在這條河游泳很危險。"],"seat":["Please take your \u0000 now.","seat","請現在就座。"],"that":["","That is my new bike.","那是我的新腳踏車。"],"rainbow":["We saw a beautiful \u0000 after the rain.","rainbow","雨後我們看見一道美麗的彩虹。"],"tonight":["I will study math \u0000.","tonight","我今晚要念數學。"],"July":["My birthday is in \u0000.","July","我的生日在七月。"],"mass":["A \u0000 of dark clouds covered the sky.","mass","一團烏雲遮住了天空。"],"rent":["They \u0000 a small house near school.","rent","他們在學校附近租了一間小房子。"],"overweight":["The doctor said he is \u0000.","overweight","醫生說他體重過重。"],"poison":["Keep the \u0000 away from children.","poison","把毒物放在小孩碰不到的地方。"],"position":["Put the chair back in its \u0000.","position","把椅子放回原來的位置。"],"germ":["Wash your hands to kill \u0000.","germs","洗手可以殺死細菌。"],"altogether":["These books cost five hundred dollars \u0000.","altogether","這些書總共五百元。"],"root":["The \u0000 of this tree are very deep.","roots","這棵樹的根很深。"],"drugstore":["I bought some medicine at the \u0000.","drugstore","我在藥房買了一些藥。"],"youth":["Many \u0000 joined the summer camp.","youths","很多青少年參加了夏令營。"],"coin":["He put a \u0000 into the machine.","coin","他把一枚硬幣投進機器裡。"],"hide-and-seek":["The children are playing \u0000.","hide-and-seek","孩子們正在玩捉迷藏。"],"backward":["He took a \u0000 step.","backward","他向後退了一步。"],"topic":["Our \u0000 today is the environment.","topic","我們今天的主題是環境。"],"precious":["Time is \u0000, so do not waste it.","precious","時間很寶貴，不要浪費。"],"support":["My parents \u0000 my dream.","support","我父母支持我的夢想。"],"cassette":["My father still keeps his old \u0000.","cassettes","我爸爸還留著他的舊卡帶。"],"trust":["I \u0000 my best friend.","trust","我信任我最好的朋友。"],"skillful":["She is a \u0000 piano player.","skillful","她是個熟練的鋼琴手。"],"message":["I left a \u0000 for you.","message","我留了一個口信給你。"],"omit":["You may \u0000 the last question.","omit","你可以略過最後一題。"],"congratulation":["\u0000 on your new job!","Congratulations","恭喜你有了新工作！"],"painful":["The cut on my finger is \u0000.","painful","我手指上的傷口很痛。"],"earrings":["She is wearing gold \u0000.","earrings","她戴著金耳環。"],"classical":["My mother enjoys \u0000 music.","classical","我媽媽喜歡古典音樂。"],"slender":["The tall girl has a \u0000 body.","slender","那個高女孩身材纖細。"],"toilet":["The \u0000 in the bathroom is broken.","toilet","浴室的馬桶壞了。"],"nervous":["I felt \u0000 before the speech.","nervous","演講前我覺得很緊張。"],"sweep":["Please \u0000 the floor after dinner.","sweep","晚餐後請掃地。"],"offer":["The hotel \u0000 free breakfast.","offers","那家旅館提供免費早餐。"],"triangle":["Draw a \u0000 on the paper.","triangle","在紙上畫一個三角形。"],"puzzle":["His answer \u0000 everyone.","puzzled","他的回答讓大家很困惑。"],"event":["The sports \u0000 will begin at nine.","event","運動賽事九點開始。"],"regular":["He does \u0000 exercise every week.","regular","他每週定期運動。"],"liquid":["Water is a kind of \u0000.","liquid","水是一種液體。"],"supper":["We had \u0000 at seven.","supper","我們七點吃晚餐。"],"geography":["\u0000 is my favorite subject.","Geography","地理是我最喜歡的科目。"],"rare":["Snow is \u0000 in this city.","rare","這座城市很少下雪。"],"how much":["","How much is this shirt?","這件襯衫多少錢？"],"spread":["The bad news \u0000 quickly.","spread","壞消息傳得很快。"],"mediocre":["The movie was \u0000, not good or bad.","mediocre","那部電影很平庸，不好也不壞。"],"impartial":["A good teacher should be \u0000.","impartial","好老師應該公正。"],"coherent":["His answer was clear and \u0000.","coherent","他的回答清楚又連貫。"],"diminish":["The noise slowly \u0000.","diminished","噪音慢慢減少了。"],"ambiguous":["His answer was \u0000.","ambiguous","他的回答模稜兩可。"],"a (an)":["","I have a dog and an old cat.","我有一隻狗和一隻老貓。"],"a few":["","She has a few good friends.","她有幾個好朋友。"],"a little":["","There is a little water in the bottle.","瓶子裡有一點水。"],"a lot":["","She reads a lot in her free time.","她空閒時讀很多書。"],"able":["He is \u0000 to run very fast.","able","他能跑得很快。"],"above":["The bird flew \u0000 the trees.","above","那隻鳥飛到樹的上方。"],"abroad":["My sister is studying \u0000.","abroad","我姊姊在國外念書。"],"across":["The store is \u0000 the street.","across","那家店在街道對面。"],"actress":["The \u0000 is famous in Taiwan.","actress","那位女演員在台灣很有名。"],"afraid":["I am \u0000 of dogs.","afraid","我怕狗。"],"after":["We go home \u0000 school.","after","我們放學後回家。"],"afternoon":["We play games every Friday \u0000.","afternoon","我們每個星期五下午玩遊戲。"],"again":["","Please say that again.","請再說一次。"],"age":["Children of this \u0000 love games.","age","這個年紀的孩子喜歡遊戲。"],"ago":["I met him two years \u0000.","ago","我兩年前遇見他。"],"agree":["I \u0000 with your idea.","agree","我同意你的想法。"],"ahead":["The station is just \u0000 of us.","ahead","車站就在我們前面。"],"air":["The \u0000 in the mountains is clean.","air","山上的空氣很乾淨。"],"airplane":["The \u0000 is ready to fly.","airplane","飛機準備要起飛了。"],"airport":["We took a bus to the \u0000.","airport","我們搭公車去機場。"],"all":["","All the students are here.","所有學生都到了。"],"almost":["It is \u0000 eight o'clock.","almost","快要八點了。"],"already":["She has \u0000 finished her homework.","already","她已經寫完功課了。"],"also":["","He can sing and also dance.","他會唱歌也會跳舞。"],"always":["","She is always late for class.","她上課總是遲到。"],"a.m.":["","The train leaves at six a.m.","火車早上六點開。"],"America":["My uncle lives in \u0000.","America","我叔叔住在美國。"],"American":["He is an \u0000 teacher.","American","他是一位美國老師。"],"and":["","I like apples and bananas.","我喜歡蘋果和香蕉。"],"angry":["My father was \u0000 with me.","angry","我爸爸對我生氣。"],"animal":["The zoo has many \u0000.","animals","動物園裡有很多動物。"],"another":["","May I have another cup of tea?","我可以再來一杯茶嗎？"],"answer":["Nobody knew the \u0000 to that question.","answer","沒有人知道那題的答案。"],"ant":["\u0000 are carrying food to their home.","Ants","螞蟻正把食物搬回家。"],"any":["","Do you have any questions?","你有任何問題嗎？"],"anyone":["\u0000 can join the game.","Anyone","任何人都可以參加這個遊戲。"],"anything":["I did not eat \u0000 today.","anything","我今天什麼都沒吃。"],"apartment":["They live in a small \u0000.","apartment","他們住在一間小公寓。"],"appear":["A cat \u0000 behind the door.","appeared","一隻貓出現在門後。"],"apple":["I eat an \u0000 every morning.","apple","我每天早上吃一顆蘋果。"],"April":["It often rains in \u0000.","April","四月常常下雨。"],"arm":["He hurt his \u0000 in the game.","arm","他在比賽中弄傷了手臂。"],"around":["We walked \u0000 the lake.","around","我們繞著湖走。"],"arrive":["They \u0000 at the station early.","arrived","他們很早就到車站了。"],"art":["\u0000 is my favorite class.","Art","美術是我最喜歡的課。"],"as":["","He is as tall as his father.","他和他爸爸一樣高。"],"ask":["She \u0000 me a question.","asked","她問了我一個問題。"],"at":["","We meet at the school gate.","我們在校門口見面。"],"aunt":["My \u0000 makes very good cakes.","aunt","我阿姨做的蛋糕很好吃。"],"autumn":["The leaves turn yellow in \u0000.","autumn","秋天樹葉會變黃。"],"away":["The station is two blocks \u0000.","away","車站在兩個街區外。"],"baby":["The \u0000 is sleeping now.","baby","寶寶正在睡覺。"],"back":["He came \u0000 home late.","back","他很晚才回到家。"],"bad":["The weather was \u0000 yesterday.","bad","昨天天氣很差。"],"badminton":["We play \u0000 after school.","badminton","我們放學後打羽毛球。"],"bag":["Her \u0000 is full of books.","bag","她的袋子裝滿了書。"],"bake":["My mother \u0000 bread on Sunday.","bakes","我媽媽星期天烤麵包。"],"bakery":["I bought a cake at the \u0000.","bakery","我在麵包店買了一個蛋糕。"],"balcony":["There are flowers on the \u0000.","balcony","陽台上有花。"],"ball":["The dog is running after the \u0000.","ball","狗正在追那顆球。"],"banana":["Monkeys love to eat \u0000.","bananas","猴子愛吃香蕉。"],"band":["He plays the guitar in a \u0000.","band","他在樂團裡彈吉他。"],"bank":["I put my money in the \u0000.","bank","我把錢存在銀行。"],"barbecue":["We had a \u0000 at the beach.","barbecue","我們在海邊烤肉。"],"baseball":["My brother is a \u0000 player.","baseball","我哥哥是棒球選手。"],"basket":["The \u0000 is full of eggs.","basket","籃子裡裝滿了蛋。"],"basketball":["They play \u0000 every Sunday.","basketball","他們每個星期天打籃球。"],"bat":["\u0000 sleep in the day.","Bats","蝙蝠白天睡覺。"],"bath":["I take a \u0000 before bed.","bath","我睡前洗澡。"],"bathroom":["The \u0000 is next to my room.","bathroom","浴室在我房間隔壁。"],"be":["","I want to be a doctor.","我想當醫生。"],"beach":["We walked on the \u0000 together.","beach","我們一起在海灘上散步。"],"bean":["He does not like green \u0000.","beans","他不喜歡四季豆。"],"bear":["A big \u0000 lives in the forest.","bear","一隻大熊住在森林裡。"],"beautiful":["What a \u0000 flower!","beautiful","好美的一朵花！"],"because":["","I stayed home because I was sick.","我因為生病待在家裡。"],"become":["She wants to \u0000 a nurse.","become","她想成為護士。"],"bed":["Please make your \u0000 now.","bed","請現在整理你的床。"],"bedroom":["My \u0000 is small but clean.","bedroom","我的臥室很小但很乾淨。"],"bee":["A \u0000 is flying over the flower.","bee","一隻蜜蜂在花上飛。"],"beef":["This \u0000 noodle soup is delicious.","beef","這碗牛肉麵很好吃。"],"before":["Wash your hands \u0000 dinner.","before","晚餐前先洗手。"],"begin":["The movie \u0000 at seven.","begins","電影七點開始。"],"behind":["The cat is hiding \u0000 the door.","behind","貓躲在門後面。"],"believe":["I \u0000 you are right.","believe","我相信你是對的。"],"bell":["The school \u0000 rang loudly.","bell","學校的鐘聲大聲響起。"],"belong":["This book \u0000 to me.","belongs","這本書是我的。"],"below":["The temperature is \u0000 zero.","below","氣溫在零度以下。"],"belt":["He is wearing a black \u0000.","belt","他繫著一條黑色皮帶。"],"bench":["They sat on the \u0000 in the park.","bench","他們坐在公園的長椅上。"],"beside":["She sat \u0000 her mother.","beside","她坐在媽媽旁邊。"],"between":["The bank is \u0000 two stores.","between","銀行在兩家店中間。"],"bike":["I ride my \u0000 to school.","bike","我騎腳踏車上學。"],"big":["This room is very \u0000.","big","這個房間很大。"],"bird":["A \u0000 is singing in the tree.","bird","一隻鳥在樹上唱歌。"],"birthday":["Today is my father's \u0000.","birthday","今天是我爸爸的生日。"],"bite":["The dog will not \u0000 you.","bite","這隻狗不會咬你。"],"black":["She has long \u0000 hair.","black","她有一頭黑色長髮。"],"blackboard":["The teacher wrote on the \u0000.","blackboard","老師在黑板上寫字。"],"blanket":["It is cold, so take a \u0000.","blanket","天氣很冷，帶一條毯子。"],"blind":["The \u0000 man walks with a dog.","blind","那位盲人和一隻狗同行。"],"block":["Walk two \u0000 and turn left.","blocks","走兩個街區後左轉。"],"blow":["The wind is \u0000 hard.","blowing","風吹得很大。"],"blue":["The sky is \u0000 today.","blue","今天天空是藍的。"],"boat":["They went across the river by \u0000.","boat","他們搭船過河。"],"body":["Exercise is good for your \u0000.","body","運動對身體有益。"],"boil":["Please \u0000 some water for tea.","boil","請煮些水來泡茶。"],"book":["This \u0000 is very interesting.","book","這本書很有趣。"],"bookstore":["I found the map in a \u0000.","bookstore","我在書店找到那張地圖。"],"bored":["The students look \u0000 today.","bored","學生們今天看起來很厭煩。"],"boring":["The movie was long and \u0000.","boring","那部電影又長又無聊。"],"born":["She was \u0000 in Taiwan.","born","她在台灣出生。"],"borrow":["May I \u0000 your pen?","borrow","我可以借你的筆嗎？"],"boss":["His \u0000 is very kind.","boss","他的老闆人很好。"],"both":["","Both of my sisters like music.","我兩個姊姊都喜歡音樂。"],"bottle":["There is no water in the \u0000.","bottle","瓶子裡沒有水。"],"bottom":["Her name is at the \u0000.","bottom","她的名字在最下面。"],"bow":["The singer \u0000 to everyone.","bowed","歌手向大家鞠躬。"],"bowl":["He ate a \u0000 of rice.","bowl","他吃了一碗飯。"],"box":["What is inside this \u0000?","box","這個盒子裡面是什麼？"],"boy":["The \u0000 is playing with a ball.","boy","那個男孩正在玩球。"],"bread":["I eat \u0000 and eggs for breakfast.","bread","我早餐吃麵包和蛋。"],"break":["Do not \u0000 the glass.","break","不要打破那個玻璃杯。"],"breakfast":["We have \u0000 at seven.","breakfast","我們七點吃早餐。"],"bridge":["There is an old \u0000 over the river.","bridge","河上有一座舊橋。"],"bright":["Her smile is \u0000 and warm.","bright","她的笑容明亮又溫暖。"],"bring":["Please \u0000 your book tomorrow.","bring","明天請把書帶來。"],"brother":["My \u0000 is taller than me.","brother","我哥哥比我高。"],"brown":["She has \u0000 eyes.","brown","她有一雙棕色的眼睛。"],"brush":["\u0000 your teeth before bed.","Brush","睡前刷牙。"],"bug":["A \u0000 is on the window.","bug","有一隻小蟲在窗戶上。"],"build":["They are \u0000 a new school.","building","他們正在蓋一所新學校。"],"bun":["I had a \u0000 for breakfast.","bun","我早餐吃了一個小圓麵包。"],"burn":["The paper \u0000 quickly.","burned","那張紙很快就燒起來了。"],"bus":["I take the \u0000 to school.","bus","我搭公車上學。"],"business":["His \u0000 is growing fast.","business","他的生意成長得很快。"],"businessman":["Her father is a \u0000.","businessman","她爸爸是商人。"],"busy":["My mother is \u0000 every day.","busy","我媽媽每天都很忙。"],"but":["","I like tea but not coffee.","我喜歡茶但不喜歡咖啡。"],"butter":["Put some \u0000 on the bread.","butter","在麵包上抹一些奶油。"],"butterfly":["A \u0000 is flying in the garden.","butterfly","一隻蝴蝶在花園裡飛。"],"buy":["She needs to \u0000 a new bag.","buy","她需要買一個新袋子。"],"by":["","He goes to work by train.","他搭火車去上班。"],"cage":["The bird flew out of the \u0000.","cage","鳥從籠子裡飛出來。"],"cake":["She made a birthday \u0000.","cake","她做了一個生日蛋糕。"],"call":["Please \u0000 me tonight.","call","今晚請打電話給我。"],"camera":["My new \u0000 takes good pictures.","camera","我的新相機拍照很好。"],"camp":["We \u0000 in the mountains every summer.","camp","我們每年夏天在山上露營。"],"can":["","I can swim very well.","我游泳游得很好。"],"candle":["There are ten \u0000 on the cake.","candles","蛋糕上有十根蠟燭。"],"candy":["The children ate too much \u0000.","candy","孩子們吃了太多糖果。"],"cap":["His new blue \u0000 looks nice.","cap","他的新藍帽子很好看。"],"car":["My father washes his \u0000 every Sunday.","car","我爸爸每個星期天洗車。"],"care":["She takes good \u0000 of her dog.","care","她把她的狗照顧得很好。"],"careful":["Be \u0000 when you cross the road.","careful","過馬路時要小心。"],"carry":["He helped me \u0000 the heavy box.","carry","他幫我搬那個重箱子。"],"case":["In that \u0000, we should leave early.","case","那樣的話，我們應該早點離開。"],"castle":["The old \u0000 is on a hill.","castle","那座古堡在山丘上。"],"cat":["My \u0000 sleeps on the sofa.","cat","我的貓睡在沙發上。"],"catch":["He ran fast to \u0000 the bus.","catch","他跑得很快去趕公車。"],"celebrate":["We \u0000 my mother's birthday today.","celebrate","我們今天慶祝我媽媽的生日。"],"cent":["This candy costs fifty \u0000.","cents","這顆糖果五十分錢。"],"center":["There is a table in the \u0000.","center","中間有一張桌子。"],"centimeter":["The line is ten \u0000 long.","centimeters","這條線長十公分。"],"chair":["Please put the \u0000 by the window.","chair","請把椅子放在窗邊。"],"chalk":["The teacher needs a piece of \u0000.","chalk","老師需要一支粉筆。"],"chance":["This is your last \u0000.","chance","這是你最後的機會。"],"change":["Can you \u0000 this ten dollar bill?","change","你可以換開這張十元鈔票嗎？"],"cheap":["These shoes are \u0000 but good.","cheap","這雙鞋便宜又好。"],"cheat":["Never \u0000 on a test.","cheat","考試絕對不要作弊。"],"check":["Please \u0000 your answers again.","check","請再檢查一次你的答案。"],"cheer":["The students \u0000 for their team.","cheered","學生們為他們的隊伍歡呼。"],"cheese":["I like \u0000 on my bread.","cheese","我喜歡在麵包上放乳酪。"],"chess":["My grandfather taught me \u0000.","chess","我爺爺教我下西洋棋。"],"chicken":["We had \u0000 and rice for dinner.","chicken","我們晚餐吃了雞肉和飯。"],"child":["Every \u0000 needs love and care.","child","每個小孩都需要愛與關心。"],"China":["\u0000 is a very large country.","China","中國是一個很大的國家。"],"Chinese":["I study \u0000 at school.","Chinese","我在學校學中文。"],"choose":["You may \u0000 one of these books.","choose","你可以從這些書中選一本。"],"Christmas":["We sing songs on \u0000.","Christmas","我們在聖誕節唱歌。"],"church":["The old \u0000 is near the park.","church","那座舊教堂在公園附近。"],"circle":["Draw a \u0000 on the blackboard.","circle","在黑板上畫一個圓圈。"],"city":["This \u0000 is famous for its food.","city","這座城市以美食聞名。"],"clap":["Everyone \u0000 after the show.","clapped","表演結束後大家都鼓掌。"],"class":["Our \u0000 has thirty students.","class","我們班有三十個學生。"],"classmate":["My \u0000 helped me with math.","classmate","我同學幫我看數學。"],"classroom":["The \u0000 is very clean today.","classroom","今天教室很乾淨。"],"clean":["Please \u0000 your room now.","clean","請現在打掃你的房間。"],"clear":["The water in the lake is \u0000.","clear","湖水很清澈。"],"clerk":["The \u0000 is helping a customer.","clerk","店員正在幫一位顧客。"],"climb":["They \u0000 the mountain last summer.","climbed","他們去年夏天爬了那座山。"],"clock":["The \u0000 on the wall is slow.","clock","牆上的時鐘慢了。"],"close":["Please \u0000 the window before you leave.","close","離開前請關上窗戶。"],"cloudy":["It is \u0000 and cool today.","cloudy","今天多雲又涼爽。"],"club":["She joined the music \u0000.","club","她加入了音樂社。"],"coat":["Put on your \u0000 before going out.","coat","出門前穿上大衣。"],"coffee":["My father drinks \u0000 every morning.","coffee","我爸爸每天早上喝咖啡。"],"Coke":["May I have a cold \u0000?","Coke","可以給我一杯冰可樂嗎？"],"cold":["The water is too \u0000 for me.","cold","這水對我來說太冷了。"],"collect":["My brother \u0000 old coins.","collects","我哥哥收集舊硬幣。"],"color":["What \u0000 is your new bike?","color","你的新腳踏車是什麼顏色？"],"come":["Please \u0000 to my house tonight.","come","今晚請來我家。"],"comfortable":["This chair is very \u0000.","comfortable","這張椅子很舒服。"],"comic":["He reads \u0000 books after school.","comic","他放學後看漫畫書。"],"common":["Rain is \u0000 in this season.","common","這個季節常常下雨。"],"computer":["I use a \u0000 to do homework.","computer","我用電腦寫功課。"],"convenient":["This store is \u0000 for us.","convenient","這家店對我們很方便。"],"cook":["My mother \u0000 dinner every evening.","cooks","我媽媽每天晚上煮晚餐。"],"cookie":["She made \u0000 for the party.","cookies","她為派對做了餅乾。"],"cool":["The wind is \u0000 this morning.","cool","今天早上的風很涼。"],"copy":["Please \u0000 these words in your notebook.","copy","請把這些字抄在筆記本上。"],"corner":["The shop is at the \u0000.","corner","那家店在轉角。"],"correct":["Your answer is \u0000.","correct","你的答案是正確的。"],"cost":["This bag \u0000 me two hundred dollars.","cost","這個包包花了我兩百元。"],"couch":["The cat is sleeping on the \u0000.","couch","貓在沙發上睡覺。"],"count":["The little boy can \u0000 to twenty.","count","那個小男孩可以數到二十。"],"country":["My grandfather lives in the \u0000.","country","我爺爺住在鄉下。"],"cousin":["My \u0000 is coming to visit us.","cousin","我表哥要來看我們。"],"cover":["Please \u0000 the food before you go.","cover","走之前請把食物蓋起來。"],"cow":["The farmer has ten \u0000.","cows","那個農夫有十頭母牛。"],"cowboy":["The \u0000 rides a brown horse.","cowboy","那個牛仔騎著一匹棕色的馬。"],"crazy":["That was a \u0000 idea.","crazy","那是個瘋狂的想法。"],"cross":["Look both ways before you \u0000.","cross","過馬路前先看兩邊。"],"cry":["The baby is \u0000 again.","crying","寶寶又在哭了。"],"cup":["She drank a \u0000 of hot tea.","cup","她喝了一杯熱茶。"],"cut":["He \u0000 the cake into eight pieces.","cut","他把蛋糕切成八塊。"],"cute":["Your little sister is very \u0000.","cute","你妹妹很可愛。"],"dance":["They \u0000 together at the party.","danced","他們在派對上一起跳舞。"],"dark":["The sky gets \u0000 after six.","dark","六點以後天就黑了。"],"date":["What is the \u0000 today?","date","今天是幾號？"],"daughter":["His \u0000 is a good singer.","daughter","他女兒是個好歌手。"],"day":["It was a long and busy \u0000.","day","那是漫長又忙碌的一天。"],"dear":["\u0000 Mother, I miss you very much.","Dear","親愛的媽媽，我很想你。"],"December":["It is very cold in \u0000.","December","十二月很冷。"],"decide":["We \u0000 to go by train.","decided","我們決定搭火車去。"],"delicious":["This soup is really \u0000.","delicious","這碗湯真好喝。"],"dentist":["I go to the \u0000 twice a year.","dentist","我一年看兩次牙醫。"],"department store":["We bought shoes at the \u0000.","department store","我們在百貨公司買了鞋子。"],"desk":["My books are on the \u0000.","desk","我的書在書桌上。"],"dictionary":["Look up the word in the \u0000.","dictionary","在字典裡查這個字。"],"die":["The old tree \u0000 last winter.","died","那棵老樹去年冬天枯死了。"],"different":["We have \u0000 ideas about this.","different","我們對這件事有不同的想法。"],"difficult":["This question is too \u0000 for me.","difficult","這題對我來說太難了。"],"dig":["The dog is \u0000 in the garden.","digging","狗正在花園裡挖洞。"],"dining room":["We eat in the \u0000.","dining room","我們在飯廳吃飯。"],"dinner":["\u0000 is ready, please come.","Dinner","晚餐好了，請過來。"],"dirty":["Your hands are very \u0000.","dirty","你的手很髒。"],"dish":["She washed all the \u0000.","dishes","她把所有的盤子都洗了。"],"do":["","What do you do after school?","你放學後都做什麼？"],"doctor":["The \u0000 said I need more rest.","doctor","醫生說我需要多休息。"],"dodgeball":["We play \u0000 after lunch.","dodgeball","我們午餐後玩躲避球。"],"dog":["His \u0000 runs very fast.","dog","他的狗跑得很快。"],"doll":["She got a new \u0000 for her birthday.","doll","她生日收到一個新洋娃娃。"],"dollar":["This book costs three hundred \u0000.","dollars","這本書要三百元。"],"door":["Someone is knocking on the \u0000.","door","有人在敲門。"],"dot":["Put a \u0000 at the end.","dot","在最後加一個點。"],"down":["He walked \u0000 the hill slowly.","down","他慢慢走下山。"],"dozen":["She bought a \u0000 eggs.","dozen","她買了一打蛋。"],"dragon":["The \u0000 is a famous Chinese animal.","dragon","龍是有名的中國動物。"],"draw":["She likes to \u0000 pictures of cats.","draw","她喜歡畫貓的圖畫。"],"drawer":["Your socks are in the \u0000.","drawer","你的襪子在抽屜裡。"],"dream":["I had a strange \u0000 last night.","dream","我昨晚做了一個奇怪的夢。"],"dress":["She wore a white \u0000 to the party.","dress","她穿了一件白洋裝去派對。"],"drink":["Please \u0000 some water now.","drink","請現在喝點水。"],"drive":["My uncle \u0000 a big truck.","drives","我叔叔開一輛大卡車。"],"driver":["The bus \u0000 is very kind.","driver","那位公車司機人很好。"],"drop":["Do not \u0000 the glass.","drop","不要把玻璃杯掉下去。"],"drum":["He plays the \u0000 in a band.","drums","他在樂團裡打鼓。"],"dry":["The clothes are \u0000 now.","dry","衣服現在乾了。"],"duck":["\u0000 are swimming in the lake.","Ducks","鴨子在湖裡游泳。"],"dumpling":["We make \u0000 on New Year's Day.","dumplings","我們在元旦包餃子。"],"during":["He fell asleep \u0000 the movie.","during","他在看電影時睡著了。"],"each":["","Each student has a new book.","每個學生都有一本新書。"],"ear":["The rabbit has long \u0000.","ears","兔子有長長的耳朵。"],"early":["She gets up \u0000 every morning.","early","她每天早上很早起床。"],"earth":["The \u0000 goes around the sun.","earth","地球繞著太陽轉。"],"Easter":["Children look for eggs on \u0000.","Easter","孩子們在復活節找蛋。"],"easy":["This game is \u0000 to learn.","easy","這個遊戲很容易學。"],"eat":["We \u0000 lunch at noon.","eat","我們中午吃午餐。"],"egg":["I want two \u0000 for breakfast.","eggs","我早餐想吃兩顆蛋。"],"eight":["","There are eight people in my family.","我家有八個人。"],"eighteen":["That girl is \u0000 years old.","eighteen","那個女孩十八歲。"],"eighth":["He is the \u0000 student in line.","eighth","他是隊伍中第八個學生。"],"eighty":["My grandmother is \u0000 years old.","eighty","我奶奶八十歲。"],"either":["","I do not like coffee either.","我也不喜歡咖啡。"],"elementary school":["My little brother is in \u0000.","elementary school","我弟弟在念小學。"],"elephant":["The \u0000 is the largest land animal.","elephant","大象是最大的陸地動物。"],"eleven":["The store closes at \u0000.","eleven","那家店十一點關門。"],"eleventh":["Today is the \u0000 of June.","eleventh","今天是六月十一日。"],"else":["Is there anything \u0000 you need?","else","你還需要別的東西嗎？"],"e-mail":["I sent him an \u0000 yesterday.","e-mail","我昨天寄了一封電子郵件給他。"],"end":["The story has a happy \u0000.","end","這個故事有快樂的結局。"],"engineer":["Her father is a computer \u0000.","engineer","她爸爸是電腦工程師。"],"English":["\u0000 is not easy, but it is fun.","English","英文不容易，但很有趣。"],"enjoy":["We \u0000 the trip very much.","enjoyed","我們非常享受那趟旅行。"],"enough":["We do not have \u0000 time.","enough","我們沒有足夠的時間。"],"enter":["Please knock before you \u0000.","enter","進來前請先敲門。"],"envelope":["She put the letter in an \u0000.","envelope","她把信放進信封裡。"],"eraser":["May I borrow your \u0000?","eraser","我可以借你的橡皮擦嗎？"],"eve":["We had a big dinner on New Year's \u0000.","Eve","我們在除夕吃了一頓大餐。"],"even":["He works hard, \u0000 on Sunday.","even","他很努力，甚至星期天也工作。"],"evening":["We watch television in the \u0000.","evening","我們傍晚看電視。"],"ever":["","Have you ever been to America?","你曾經去過美國嗎？"],"every":["","She reads a book every night.","她每天晚上讀一本書。"],"everyone":["\u0000 in my class likes music.","Everyone","我班上每個人都喜歡音樂。"],"everything":["\u0000 in this shop is cheap.","Everything","這家店的每樣東西都便宜。"],"example":["Please give me an \u0000.","example","請給我一個例子。"],"excellent":["Her English is \u0000.","excellent","她的英文極好。"],"except":["Everyone came \u0000 my brother.","except","除了我哥哥以外大家都來了。"],"excited":["The children were \u0000 about the trip.","excited","孩子們對這趟旅行很興奮。"],"exciting":["The game was very \u0000.","exciting","那場比賽很刺激。"],"excuse":["\u0000 me, where is the station?","Excuse","不好意思，請問車站在哪裡？"],"exercise":["\u0000 is good for your health.","Exercise","運動對健康有益。"],"expensive":["This watch is too \u0000.","expensive","這支手錶太貴了。"],"experience":["Working here was a good \u0000.","experience","在這裡工作是很好的經驗。"],"eye":["She closed her \u0000 and rested.","eyes","她閉上眼睛休息。"],"face":["Wash your \u0000 before breakfast.","face","早餐前先洗臉。"],"fact":["The \u0000 is that he was wrong.","fact","事實是他錯了。"],"factory":["My father works in a \u0000.","factory","我爸爸在工廠工作。"],"fail":["He \u0000 the test last time.","failed","他上次考試不及格。"],"fall":["Be careful, do not \u0000 down.","fall","小心，不要跌倒。"],"family":["My \u0000 goes to the beach every summer.","family","我家每年夏天去海邊。"],"famous":["This city is \u0000 for its night market.","famous","這座城市以夜市聞名。"],"fan":["He became a \u0000 of that singer.","fan","他成了那位歌手的粉絲。"],"far":["The school is not \u0000 from here.","far","學校離這裡不遠。"],"farm":["There are many animals on the \u0000.","farm","農場上有很多動物。"],"farmer":["The \u0000 works from morning to night.","farmer","那個農夫從早工作到晚。"],"fast":["He can run very \u0000.","fast","他可以跑得很快。"],"fat":["The cat is getting \u0000.","fat","那隻貓變胖了。"],"father":["My \u0000 is a doctor.","father","我爸爸是醫生。"],"favorite":["Blue is my \u0000 color.","favorite","藍色是我最喜歡的顏色。"],"February":["We have a long holiday in \u0000.","February","我們二月有長假。"],"feed":["Please \u0000 the dog before you leave.","feed","走之前請餵狗。"],"feel":["I \u0000 tired after the game.","feel","比賽後我覺得很累。"],"festival":["The Moon \u0000 is in autumn.","Festival","中秋節在秋天。"],"fever":["He has a high \u0000 today.","fever","他今天發高燒。"],"few":["","Few people know this story.","很少人知道這個故事。"],"fifteen":["There are \u0000 boys in the club.","fifteen","社團裡有十五個男生。"],"fifteenth":["Her birthday is the \u0000 of March.","fifteenth","她的生日是三月十五日。"],"fifth":["That was his \u0000 cup of tea.","fifth","那是他的第五杯茶。"],"fifty":["The book costs \u0000 dollars.","fifty","這本書五十元。"],"fight":["The two boys had a \u0000.","fight","那兩個男孩打了一架。"],"fill":["Please \u0000 the bottle with water.","fill","請把瓶子裝滿水。"],"finally":["We \u0000 found the right way.","finally","我們最後找到了正確的路。"],"find":["I cannot \u0000 my keys.","find","我找不到我的鑰匙。"],"fine":["The weather is \u0000 today.","fine","今天天氣很好。"],"finger":["He hurt his \u0000 this morning.","finger","他今天早上弄傷了手指。"],"finish":["She \u0000 her homework before dinner.","finished","她在晚餐前寫完功課。"],"fire":["The \u0000 burned all night.","fire","那場火燒了一整夜。"],"first":["He was the \u0000 to arrive.","first","他是第一個到的。"],"fish":["We caught three \u0000 in the river.","fish","我們在河裡抓到三條魚。"],"fisherman":["The \u0000 goes to sea early.","fisherman","那位漁夫很早出海。"],"five":["","I have five dollars in my pocket.","我口袋裡有五塊錢。"],"fix":["Can you \u0000 my bike?","fix","你可以修我的腳踏車嗎？"],"floor":["Do not sit on the \u0000.","floor","不要坐在地板上。"],"flower":["These \u0000 smell very nice.","flowers","這些花很香。"],"flute":["She plays the \u0000 in the band.","flute","她在樂團裡吹笛子。"],"fly":["Birds \u0000 to the south in winter.","fly","鳥兒冬天飛往南方。"],"follow":["Please \u0000 me to the office.","follow","請跟我到辦公室。"],"food":["The \u0000 here is cheap and good.","food","這裡的食物又便宜又好吃。"],"foot":["My left \u0000 hurts a lot.","foot","我的左腳很痛。"],"for":["","This gift is for you.","這個禮物是給你的。"],"foreign":["She is learning a \u0000 language.","foreign","她正在學一種外國語言。"],"foreigner":["A \u0000 asked me for directions.","foreigner","一位外國人向我問路。"],"forget":["Do not \u0000 your umbrella.","forget","不要忘了你的雨傘。"],"fork":["We eat noodles with a \u0000.","fork","我們用叉子吃麵。"],"forty":["There are \u0000 students in the class.","forty","班上有四十個學生。"],"four":["","She has four brothers.","她有四個兄弟。"],"fourteen":["My cousin is \u0000 years old.","fourteen","我表弟十四歲。"],"fourteenth":["The party is on the \u0000.","fourteenth","派對在十四號。"],"fourth":["This is his \u0000 year here.","fourth","這是他在這裡的第四年。"],"fox":["A \u0000 ran across the road.","fox","一隻狐狸跑過馬路。"],"free":["Are you \u0000 this weekend?","free","你這個週末有空嗎？"],"French fries":["He ordered a hamburger and \u0000.","French fries","他點了漢堡和炸薯條。"],"fresh":["These vegetables are very \u0000.","fresh","這些蔬菜很新鮮。"],"Friday":["We have a test every \u0000.","Friday","我們每個星期五考試。"],"friend":["She is my best \u0000.","friend","她是我最好的朋友。"],"friendly":["The people here are very \u0000.","friendly","這裡的人很友善。"],"frisbee":["They played \u0000 in the park.","frisbee","他們在公園玩飛盤。"],"frog":["A \u0000 jumped into the water.","frog","一隻青蛙跳進水裡。"],"from":["","This letter is from my aunt.","這封信是我阿姨寄來的。"],"front":["A tall tree stands in \u0000 of the house.","front","房子前面立著一棵高樹。"],"fruit":["Eat more \u0000 and vegetables.","fruit","多吃水果和蔬菜。"],"fry":["My mother is \u0000 an egg.","frying","我媽媽正在煎蛋。"],"full":["The room was \u0000 of people.","full","房間裡擠滿了人。"],"fun":["The trip was really \u0000.","fun","那趟旅行真好玩。"],"funny":["His story was really \u0000.","funny","他的故事真好笑。"],"future":["No one knows the \u0000.","future","沒有人知道未來。"],"game":["Our team won the \u0000.","game","我們隊贏了那場比賽。"],"garbage":["Please take out the \u0000.","garbage","請把垃圾拿出去。"],"garden":["My grandmother works in the \u0000.","garden","我奶奶在花園裡工作。"],"gas":["The \u0000 in the kitchen is off.","gas","廚房的瓦斯關了。"],"gate":["We waited at the school \u0000.","gate","我們在校門口等。"],"get":["I \u0000 up at six every day.","get","我每天六點起床。"],"ghost":["She is afraid of \u0000.","ghosts","她怕鬼。"],"giant":["A \u0000 tree stands near the temple.","giant","一棵巨大的樹立在寺廟旁。"],"gift":["This is a \u0000 from my teacher.","gift","這是我老師送的禮物。"],"girl":["The \u0000 in red is my sister.","girl","穿紅衣服的女孩是我妹妹。"],"give":["Please \u0000 this book to him.","give","請把這本書給他。"],"glad":["I am \u0000 to see you again.","glad","我很高興再見到你。"],"glass":["He drank a \u0000 of milk.","glass","他喝了一杯牛奶。"],"glasses":["My father wears \u0000 to read.","glasses","我爸爸看書時戴眼鏡。"],"glove":["She lost one of her \u0000.","gloves","她弄丟了一隻手套。"],"glue":["Use \u0000 to fix the paper.","glue","用膠水把紙黏好。"],"go":["Let us \u0000 to the park.","go","我們去公園吧。"],"goat":["The \u0000 is eating grass.","goat","那隻山羊在吃草。"],"good":["This is a very \u0000 idea.","good","這是個很好的主意。"],"goodbye":["She said \u0000 and left.","goodbye","她說了再見就離開了。"],"goose":["A \u0000 is swimming in the pond.","goose","一隻鵝在池塘裡游泳。"],"grade":["He got a good \u0000 in math.","grade","他數學拿到好成績。"],"gram":["This apple is two hundred \u0000.","grams","這顆蘋果兩百公克。"],"grandfather":["My \u0000 tells great stories.","grandfather","我爺爺很會說故事。"],"grandmother":["My \u0000 cooks very well.","grandmother","我奶奶很會做菜。"],"grape":["These \u0000 are sweet.","grapes","這些葡萄很甜。"],"grass":["Two boys sat down on the \u0000.","grass","兩個男孩坐在草地上。"],"gray":["The man in the \u0000 coat is my uncle.","gray","穿灰色大衣的男人是我叔叔。"],"great":["That was a \u0000 show.","great","那是一場很棒的表演。"],"ground":["The \u0000 is wet after the rain.","ground","雨後地面是濕的。"],"group":["We work in small \u0000.","groups","我們分小組做事。"],"grow":["My father \u0000 vegetables at home.","grows","我爸爸在家種菜。"],"guava":["\u0000 is my favorite fruit.","Guava","番石榴是我最喜歡的水果。"],"guess":["Can you \u0000 my age?","guess","你猜得到我幾歲嗎？"],"guitar":["He learned to play the \u0000 last year.","guitar","他去年學會彈吉他。"],"guy":["That \u0000 is my neighbor.","guy","那個傢伙是我的鄰居。"],"gym":["We play basketball in the \u0000.","gym","我們在體育館打籃球。"],"habit":["Reading is a good \u0000.","habit","閱讀是個好習慣。"],"hair":["Her \u0000 is long and black.","hair","她的頭髮又長又黑。"],"half":["I ate \u0000 of the cake.","half","我吃了一半的蛋糕。"],"Halloween":["Children wear masks on \u0000.","Halloween","孩子們在萬聖節戴面具。"],"ham":["I want a \u0000 sandwich.","ham","我想要一個火腿三明治。"],"hamburger":["This \u0000 is too big for me.","hamburger","這個漢堡對我來說太大了。"],"hand":["Please raise your \u0000 to answer.","hand","回答前請舉手。"],"handsome":["Her brother is tall and \u0000.","handsome","她哥哥又高又帥。"],"hang":["\u0000 your coat behind the door.","Hang","把你的大衣掛在門後。"],"happen":["What \u0000 to your arm?","happened","你的手臂怎麼了？"],"happy":["She looks \u0000 today.","happy","她今天看起來很開心。"],"hard":["This question is very \u0000.","hard","這個問題很難。"],"hard-working":["He is a \u0000 student.","hard-working","他是個用功的學生。"],"hat":["She bought a new \u0000.","hat","她買了一頂新帽子。"],"hate":["I \u0000 rainy days.","hate","我討厭下雨天。"],"have":["","We have two dogs at home.","我們家有兩隻狗。"],"he":["","He is my new classmate.","他是我的新同學。"],"head":["My \u0000 hurts a little.","head","我的頭有點痛。"],"health":["\u0000 is more important than money.","Health","健康比金錢重要。"],"healthy":["She eats \u0000 food every day.","healthy","她每天吃健康的食物。"],"hear":["I can \u0000 the birds singing.","hear","我可以聽見鳥在唱歌。"],"heart":["His \u0000 is beating fast.","heart","他的心跳得很快。"],"heat":["Please \u0000 the soup for me.","heat","請幫我把湯加熱。"],"heavy":["This box is too \u0000 to carry.","heavy","這個箱子太重了，搬不動。"],"hello":["","She said hello to everyone.","她跟大家打招呼。"],"help":["Can you \u0000 me with this box?","help","你可以幫我搬這個箱子嗎？"],"helpful":["Your advice was very \u0000.","helpful","你的建議很有幫助。"],"hen":["The \u0000 laid three eggs today.","hen","那隻母雞今天下了三顆蛋。"],"here":["","Please put your bag here.","請把你的袋子放在這裡。"],"hey":["","Hey, wait for me!","嘿，等等我！"],"hi":["","She said hi to her teacher.","她跟老師打招呼。"],"hide":["The boy tried to \u0000 behind a tree.","hide","那個男孩想躲在樹後面。"],"high":["The wall is too \u0000 to climb.","high","那面牆太高了爬不上去。"],"hike":["We \u0000 in the mountains every spring.","hike","我們每年春天到山上健行。"],"hill":["A small house stands on the \u0000.","hill","小山上有一間小房子。"],"hippo":["The \u0000 is resting in the water.","hippo","河馬正在水裡休息。"],"history":["\u0000 is my favorite subject.","History","歷史是我最喜歡的科目。"],"hit":["The ball \u0000 the window.","hit","球打到了窗戶。"],"hobby":["My \u0000 is playing the guitar.","hobby","我的嗜好是彈吉他。"],"hold":["Please \u0000 my bag for a minute.","hold","請幫我拿一下袋子。"],"holiday":["We visit our grandmother on \u0000.","holidays","我們假日去看奶奶。"],"home":["She stayed \u0000 and watched television.","home","她待在家裡看電視。"],"homework":["I finish my \u0000 before dinner.","homework","我在晚餐前寫完功課。"],"honest":["An \u0000 answer is always better.","honest","誠實的回答總是比較好。"],"honey":["She puts \u0000 in her tea.","honey","她在茶裡加蜂蜜。"],"hop":["The little rabbit \u0000 away.","hopped","小兔子跳走了。"],"hope":["I \u0000 you feel better soon.","hope","我希望你早日好起來。"],"horse":["The \u0000 ran across the farm.","horse","那匹馬跑過農場。"],"hospital":["My uncle works at the \u0000.","hospital","我叔叔在醫院工作。"],"hot":["The soup is still very \u0000.","hot","湯還很燙。"],"hot dog":["He ate a \u0000 for lunch.","hot dog","他午餐吃了一個熱狗。"],"hour":["We waited for two \u0000.","hours","我們等了兩個小時。"],"house":["Their \u0000 is near the river.","house","他們的房子在河邊。"],"housewife":["She is a busy \u0000.","housewife","她是個忙碌的家庭主婦。"],"how":["","How do you go to school?","你怎麼去上學？"],"however":["It was raining; \u0000, we went out.","however","那時在下雨，然而我們還是出門了。"],"hundred":["This shirt costs five \u0000 dollars.","hundred","這件襯衫五百元。"],"hungry":["I am \u0000 after the long walk.","hungry","走了很久之後我肚子餓了。"],"hunt":["The cat likes to \u0000 small birds.","hunt","那隻貓喜歡獵捕小鳥。"],"hurry":["\u0000 up, or we will be late.","Hurry","快一點，不然我們會遲到。"],"hurt":["My leg \u0000 after the long walk.","hurts","走了很久之後我的腿很痛。"],"husband":["Her \u0000 is a police officer.","husband","她先生是警察。"],"I":["","I am ready to go now.","我現在準備好了。"],"ice":["Please put some \u0000 in my drink.","ice","請在我的飲料裡加些冰塊。"],"ice cream":["The children love chocolate \u0000.","ice cream","孩子們喜歡巧克力冰淇淋。"],"idea":["That is a very good \u0000.","idea","那是個很好的主意。"],"if":["","If it rains, we will stay home.","如果下雨，我們就待在家。"],"important":["Sleep is \u0000 for students.","important","睡眠對學生很重要。"],"in":["","The keys are in my bag.","鑰匙在我的袋子裡。"],"insect":["Some \u0000 are useful to farmers.","insects","有些昆蟲對農夫有用。"],"inside":["It is warm \u0000 the house.","inside","房子裡面很溫暖。"],"interest":["Music is his greatest \u0000.","interest","音樂是他最大的興趣。"],"interested":["She is \u0000 in old maps.","interested","她對舊地圖很有興趣。"],"interesting":["This story is really \u0000.","interesting","這個故事真有趣。"],"Internet":["I found the answer on the \u0000.","Internet","我在網路上找到答案。"],"into":["The cat jumped \u0000 the box.","into","貓跳進盒子裡。"],"invite":["I want to \u0000 you to my party.","invite","我想邀請你來我的派對。"],"island":["They live on a small \u0000.","island","他們住在一座小島上。"],"it":["","It is getting dark outside.","外面天色變暗了。"],"jacket":["Wear your \u0000, it is cold.","jacket","穿上外套，天氣很冷。"],"January":["The new year begins in \u0000.","January","新的一年從一月開始。"],"jeans":["He is wearing blue \u0000 today.","jeans","他今天穿藍色牛仔褲。"],"job":["My sister just found a new \u0000.","job","我姊姊剛找到新工作。"],"jog":["They \u0000 in the park every morning.","jog","他們每天早上在公園慢跑。"],"join":["Would you like to \u0000 our club?","join","你想加入我們的社團嗎？"],"joy":["The good news brought us \u0000.","joy","那個好消息帶給我們歡樂。"],"juice":["I drink orange \u0000 for breakfast.","juice","我早餐喝柳橙汁。"],"jump":["The dog can \u0000 over the box.","jump","那隻狗可以跳過箱子。"],"June":["School ends in \u0000.","June","學校六月結束。"],"junior high school":["My brother goes to \u0000.","junior high school","我弟弟念國中。"],"just":["","I just finished my homework.","我剛寫完功課。"],"kangaroo":["A \u0000 can jump very far.","kangaroo","袋鼠可以跳得很遠。"],"keep":["Please \u0000 the door closed.","keep","請把門保持關著。"],"key":["I lost the \u0000 to my house.","key","我把家裡的鑰匙弄丟了。"],"kick":["He \u0000 the ball into the goal.","kicked","他把球踢進球門。"],"kid":["Those \u0000 are playing in the yard.","kids","那些孩子在院子裡玩。"],"kill":["Hot water can \u0000 germs.","kill","熱水可以殺死細菌。"],"kilogram":["This bag of rice is five \u0000.","kilograms","這袋米重五公斤。"],"kind":["She is \u0000 to every student.","kind","她對每個學生都很親切。"],"king":["The \u0000 lived in a big castle.","king","國王住在一座大城堡裡。"],"kiss":["The mother gave her baby a \u0000.","kiss","那位媽媽親了她的寶寶一下。"],"kitchen":["My mother is cooking in the \u0000.","kitchen","我媽媽正在廚房做菜。"],"kite":["They are flying a \u0000 on the beach.","kite","他們在海灘上放風箏。"],"knee":["He fell and hurt his \u0000.","knee","他跌倒弄傷了膝蓋。"],"knife":["Be careful with that sharp \u0000.","knife","小心那把利刀。"],"knock":["Someone is \u0000 at the door.","knocking","有人在敲門。"],"know":["I \u0000 the answer to this question.","know","我知道這題的答案。"],"knowledge":["Books give us \u0000.","knowledge","書本帶給我們知識。"],"koala":["The \u0000 sleeps most of the day.","koala","無尾熊一天大部分時間在睡覺。"],"lake":["We went fishing at the \u0000.","lake","我們去湖邊釣魚。"],"lamp":["Please turn on the \u0000.","lamp","請把燈打開。"],"land":["The airplane \u0000 safely.","landed","飛機安全降落了。"],"language":["English is a useful \u0000.","language","英文是很有用的語言。"],"lantern":["Children carry \u0000 at the festival.","lanterns","孩子們在節慶時提燈籠。"],"large":["They live in a \u0000 house.","large","他們住在一棟大房子裡。"],"last":["This is the \u0000 day of school.","last","這是學期的最後一天。"],"late":["Do not be \u0000 for class.","late","上課不要遲到。"],"later":["","I will call you later.","我等一下打給你。"],"laugh":["Everyone \u0000 at his funny story.","laughed","大家都被他的趣事逗笑了。"],"lawyer":["Her mother is a \u0000.","lawyer","她媽媽是律師。"],"lazy":["Do not be \u0000 about your homework.","lazy","功課不要偷懶。"],"lead":["This road \u0000 to the beach.","leads","這條路通往海灘。"],"leader":["He is the \u0000 of our group.","leader","他是我們這組的組長。"],"learn":["We \u0000 something new every day.","learn","我們每天學新東西。"],"least":["She spends at \u0000 an hour reading.","least","她至少花一小時閱讀。"],"leave":["The train will \u0000 at eight.","leave","火車八點開走。"],"left":["Turn \u0000 at the next corner.","left","在下一個轉角左轉。"],"leg":["The table has four \u0000.","legs","這張桌子有四隻腳。"],"lemon":["Put a little \u0000 in the water.","lemon","在水裡加一點檸檬。"],"lend":["Can you \u0000 me your pen?","lend","你可以借我你的筆嗎？"],"less":["","Try to eat less sugar.","盡量少吃糖。"],"lesson":["Today's \u0000 was about animals.","lesson","今天的課是關於動物。"],"let":["\u0000 me help you with that.","Let","讓我幫你。"],"letter":["I wrote a \u0000 to my friend.","letter","我寫了一封信給朋友。"],"lettuce":["Put some \u0000 in the sandwich.","lettuce","在三明治裡放一些萵苣。"],"library":["She studies in the \u0000 after school.","library","她放學後在圖書館念書。"],"lid":["Please put the \u0000 on the box.","lid","請把蓋子蓋在盒子上。"],"lie":["He never \u0000 to his parents.","lies","他從不對父母說謊。"],"life":["\u0000 in the country is quiet.","Life","鄉下的生活很安靜。"],"light":["The \u0000 in the room is too bright.","light","房間的燈太亮了。"],"like":["I \u0000 to play basketball.","like","我喜歡打籃球。"],"line":["Please stand in \u0000 and wait.","line","請排隊等候。"],"lion":["The \u0000 is sleeping under a tree.","lion","獅子在樹下睡覺。"],"lip":["Her \u0000 are dry in winter.","lips","她的嘴唇冬天很乾。"],"list":["Write your name on this \u0000.","list","把你的名字寫在這張名單上。"],"live":["They \u0000 near the train station.","live","他們住在火車站附近。"],"living room":["We watch television in the \u0000.","living room","我們在客廳看電視。"],"lonely":["He felt \u0000 on his first day.","lonely","他第一天覺得很寂寞。"],"long":["The river is very \u0000.","long","這條河很長。"],"look":["\u0000 at that beautiful bird.","Look","看那隻美麗的鳥。"],"lose":["Do not \u0000 your ticket.","lose","不要弄丟你的票。"],"loud":["The music is too \u0000.","loud","音樂太大聲了。"],"love":["I \u0000 my family very much.","love","我非常愛我的家人。"],"low":["The chair is too \u0000 for me.","low","這張椅子對我來說太低了。"],"lucky":["You are \u0000 to have such friends.","lucky","你很幸運有這樣的朋友。"],"lunch":["We eat \u0000 at twelve.","lunch","我們十二點吃午餐。"],"machine":["This \u0000 makes coffee.","machine","這台機器可以煮咖啡。"],"mad":["The \u0000 dog ran through the street.","mad","那隻瘋狗跑過街道。"],"magic":["The children enjoyed the \u0000 show.","magic","孩子們很喜歡那場魔術表演。"],"mail":["The \u0000 comes every morning.","mail","信件每天早上送來。"],"mailman":["The \u0000 brought a package.","mailman","郵差送來一個包裹。"],"make":["She wants to \u0000 a birthday cake.","make","她想做一個生日蛋糕。"],"man":["That \u0000 is my neighbor.","man","那個男人是我的鄰居。"],"many":["","There are many people in the market.","市場裡有很多人。"],"map":["We looked at the \u0000 carefully.","map","我們仔細看了地圖。"],"March":["Spring begins in \u0000.","March","春天在三月開始。"],"mark":["Please \u0000 the correct answer.","mark","請標出正確的答案。"],"marker":["He wrote the title with a \u0000.","marker","他用簽字筆寫標題。"],"market":["My mother buys fish at the \u0000.","market","我媽媽在市場買魚。"],"married":["My cousin got \u0000 last year.","married","我表姊去年結婚了。"],"mask":["The children wore \u0000 to the party.","masks","孩子們戴面具去派對。"],"mat":["Please leave your shoes on the \u0000.","mat","請把鞋子放在墊子上。"],"math":["\u0000 is not easy, but it is fun.","Math","數學不容易，但很有趣。"],"matter":["What is the \u0000 with you?","matter","你怎麼了？"],"may":["","It may rain this afternoon.","今天下午可能會下雨。"],"maybe":["\u0000 we can meet after school.","Maybe","也許我們可以放學後見面。"],"meal":["This \u0000 was really delicious.","meal","這一餐真的很好吃。"],"mean":["What does this word \u0000?","mean","這個字是什麼意思？"],"meat":["He does not eat \u0000.","meat","他不吃肉。"],"medicine":["Take this \u0000 after dinner.","medicine","晚餐後吃這個藥。"],"medium":["She ordered a \u0000 drink.","medium","她點了中杯飲料。"],"meet":["Let us \u0000 at the library.","meet","我們在圖書館見面吧。"],"meeting":["The \u0000 starts at nine.","meeting","會議九點開始。"],"menu":["May I see the \u0000, please?","menu","可以給我看菜單嗎？"],"mile":["The park is two \u0000 away.","miles","公園在兩英里外。"],"milk":["She drinks \u0000 every morning.","milk","她每天早上喝牛奶。"],"mind":["Do you \u0000 if I sit here?","mind","你介意我坐這裡嗎？"],"minute":["Please wait a few \u0000.","minutes","請等幾分鐘。"],"Miss":["","Miss Wang teaches us English.","王小姐教我們英文。"],"mistake":["Everyone makes \u0000 sometimes.","mistakes","每個人有時都會犯錯。"],"modern":["The \u0000 building looks very tall.","modern","那棟現代建築看起來很高。"],"moment":["Please wait a \u0000.","moment","請等一下。"],"Monday":["We have a math test on \u0000.","Monday","我們星期一有數學考試。"],"money":["He saves \u0000 for a new bike.","money","他存錢買新腳踏車。"],"monkey":["The \u0000 took my banana.","monkey","那隻猴子拿走了我的香蕉。"],"month":["My birthday is next \u0000.","month","我的生日在下個月。"],"mop":["He \u0000 the floor every evening.","mops","他每天傍晚拖地。"],"more":["","I need more time to finish.","我需要更多時間完成。"],"morning":["She reads the news every \u0000.","morning","她每天早上看新聞。"],"most":["","Most students like this teacher.","大部分學生喜歡這位老師。"],"mother":["My \u0000 works at a bank.","mother","我媽媽在銀行工作。"],"motorcycle":["He goes to work by \u0000.","motorcycle","他騎機車上班。"],"mountain":["We climbed the \u0000 last Sunday.","mountain","我們上個星期天爬了那座山。"],"mouse":["A \u0000 ran under the table.","mouse","一隻老鼠跑到桌子底下。"],"mouth":["Do not talk with food in your \u0000.","mouth","嘴裡有食物時不要說話。"],"move":["Please \u0000 your chair a little.","move","請把椅子移一下。"],"Mr.":["","Mr. Lin is our new teacher.","林先生是我們的新老師。"],"Mrs.":["","Mrs. Chen lives next door.","陳太太住在隔壁。"],"MRT":["I take the \u0000 to school.","MRT","我搭捷運上學。"],"Ms.":["","Ms. Lee works in that office.","李女士在那間辦公室工作。"],"much":["","How much time do we have?","我們有多少時間？"],"mud":["His shoes are covered with \u0000.","mud","他的鞋子沾滿泥巴。"],"museum":["We visited the \u0000 yesterday.","museum","我們昨天參觀了博物館。"],"music":["She listens to \u0000 while she studies.","music","她一邊念書一邊聽音樂。"],"must":["","You must finish your homework first.","你必須先寫完功課。"],"nail":["He hurt his finger on a \u0000.","nail","他被釘子弄傷了手指。"],"name":["What is your friend's \u0000?","name","你朋友叫什麼名字？"],"national":["We visited the \u0000 museum.","national","我們參觀了國家博物館。"],"near":["The store is \u0000 my house.","near","那家店在我家附近。"],"neck":["The bird has a long \u0000.","neck","那隻鳥有長長的脖子。"],"need":["I \u0000 a pen for the test.","need","我考試需要一支筆。"],"neighbor":["My \u0000 has three dogs.","neighbor","我的鄰居養了三隻狗。"],"never":["","She is never late for work.","她上班從不遲到。"],"new":["He bought a \u0000 computer.","new","他買了一台新電腦。"],"news":["The \u0000 made us all happy.","news","那個消息讓我們都很開心。"],"next":["The bank is \u0000 to the school.","next","銀行在學校隔壁。"],"nice":["It is \u0000 to meet you.","nice","很高興認識你。"],"night":["The stars are bright at \u0000.","night","星星在夜裡很亮。"],"nine":["","There are nine players on the team.","隊上有九個球員。"],"nineteen":["My brother turns \u0000 today.","nineteen","我哥哥今天滿十九歲。"],"nineteenth":["The show is on the \u0000.","nineteenth","表演在十九號。"],"ninety":["This book has \u0000 pages.","ninety","這本書有九十頁。"],"ninth":["He came in \u0000 in the race.","ninth","他在賽跑中得到第九名。"],"no":["","There is no milk in the bottle.","瓶子裡沒有牛奶。"],"nobody":["\u0000 knows the answer.","Nobody","沒有人知道答案。"],"nod":["She \u0000 and smiled at me.","nodded","她對我點頭微笑。"],"noise":["Please do not make so much \u0000.","noise","請不要製造這麼多噪音。"],"noodle":["This \u0000 shop is always full.","noodle","這家麵店總是客滿。"],"noon":["We eat lunch at \u0000.","noon","我們中午吃午餐。"],"north":["The wind comes from the \u0000.","north","風從北方吹來。"],"nose":["The little boy has a red \u0000.","nose","那個小男孩鼻子紅紅的。"],"not":["","This answer is not correct.","這個答案不正確。"],"note":["He wrote a short \u0000 to me.","note","他寫了一張短箋給我。"],"notebook":["My \u0000 is on the desk.","notebook","我的筆記本在書桌上。"],"nothing":["There is \u0000 in the box.","nothing","盒子裡什麼都沒有。"],"notice":["Did you \u0000 the new sign?","notice","你注意到那個新標誌了嗎？"],"November":["It gets cold in \u0000.","November","十一月天氣變冷。"],"now":["","We should leave now.","我們現在應該離開了。"],"nurse":["The \u0000 helped the sick child.","nurse","護士幫助那個生病的孩子。"],"o'clock":["","The movie begins at eight o'clock.","電影八點開始。"],"October":["School starts again in \u0000.","October","學校十月再度開學。"],"of":["","A cup of tea would be nice.","來杯茶就太好了。"],"off":["Please turn \u0000 the light.","off","請把燈關掉。"],"office":["Her \u0000 is on the third floor.","office","她的辦公室在三樓。"],"officer":["The police \u0000 helped us.","officer","那位警官幫了我們。"],"often":["","We often go hiking on weekends.","我們週末常去健行。"],"oil":["Put a little \u0000 in the pan.","oil","在鍋子裡放一點油。"],"OK":["","Is it OK if I call you later?","我等一下打給你可以嗎？"],"old":["This house is very \u0000.","old","這棟房子很舊。"],"on":["","The book is on the table.","書在桌子上。"],"once":["","I have been there once.","我去過那裡一次。"],"one":["","Only one student answered the question.","只有一個學生回答了問題。"],"open":["Please \u0000 the window.","open","請打開窗戶。"],"or":["","Do you want tea or coffee?","你要茶還是咖啡？"],"orange":["She ate an \u0000 after lunch.","orange","她午餐後吃了一顆柳橙。"],"order":["We \u0000 pizza for dinner.","ordered","我們晚餐點了披薩。"],"other":["","The other students went home.","其他學生回家了。"],"out":["He went \u0000 without his coat.","out","他沒穿大衣就出去了。"],"outside":["The children are playing \u0000.","outside","孩子們在外面玩。"],"over":["The bird flew \u0000 the house.","over","那隻鳥飛過房子上方。"],"own":["She has her \u0000 room.","own","她有自己的房間。"],"ox":["The farmer keeps two \u0000.","oxen","那個農夫養了兩頭公牛。"],"pack":["Please \u0000 your bag tonight.","pack","今晚請把袋子打包好。"],"package":["A \u0000 came for you today.","package","今天有你的包裹。"],"page":["Turn to \u0000 twenty, please.","page","請翻到第二十頁。"],"paint":["They \u0000 the wall blue.","painted","他們把牆漆成藍色。"],"pair":["I bought a \u0000 of shoes.","pair","我買了一雙鞋。"],"pants":["These \u0000 are too long.","pants","這條長褲太長了。"],"papaya":["\u0000 milk is popular in Taiwan.","Papaya","木瓜牛奶在台灣很受歡迎。"],"parent(s)":["My \u0000 both work in the city.","parents","我父母都在城裡工作。"],"park":["We walked through the \u0000.","park","我們走過那座公園。"],"part":["The last \u0000 of the story is sad.","part","故事的最後一段很悲傷。"],"party":["She invited ten friends to the \u0000.","party","她邀請了十個朋友來派對。"],"pass":["Please \u0000 me the salt.","pass","請把鹽遞給我。"],"past":["We walked \u0000 the old church.","past","我們走過那座舊教堂。"],"paste":["Use \u0000 to fix the picture.","paste","用漿糊把圖片黏好。"],"pay":["I will \u0000 for the tickets.","pay","我來付票錢。"],"PE":["We have \u0000 class on Friday.","PE","我們星期五有體育課。"],"peach":["These \u0000 are sweet and fresh.","peaches","這些桃子又甜又新鮮。"],"pear":["She picked a \u0000 from the tree.","pear","她從樹上摘了一顆梨子。"],"pen":["May I use your \u0000?","pen","我可以用你的筆嗎？"],"pencil":["He writes with a \u0000.","pencil","他用鉛筆寫字。"],"perhaps":["\u0000 she forgot the meeting.","Perhaps","或許她忘了那場會議。"],"person":["He is a very kind \u0000.","person","他是個很親切的人。"],"pet":["My \u0000 dog is three years old.","pet","我的寵物狗三歲了。"],"photo":["She showed me an old \u0000.","photo","她給我看一張舊照片。"],"piano":["My sister plays the \u0000 well.","piano","我姊姊鋼琴彈得很好。"],"pick":["Please \u0000 up the paper on the floor.","pick","請把地上的紙撿起來。"],"picnic":["They went on a \u0000 last Sunday.","picnic","他們上星期天去野餐。"],"picture":["She drew a \u0000 of her cat.","picture","她畫了一張她的貓的圖。"],"pie":["My aunt made an apple \u0000.","pie","我阿姨做了一個蘋果派。"],"piece":["He gave me a \u0000 of cake.","piece","他給了我一塊蛋糕。"],"pin":["She used a \u0000 to fix her hat.","pin","她用大頭針固定帽子。"],"pink":["Her bedroom wall is \u0000.","pink","她臥室的牆是粉紅色的。"],"pipe":["Water comes out of this \u0000.","pipe","水從這根管子流出來。"],"pizza":["We shared a large \u0000.","pizza","我們一起吃了一個大披薩。"],"place":["This is a good \u0000 to rest.","place","這是個休息的好地方。"],"plan":["What is your \u0000 for tomorrow?","plan","你明天有什麼計畫？"],"planet":["The earth is a small \u0000.","planet","地球是一顆小行星。"],"plant":["She waters the \u0000 every day.","plants","她每天為植物澆水。"],"plate":["Put the fish on this \u0000.","plate","把魚放在這個盤子上。"],"play":["The children \u0000 together after school.","play","孩子們放學後一起玩。"],"player":["He is the best \u0000 on our team.","player","他是我們隊上最好的球員。"],"playground":["The \u0000 is behind the school.","playground","操場在學校後面。"],"pleasure":["It is a \u0000 to work with you.","pleasure","和你共事是一種樂趣。"],"please":["\u0000 close the door quietly.","Please","請輕輕把門關上。"],"pocket":["He put the coin in his \u0000.","pocket","他把硬幣放進口袋。"],"point":["She \u0000 at the map on the wall.","pointed","她指著牆上的地圖。"],"police":["The \u0000 came very quickly.","police","警察來得很快。"],"polite":["He is always \u0000 to others.","polite","他對別人總是很有禮貌。"],"pond":["Some fish swim in the \u0000.","pond","有些魚在池塘裡游。"],"pool":["They swim in the \u0000 every summer.","pool","他們每年夏天在游泳池游泳。"],"poor":["The \u0000 man needed our help.","poor","那個可憐的人需要我們的幫助。"],"popcorn":["We ate \u0000 during the movie.","popcorn","我們看電影時吃爆米花。"],"popular":["This song is very \u0000 now.","popular","這首歌現在很受歡迎。"],"pork":["We had \u0000 and rice for lunch.","pork","我們午餐吃了豬肉和飯。"],"possible":["Is it \u0000 to finish today?","possible","今天有可能完成嗎？"],"post office":["I mailed the letter at the \u0000.","post office","我在郵局寄了那封信。"],"postcard":["She sent me a \u0000 from America.","postcard","她從美國寄給我一張明信片。"],"pot":["There is hot soup in the \u0000.","pot","鍋子裡有熱湯。"],"pound":["This big fish is three \u0000.","pounds","這條大魚有三磅重。"],"practice":["He \u0000 the piano every evening.","practices","他每天傍晚練鋼琴。"],"pray":["They \u0000 at the temple every month.","pray","他們每個月在寺廟祈禱。"],"prepare":["We must \u0000 for the test.","prepare","我們必須準備考試。"],"present":["She got a \u0000 from her aunt.","present","她收到阿姨送的禮物。"],"pretty":["That is a \u0000 dress.","pretty","那是一件漂亮的洋裝。"],"price":["The \u0000 of this bag is too high.","price","這個包包的價格太高了。"],"princess":["The \u0000 lived in the castle.","princess","公主住在城堡裡。"],"prize":["He won first \u0000 in the race.","prize","他在賽跑中贏得第一名。"],"problem":["We can solve this \u0000 together.","problem","我們可以一起解決這個問題。"],"program":["My favorite \u0000 is on tonight.","program","我最喜歡的節目今晚播出。"],"proud":["His parents are \u0000 of him.","proud","他父母以他為榮。"],"public":["Our town has a good \u0000 library.","public","我們鎮上有一間很好的公立圖書館。"],"pull":["Do not \u0000 the door so hard.","pull","不要那麼用力拉門。"],"pumpkin":["We made a \u0000 pie.","pumpkin","我們做了一個南瓜派。"],"purple":["She likes \u0000 flowers.","purple","她喜歡紫色的花。"],"push":["Please \u0000 the button here.","push","請按這裡的按鈕。"],"put":["\u0000 your books on the shelf.","Put","把你的書放在架子上。"],"quarter":["It is a \u0000 past six.","quarter","現在是六點十五分。"],"queen":["The \u0000 visited our city.","queen","女王造訪了我們的城市。"],"question":["May I ask you a \u0000?","question","我可以問你一個問題嗎？"],"quick":["She gave a \u0000 answer.","quick","她很快就回答了。"],"quiet":["Please be \u0000 in the library.","quiet","在圖書館請保持安靜。"],"quite":["The film was \u0000 interesting.","quite","那部電影相當有趣。"],"quiz":["We have an English \u0000 today.","quiz","我們今天有英文小考。"],"rabbit":["The \u0000 is eating a carrot.","rabbit","兔子正在吃紅蘿蔔。"],"race":["He came in second in the \u0000.","race","他在賽跑中得到第二名。"],"radio":["My grandfather listens to the \u0000.","radio","我爺爺聽收音機。"],"rain":["It began to \u0000 in the afternoon.","rain","下午開始下雨了。"],"raise":["\u0000 your hand if you know.","Raise","知道的話請舉手。"],"rat":["A \u0000 ran out of the box.","rat","一隻老鼠從箱子裡跑出來。"],"read":["She \u0000 a book before bed.","reads","她睡前讀一本書。"],"ready":["Are you \u0000 to leave?","ready","你準備好要走了嗎？"],"real":["Is this a \u0000 diamond?","real","這是真的鑽石嗎？"],"really":["I \u0000 enjoyed the show.","really","我真的很喜歡那場表演。"],"recorder":["He used a \u0000 in class.","recorder","他在課堂上用錄音機。"],"red":["Her \u0000 skirt is new.","red","她的紅裙子是新的。"],"refrigerator":["Put the milk in the \u0000.","refrigerator","把牛奶放進冰箱。"],"remember":["\u0000 to bring your notebook.","Remember","記得帶你的筆記本。"],"repeat":["Could you \u0000 the question?","repeat","你可以重複那個問題嗎？"],"reporter":["The \u0000 asked many questions.","reporter","那位記者問了很多問題。"],"rest":["You should \u0000 for an hour.","rest","你應該休息一小時。"],"restaurant":["We ate at a Chinese \u0000.","restaurant","我們在一家中式餐廳吃飯。"],"restroom":["The \u0000 is down the hall.","restroom","洗手間在走廊那頭。"],"rice":["He eats \u0000 every day.","rice","他每天吃飯。"],"rich":["The \u0000 man built a school.","rich","那位有錢人蓋了一所學校。"],"ride":["She \u0000 her bike to work.","rides","她騎腳踏車上班。"],"right":["Turn \u0000 at the traffic light.","right","在紅綠燈右轉。"],"ring":["He gave her a gold \u0000.","ring","他送了她一枚金戒指。"],"river":["Children swim in the \u0000 in summer.","river","孩子們夏天在河裡游泳。"],"road":["This \u0000 is closed today.","road","這條路今天封閉。"],"robot":["The \u0000 can clean the floor.","robot","這個機器人會掃地。"],"ROC":["The \u0000 flag is red and blue.","ROC","中華民國國旗是紅色和藍色的。"],"rock":["A big \u0000 fell from the hill.","rock","一塊大石頭從山上掉下來。"],"roll":["The ball \u0000 under the desk.","rolled","球滾到桌子底下。"],"room":["My \u0000 is on the second floor.","room","我的房間在二樓。"],"roller-blade":["They \u0000 in the park.","roller-blade","他們在公園溜直排輪。"],"rope":["He climbed up with a \u0000.","rope","他用繩子爬上去。"],"rose":["She grows \u0000 in her garden.","roses","她在花園裡種玫瑰。"],"round":["The table in the kitchen is \u0000.","round","廚房的桌子是圓的。"],"row":["The children sat in a \u0000.","row","孩子們坐成一排。"],"rule":["Everyone must follow the \u0000.","rules","每個人都必須遵守規則。"],"ruler":["May I borrow your \u0000?","ruler","我可以借你的尺嗎？"],"run":["He \u0000 five miles every morning.","runs","他每天早上跑五英里。"],"sad":["She felt \u0000 about the news.","sad","她對那個消息感到難過。"],"safe":["This place is \u0000 for children.","safe","這個地方對小孩來說很安全。"],"sail":["The ship \u0000 to the island.","sailed","那艘船航向那座島。"],"salad":["She ordered a vegetable \u0000.","salad","她點了一份蔬菜沙拉。"],"sale":["That old house is for \u0000.","sale","那棟舊房子要出售。"],"salesman":["The \u0000 showed us the car.","salesman","那位推銷員給我們看那輛車。"],"salt":["Add a little \u0000 to the soup.","salt","在湯裡加一點鹽。"],"same":["We are in the \u0000 class.","same","我們在同一班。"],"sandwich":["He made a ham \u0000.","sandwich","他做了一個火腿三明治。"],"sacred":["This temple is a \u0000 place.","sacred","這座寺廟是神聖的地方。"],"save":["We should \u0000 water every day.","save","我們應該每天節約用水。"],"school":["Our \u0000 has a big playground.","school","我們學校有一個大操場。"],"science":["\u0000 is an interesting subject.","Science","科學是有趣的科目。"],"scooter":["She rides a \u0000 to the market.","scooter","她騎速克達去市場。"],"screen":["The words on the \u0000 are small.","screen","螢幕上的字很小。"],"sea":["The \u0000 is calm this morning.","sea","今天早上海面很平靜。"],"season":["Autumn is my favorite \u0000.","season","秋天是我最喜歡的季節。"],"second":["This is my \u0000 visit here.","second","這是我第二次來這裡。"],"secretary":["The \u0000 answered the telephone.","secretary","秘書接了電話。"],"see":["I can \u0000 the mountain from here.","see","我從這裡可以看見那座山。"],"seed":["He planted some \u0000 in the garden.","seeds","他在花園裡種了一些種子。"],"seesaw":["Two kids are playing on the \u0000.","seesaw","兩個孩子在玩蹺蹺板。"],"seldom":["He \u0000 eats fast food.","seldom","他很少吃速食。"],"sell":["This shop \u0000 fresh fruit.","sells","這家店賣新鮮水果。"],"send":["I will \u0000 you an e-mail.","send","我會寄一封電子郵件給你。"],"senior high school":["My sister goes to \u0000.","senior high school","我姊姊念高中。"],"sentence":["Write a \u0000 with this word.","sentence","用這個字寫一個句子。"],"September":["School begins in \u0000.","September","學校九月開學。"],"serious":["His problem is not \u0000.","serious","他的問題不嚴重。"],"set":["She \u0000 the plates on the table.","set","她把盤子放在桌上。"],"seven":["","There are seven days in a week.","一星期有七天。"],"seventeen":["He is \u0000 years old.","seventeen","他十七歲。"],"seventeenth":["Her birthday is on the \u0000.","seventeenth","她的生日在十七號。"],"seventh":["This is the \u0000 time today.","seventh","這是今天第七次了。"],"seventy":["My grandfather is \u0000 years old.","seventy","我爺爺七十歲。"],"several":["\u0000 students were absent today.","Several","今天有幾個學生缺席。"],"shake":["Do not \u0000 the bottle.","shake","不要搖那個瓶子。"],"shall":["","Shall we go for a walk?","我們去散步好嗎？"],"shape":["What \u0000 is the table?","shape","那張桌子是什麼形狀？"],"share":["We \u0000 a large pizza.","shared","我們一起吃了一個大披薩。"],"shark":["\u0000 live in the deep sea.","Sharks","鯊魚住在深海裡。"],"she":["","She is my English teacher.","她是我的英文老師。"],"sheep":["The \u0000 are eating grass.","sheep","綿羊正在吃草。"],"ship":["The \u0000 arrived this morning.","ship","那艘船今天早上到了。"],"shirt":["His \u0000 is blue and white.","shirt","他的襯衫是藍白色的。"],"shoe(s)":["Take off your \u0000 at the door.","shoes","在門口把鞋子脫掉。"],"shop":["A small \u0000 just opened near us.","shop","我們附近剛開了一家小店。"],"shopkeeper":["The \u0000 is very friendly.","shopkeeper","那位店主很友善。"],"shorts":["He wears \u0000 in summer.","shorts","他夏天穿短褲。"],"should":["","You should drink more water.","你應該多喝水。"],"shoulder":["My \u0000 hurts after the game.","shoulder","比賽後我的肩膀很痛。"],"shout":["Do not \u0000 in the classroom.","shout","不要在教室裡大叫。"],"show":["The \u0000 begins at seven.","show","表演七點開始。"],"shy":["He is too \u0000 to speak.","shy","他害羞得不敢說話。"],"sick":["She was \u0000 and stayed home.","sick","她生病待在家裡。"],"side":["The park is on the other \u0000.","side","公園在另一邊。"],"sidewalk":["Please walk on the \u0000.","sidewalk","請走人行道。"],"sight":["My grandmother has poor \u0000.","sight","我奶奶視力不好。"],"sign":["The \u0000 says the road is closed.","sign","標誌上寫著這條路封閉。"],"simple":["The teacher asked a \u0000 question.","simple","老師問了一個簡單的問題。"],"since":["I have known him \u0000 last year.","since","我從去年就認識他了。"],"sing":["They \u0000 together every Friday.","sing","他們每個星期五一起唱歌。"],"singer":["She wants to become a \u0000.","singer","她想成為歌手。"],"sir":["","Excuse me, sir, is this your bag?","先生，不好意思，這是你的包包嗎？"],"sit":["Please \u0000 down and wait.","sit","請坐下等候。"],"six":["","He has six pens in his bag.","他袋子裡有六支筆。"],"sixteen":["My cousin is \u0000 years old.","sixteen","我表哥十六歲。"],"sixteenth":["Today is the \u0000 of May.","sixteenth","今天是五月十六日。"],"sixth":["She lives on the \u0000 floor.","sixth","她住在六樓。"],"sixty":["There are \u0000 minutes in an hour.","sixty","一小時有六十分鐘。"],"size":["What \u0000 do you wear?","size","你穿什麼尺寸？"],"skate":["We \u0000 on the ice in winter.","skate","我們冬天在冰上溜冰。"],"skirt":["Her \u0000 is long and pretty.","skirt","她的裙子又長又漂亮。"],"sky":["The \u0000 is full of stars.","sky","天空布滿了星星。"],"sleep":["He \u0000 eight hours every night.","sleeps","他每晚睡八小時。"],"slide":["The children played on the \u0000.","slide","孩子們玩溜滑梯。"],"slim":["She is \u0000 and tall.","slim","她又瘦又高。"],"slow":["This bus is very \u0000.","slow","這班公車很慢。"],"small":["My room is \u0000 but warm.","small","我的房間很小但很溫暖。"],"smell":["These flowers \u0000 very sweet.","smell","這些花聞起來很香。"],"smile":["Her \u0000 made me happy.","smile","她的微笑讓我很開心。"],"smoke":["\u0000 came out of the kitchen.","Smoke","煙從廚房冒出來。"],"snack":["She bought some \u0000 for the trip.","snacks","她買了一些點心帶去旅行。"],"snake":["A \u0000 was hiding in the grass.","snake","一條蛇躲在草叢裡。"],"snow":["It began to \u0000 last night.","snow","昨晚開始下雪了。"],"snowman":["The kids made a big \u0000.","snowman","孩子們堆了一個大雪人。"],"so":["","He was so tired that he slept early.","他累得很早就睡了。"],"soccer":["They play \u0000 after school.","soccer","他們放學後踢足球。"],"socks":["My \u0000 are wet from the rain.","socks","我的襪子被雨淋濕了。"],"sofa":["Our old \u0000 is very comfortable.","sofa","我們的舊沙發很舒服。"],"soldier":["The \u0000 stood by the gate.","soldier","那位軍人站在大門旁。"],"some":["","I need some help with this.","這件事我需要一些幫助。"],"someone":["\u0000 left a bag on the bus.","Someone","有人把袋子留在公車上。"],"something":["I have \u0000 to tell you.","something","我有事情要告訴你。"],"sometimes":["","Sometimes he walks to school.","他有時候走路上學。"],"somewhere":["My keys are \u0000 in this room.","somewhere","我的鑰匙在這個房間的某個地方。"],"son":["Their \u0000 is a doctor.","son","他們的兒子是醫生。"],"song":["This \u0000 makes me happy.","song","這首歌讓我很開心。"],"soon":["","The train will arrive soon.","火車很快就會到。"],"sore":["I have a \u0000 throat today.","sore","我今天喉嚨痛。"],"sorry":["I am \u0000 about the mistake.","sorry","我為這個錯誤感到抱歉。"],"sound":["The \u0000 of the rain is nice.","sound","雨聲很好聽。"],"soup":["This \u0000 needs a little salt.","soup","這碗湯需要加一點鹽。"],"south":["Birds fly to the \u0000 in winter.","south","鳥兒冬天飛往南方。"],"space":["There is no \u0000 in my bag.","space","我的袋子沒有空間了。"],"spaghetti":["We had \u0000 for dinner.","spaghetti","我們晚餐吃義大利麵。"],"speak":["Can you \u0000 more slowly?","speak","你可以說慢一點嗎？"],"special":["Today is a \u0000 day for us.","special","今天對我們來說是特別的日子。"],"spell":["Can you \u0000 your name?","spell","你會拼你的名字嗎？"],"spend":["He \u0000 too much money on games.","spends","他花太多錢在遊戲上。"],"spider":["A \u0000 is on the wall.","spider","牆上有一隻蜘蛛。"],"spoon":["Eat the soup with a \u0000.","spoon","用湯匙喝湯。"],"sport":["Basketball is my favorite \u0000.","sport","籃球是我最喜歡的運動。"],"spring":["Flowers come out in \u0000.","spring","花在春天開。"],"square":["The box has a \u0000 top.","square","那個盒子的頂部是正方形的。"],"stairs":["Be careful on the \u0000.","stairs","走樓梯要小心。"],"stamp":["He put a \u0000 on the letter.","stamp","他在信上貼了一張郵票。"],"stand":["Please \u0000 near the window.","stand","請站在窗戶旁邊。"],"star":["One \u0000 is very bright tonight.","star","今晚有一顆星星很亮。"],"start":["The class \u0000 at eight.","starts","課八點開始。"],"station":["We waited at the train \u0000.","station","我們在火車站等。"],"stay":["Please \u0000 here until I come back.","stay","請待在這裡直到我回來。"],"steak":["He ordered a \u0000 for dinner.","steak","他晚餐點了一份牛排。"],"still":["","She is still working at her desk.","她還在書桌前工作。"],"stomach":["My \u0000 hurts after lunch.","stomach","午餐後我的胃很痛。"],"stop":["The bus \u0000 in front of us.","stopped","公車停在我們前面。"],"store":["This \u0000 opens at nine.","store","這家店九點開門。"],"straight":["Go \u0000 and turn left.","straight","直走然後左轉。"],"story":["My grandfather told me a \u0000.","story","我爺爺說了一個故事給我聽。"],"strange":["I heard a \u0000 sound.","strange","我聽到一個奇怪的聲音。"],"stranger":["Do not talk to \u0000.","strangers","不要跟陌生人說話。"],"strawberry":["These \u0000 are very sweet.","strawberries","這些草莓很甜。"],"street":["Many people walk on this \u0000.","street","很多人走在這條街上。"],"strong":["He is \u0000 enough to carry it.","strong","他夠強壯可以搬得動。"],"student":["Every \u0000 needs a notebook.","student","每個學生都需要一本筆記本。"],"study":["We \u0000 English every day.","study","我們每天學英文。"],"stupid":["That was a \u0000 mistake.","stupid","那是個愚蠢的錯誤。"],"subject":["Math is my favorite \u0000.","subject","數學是我最喜歡的科目。"],"successful":["Her plan was very \u0000.","successful","她的計畫很成功。"],"sugar":["Do not put \u0000 in my coffee.","sugar","不要在我的咖啡裡加糖。"],"summer":["We go to the beach in \u0000.","summer","我們夏天去海邊。"],"sun":["The \u0000 is behind the clouds.","sun","太陽在雲後面。"],"Sunday":["We visit our grandmother on \u0000.","Sunday","我們星期天去看奶奶。"],"sunny":["It is a \u0000 and warm day.","sunny","今天是晴朗溫暖的一天。"],"supermarket":["She buys fruit at the \u0000.","supermarket","她在超級市場買水果。"],"surprise":["His visit was a big \u0000.","surprise","他的來訪是個大驚喜。"],"surprised":["We were \u0000 by the news.","surprised","我們對那個消息感到驚訝。"],"sweater":["Put on a \u0000, it is cold.","sweater","穿上毛衣，天氣很冷。"],"sweet":["This cake is too \u0000 for me.","sweet","這個蛋糕對我來說太甜了。"],"swim":["She can \u0000 across the river.","swim","她可以游過那條河。"],"swing":["The child is playing on the \u0000.","swing","那個孩子在盪鞦韆。"],"table":["Put the plates on the \u0000.","table","把盤子放在桌上。"],"tail":["The dog has a short \u0000.","tail","那隻狗有一條短尾巴。"],"Taiwan":["\u0000 is famous for its food.","Taiwan","臺灣以美食聞名。"],"take":["Please \u0000 this book to the library.","take","請把這本書拿去圖書館。"],"talk":["They \u0000 about the trip.","talked","他們談論那趟旅行。"],"tall":["That building is very \u0000.","tall","那棟建築很高。"],"tape":["She listened to an old \u0000.","tape","她聽了一捲舊錄音帶。"],"taste":["This soup \u0000 very good.","tastes","這碗湯嚐起來很好。"],"tea":["Would you like a cup of \u0000?","tea","你要來杯茶嗎？"],"teach":["My aunt \u0000 at a school.","teaches","我阿姨在學校教書。"],"teacher":["Our \u0000 is very kind.","teacher","我們老師很親切。"],"team":["Our \u0000 won the game.","team","我們隊贏了那場比賽。"],"teenager":["Many \u0000 use the Internet daily.","teenagers","很多青少年每天用網路。"],"telephone":["Please answer the \u0000.","telephone","請接電話。"],"television":["He watches \u0000 after dinner.","television","他晚餐後看電視。"],"tell":["Please \u0000 me the truth.","tell","請告訴我實話。"],"ten":["","I have ten dollars left.","我還剩十塊錢。"],"tennis":["They play \u0000 on weekends.","tennis","他們週末打網球。"],"tenth":["He finished \u0000 in the race.","tenth","他在賽跑中得到第十名。"],"terrible":["The weather was \u0000 yesterday.","terrible","昨天天氣很糟。"],"test":["The English \u0000 was not difficult.","test","英文考試不難。"],"than":["","This box is heavier than that one.","這個箱子比那個重。"],"thank":["I want to \u0000 you for your help.","thank","我想謝謝你的幫忙。"],"the":["","The girl in blue is my sister.","穿藍色衣服的女孩是我妹妹。"],"theater":["We saw a movie at the \u0000.","theater","我們在戲院看了一部電影。"],"then":["","We ate dinner and then watched television.","我們吃了晚餐然後看電視。"],"there":["","Your shoes are over there.","你的鞋子在那邊。"],"these":["","These books belong to me.","這些書是我的。"],"they":["","They are waiting outside.","他們在外面等。"],"thick":["The ice on the lake is \u0000.","thick","湖上的冰很厚。"],"thin":["The book is \u0000 and light.","thin","這本書又薄又輕。"],"thing":["I have many \u0000 to do today.","things","我今天有很多事情要做。"],"think":["I \u0000 this answer is right.","think","我認為這個答案是對的。"],"thirsty":["I am \u0000 after the game.","thirsty","比賽後我很渴。"],"thirteen":["There are \u0000 students in the club.","thirteen","社團裡有十三個學生。"],"thirty":["There are \u0000 desks in the room.","thirty","房間裡有三十張書桌。"],"this":["","This is my new notebook.","這是我的新筆記本。"],"throat":["My \u0000 hurts when I speak.","throat","我說話時喉嚨會痛。"],"throw":["Do not \u0000 the ball inside.","throw","不要在室內丟球。"],"those":["","Those flowers are very pretty.","那些花很漂亮。"],"though":["He went out \u0000 it was raining.","though","雖然在下雨，他還是出去了。"],"thousand":["This computer costs three \u0000 dollars.","thousand","這台電腦要三千元。"],"three":["","She has three brothers.","她有三個兄弟。"],"Thursday":["Our class meets on \u0000.","Thursday","我們的課在星期四上。"],"ticket":["I bought two \u0000 for the show.","tickets","我買了兩張表演的票。"],"tidy":["Her room is always \u0000.","tidy","她的房間總是很整潔。"],"tiger":["The \u0000 is a strong animal.","tiger","老虎是強壯的動物。"],"tie":["He is wearing a blue \u0000.","tie","他打著一條藍色領帶。"],"time":["We do not have much \u0000.","time","我們沒有太多時間。"],"tired":["She felt \u0000 after work.","tired","她下班後覺得很累。"],"to":["","He walked to the station.","他走路到車站。"],"toast":["I eat \u0000 for breakfast.","toast","我早餐吃土司。"],"today":["\u0000 is a busy day.","Today","今天是忙碌的一天。"],"toe":["She hurt her \u0000 on the chair.","toe","她的腳趾撞到椅子受傷了。"],"together":["We finished the work \u0000.","together","我們一起完成了工作。"],"tomato":["She put \u0000 in the salad.","tomatoes","她在沙拉裡放了番茄。"],"tomorrow":["We will meet again \u0000.","tomorrow","我們明天再見面。"],"too":["","This shirt is too small for me.","這件襯衫對我來說太小了。"],"tooth":["The little boy lost a \u0000.","tooth","那個小男孩掉了一顆牙。"],"top":["Her name is at the \u0000.","top","她的名字在最上面。"],"total":["The \u0000 is five hundred dollars.","total","總共是五百元。"],"touch":["Do not \u0000 the hot pot.","touch","不要碰那個熱鍋。"],"towel":["Please bring me a clean \u0000.","towel","請幫我拿一條乾淨的毛巾。"],"town":["He grew up in a small \u0000.","town","他在一個小鎮長大。"],"toy":["The baby dropped his \u0000.","toy","寶寶把玩具掉了。"],"traffic":["The \u0000 is heavy this morning.","traffic","今天早上交通很擁擠。"],"train":["We took the \u0000 to the city.","train","我們搭火車去城市。"],"trash":["Please take out the \u0000 tonight.","trash","今晚請把垃圾拿出去。"],"treat":["He \u0000 us to dinner.","treated","他請我們吃晚餐。"],"tree":["There is a bird in the \u0000.","tree","樹上有一隻鳥。"],"trick":["The children played a \u0000 on him.","trick","孩子們對他惡作劇。"],"trip":["Our \u0000 to the island was great.","trip","我們的島嶼之旅很棒。"],"trouble":["He is in \u0000 at school.","trouble","他在學校惹上麻煩。"],"truck":["A big \u0000 stopped on the road.","truck","一輛大卡車停在路上。"],"true":["Is this story \u0000?","true","這個故事是真的嗎？"],"try":["\u0000 to answer this question.","Try","試著回答這個問題。"],"T-shirt":["He wears a white \u0000.","T-shirt","他穿著一件白色 T 恤。"],"tub":["She washed the baby in the \u0000.","tub","她在浴缸裡幫寶寶洗澡。"],"Tuesday":["We have PE class on \u0000.","Tuesday","我們星期二有體育課。"],"turkey":["We eat \u0000 at Christmas.","turkey","我們聖誕節吃火雞。"],"turn":["Please \u0000 the key slowly.","turn","請慢慢轉動鑰匙。"],"turtle":["A \u0000 moves very slowly.","turtle","烏龜移動得很慢。"],"twelfth":["Her birthday is the \u0000 of June.","twelfth","她的生日是六月十二日。"],"twenty":["There are \u0000 desks in the room.","twenty","房間裡有二十張書桌。"],"twentieth":["We meet again on the \u0000.","twentieth","我們二十號再見面。"],"twice":["He calls his mother \u0000 a week.","twice","他一星期打兩次電話給媽媽。"],"two":["","She has two little brothers.","她有兩個弟弟。"],"type":["What \u0000 of music do you like?","type","你喜歡哪種類型的音樂？"],"typhoon":["The \u0000 closed all the schools.","typhoon","颱風讓所有學校都停課。"],"umbrella":["Take an \u0000, it may rain.","umbrella","帶把傘，可能會下雨。"],"uncle":["My \u0000 drives a truck.","uncle","我叔叔開卡車。"],"under":["The ball rolled \u0000 the bed.","under","球滾到床底下。"],"understand":["She could not \u0000 the question.","understand","她看不懂那個問題。"],"unhappy":["She looked \u0000 after the test.","unhappy","她考完試後看起來不開心。"],"uniform":["Students wear a \u0000 to school.","uniform","學生穿制服上學。"],"until":["Wait here \u0000 the rain stops.","until","在這裡等到雨停。"],"up":["The cat climbed \u0000 the tree.","up","貓爬上了樹。"],"USA":["His cousin studies in the \u0000.","USA","他表哥在美國念書。"],"use":["May I \u0000 your telephone?","use","我可以用你的電話嗎？"],"useful":["This dictionary is very \u0000.","useful","這本字典很有用。"],"usually":["","She usually gets up at six.","她通常六點起床。"],"vacation":["We spent our \u0000 at the beach.","vacation","我們在海邊度過假期。"],"very":["","The soup is very hot.","這碗湯很燙。"],"vest":["He put on a warm \u0000.","vest","他穿上一件暖和的背心。"],"video":["They watched a short \u0000 in class.","video","他們在課堂上看了一段短片。"],"violin":["She plays the \u0000 very well.","violin","她小提琴拉得很好。"],"visit":["We will \u0000 our grandmother tomorrow.","visit","我們明天要去看奶奶。"],"voice":["Her \u0000 is soft and low.","voice","她的聲音又柔又低。"],"wait":["Please \u0000 for me at the gate.","wait","請在大門口等我。"],"waiter":["The \u0000 brought us the menu.","waiter","服務生給我們菜單。"],"waitress":["The \u0000 is very friendly.","waitress","那位女服務生很親切。"],"wake":["I \u0000 up at seven every day.","wake","我每天七點醒來。"],"walk":["They \u0000 to school together.","walk","他們一起走路上學。"],"wall":["A map hangs on the classroom \u0000.","wall","教室的牆上掛著一張地圖。"],"wallet":["He lost his \u0000 on the bus.","wallet","他在公車上弄丟了皮夾。"],"warm":["The room is \u0000 and quiet.","warm","房間又溫暖又安靜。"],"wash":["She \u0000 the dishes after dinner.","washes","她晚餐後洗碗。"],"watch":["My \u0000 is five minutes slow.","watch","我的手錶慢了五分鐘。"],"watermelon":["\u0000 is sweet in summer.","Watermelon","西瓜在夏天很甜。"],"way":["Can you show me the \u0000?","way","你可以告訴我怎麼走嗎？"],"we":["","We are going to the museum.","我們要去博物館。"],"weak":["He felt \u0000 after being sick.","weak","他生病後覺得很虛弱。"],"wear":["She likes to \u0000 a red hat.","wear","她喜歡戴紅帽子。"],"weather":["The \u0000 is nice today.","weather","今天天氣很好。"],"Wednesday":["We have music class on \u0000.","Wednesday","我們星期三有音樂課。"],"week":["There are seven days in a \u0000.","week","一星期有七天。"],"weekend":["What do you do on \u0000?","weekends","你週末都做什麼？"],"welcome":["\u0000 to our school.","Welcome","歡迎來到我們學校。"],"well":["He speaks English very \u0000.","well","他英文說得很好。"],"west":["The sun goes down in the \u0000.","west","太陽從西邊落下。"],"wet":["My shoes are \u0000 from the rain.","wet","我的鞋子被雨淋濕了。"],"whale":["A \u0000 is bigger than a shark.","whale","鯨魚比鯊魚大。"],"what":["","What are you doing now?","你現在在做什麼？"],"when":["","When does the movie start?","電影什麼時候開始？"],"where":["","Where did you put my book?","你把我的書放在哪裡？"],"whether":["I do not know \u0000 he will come.","whether","我不知道他會不會來。"],"which":["","Which color do you like better?","你比較喜歡哪個顏色？"],"white":["The \u0000 dress looks lovely on her.","white","那件白洋裝穿在她身上很好看。"],"who":["","Who is standing at the door?","誰站在門口？"],"whose":["","Whose bag is on the chair?","椅子上是誰的包包？"],"why":["","Why are you so happy today?","你今天為什麼這麼開心？"],"wife":["His \u0000 works at a hospital.","wife","他太太在醫院工作。"],"will":["","I will call you after dinner.","我晚餐後會打給你。"],"win":["Our team hopes to \u0000 the game.","win","我們隊希望贏得比賽。"],"wind":["The \u0000 is strong tonight.","wind","今晚風很強。"],"window":["Please open the \u0000 a little.","window","請把窗戶打開一點。"],"windy":["It is cold and \u0000 outside.","windy","外面又冷又多風。"],"winter":["We drink hot tea in \u0000.","winter","我們冬天喝熱茶。"],"wise":["My grandfather is a \u0000 man.","wise","我爺爺是個明智的人。"],"with":["","She went to the market with her mother.","她和媽媽一起去市場。"],"without":["","He left without saying goodbye.","他沒說再見就走了。"],"woman":["That \u0000 is our new teacher.","woman","那位女士是我們的新老師。"],"wonderful":["We had a \u0000 time together.","wonderful","我們一起度過了美好的時光。"],"word":["Write this \u0000 on the blackboard.","word","把這個字寫在黑板上。"],"work":["My father \u0000 six days a week.","works","我爸爸一星期工作六天。"],"workbook":["Please open your \u0000 to page ten.","workbook","請把作業本翻到第十頁。"],"worker":["The \u0000 finished the bridge.","workers","工人們完成了那座橋。"],"world":["English is used around the \u0000.","world","英文在世界各地被使用。"],"write":["She \u0000 a letter every month.","writes","她每個月寫一封信。"],"writer":["He wants to be a \u0000.","writer","他想成為作家。"],"wrong":["There is something \u0000 with my bike.","wrong","我的腳踏車有點問題。"],"yard":["The dog is running in the \u0000.","yard","狗在庭院裡跑。"],"year":["She has studied here for two \u0000.","years","她在這裡念了兩年。"],"yellow":["The leaves turn \u0000 in autumn.","yellow","樹葉在秋天變黃。"],"yes":["","He said yes to my question.","他對我的問題說好。"],"yesterday":["It rained hard \u0000.","yesterday","昨天雨下得很大。"],"yet":["","She has not finished her homework yet.","她還沒寫完功課。"],"you":["","You are late again.","你又遲到了。"],"young":["The \u0000 girl sings beautifully.","young","那個年輕女孩唱得很美。"],"yummy":["This cake is really \u0000.","yummy","這個蛋糕真好吃。"],"zebra":["A \u0000 has black and white lines.","zebra","斑馬身上有黑白條紋。"],"zero":["The temperature dropped to \u0000.","zero","溫度降到零度。"],"zoo":["We saw a tiger at the \u0000.","zoo","我們在動物園看到一隻老虎。"],"absent":["Two students were \u0000 today.","absent","今天有兩個學生缺席。"],"accept":["She \u0000 his gift with a smile.","accepted","她笑著接受了他的禮物。"],"accident":["The \u0000 happened near the school.","accident","那場事故發生在學校附近。"],"active":["My grandmother is still very \u0000.","active","我奶奶仍然很活躍。"],"activity":["Our class has a fun \u0000 today.","activity","我們班今天有有趣的活動。"],"add":["Please \u0000 some sugar to the tea.","add","請在茶裡加一些糖。"],"address":["Write your \u0000 on this card.","address","把你的地址寫在這張卡片上。"],"admire":["I \u0000 her for her hard work.","admire","我欽佩她的努力。"],"adult":["This movie is for \u0000 only.","adults","這部電影只給成年人看。"],"advertisement":["The \u0000 is on the wall.","advertisement","那則廣告貼在牆上。"],"advice":["His \u0000 was really helpful.","advice","他的忠告真的很有幫助。"],"advise":["The doctor \u0000 me to rest.","advised","醫生勸我休息。"],"affect":["The rain \u0000 our plan.","affected","那場雨影響了我們的計畫。"],"against":["She spoke \u0000 the new rule.","against","她反對那項新規定。"],"aim":["His \u0000 is to become a lawyer.","aim","他的目標是成為律師。"],"air conditioner":["Please turn on the \u0000.","air conditioner","請打開冷氣機。"],"airlines":["This \u0000 flies to many cities.","airlines","這家航空公司飛往許多城市。"],"alarm":["My \u0000 rings at six every morning.","alarm","我的鬧鐘每天早上六點響。"],"album":["She showed me her photo \u0000.","album","她給我看她的相簿。"],"alike":["The two brothers look very \u0000.","alike","那兩兄弟長得很像。"],"alive":["The old tree is still \u0000.","alive","那棵老樹還活著。"],"allow":["My parents \u0000 me to play outside.","allow","我父母允許我在外面玩。"],"alone":["He lives \u0000 in a small house.","alone","他一個人住在小房子裡。"],"aloud":["Please read the sentence \u0000.","aloud","請大聲把句子唸出來。"],"alphabet":["The English \u0000 has twenty-six letters.","alphabet","英文字母有二十六個。"],"ambulance":["An \u0000 took him to the hospital.","ambulance","救護車把他送到醫院。"],"among":["She is the tallest \u0000 us.","among","她是我們之中最高的。"],"amount":["A large \u0000 of water was used.","amount","用掉了大量的水。"],"ancient":["We studied \u0000 China in class.","ancient","我們在課堂上讀了古代中國。"],"angel":["The child looks like an \u0000.","angel","那個孩子看起來像天使。"],"anger":["He could not hide his \u0000.","anger","他無法隱藏他的怒氣。"],"ankle":["His \u0000 hurts after the long walk.","ankle","走了很久之後他的腳踝很痛。"],"anywhere":["I cannot find my keys \u0000.","anywhere","我到處都找不到我的鑰匙。"],"apologize":["He \u0000 for being late.","apologized","他為遲到道歉。"],"appreciate":["I \u0000 all your help.","appreciate","我很感謝你所有的幫忙。"],"area":["This \u0000 is famous for tea.","area","這個地區以茶聞名。"],"argue":["The two boys \u0000 about the game.","argued","那兩個男孩為了遊戲爭論。"],"armchair":["My father sat in his \u0000.","armchair","我爸爸坐在他的扶手椅上。"],"army":["His brother joined the \u0000.","army","他哥哥從軍了。"],"arrange":["Please \u0000 the chairs in a row.","arrange","請把椅子排成一排。"],"artist":["The \u0000 painted a beautiful sky.","artist","那位藝術家畫了美麗的天空。"],"asleep":["The baby fell \u0000 in the car.","asleep","寶寶在車上睡著了。"],"assistant":["She works as a teacher's \u0000.","assistant","她擔任老師的助理。"],"assume":["Do not \u0000 the answer is wrong.","assume","不要假定答案是錯的。"],"attention":["Please pay \u0000 to the teacher.","attention","請注意聽老師說。"],"available":["No seats are \u0000 tonight.","available","今晚沒有座位了。"],"avoid":["We should \u0000 eating too much sugar.","avoid","我們應該避免吃太多糖。"],"baby sitter":["We need a \u0000 this evening.","baby sitter","我們今晚需要一個保母。"],"backpack":["His \u0000 is full of books.","backpack","他的背包裝滿了書。"],"balloon":["The child let go of the \u0000.","balloon","那個孩子放開了氣球。"],"barber":["The \u0000 cut my hair short.","barber","理髮師把我的頭髮剪短了。"],"bark":["The dog \u0000 at every stranger.","barks","那隻狗對每個陌生人吠叫。"],"basement":["They keep old boxes in the \u0000.","basement","他們把舊箱子放在地下室。"],"basic":["These are the \u0000 rules of the game.","basic","這些是這個遊戲的基本規則。"],"bathe":["She \u0000 her dog every weekend.","bathes","她每個週末幫狗洗澡。"],"beard":["My uncle has a long \u0000.","beard","我叔叔有長鬍子。"],"beat":["Our team \u0000 theirs by two points.","beat","我們隊以兩分擊敗他們。"],"beauty":["Everyone talked about her \u0000.","beauty","大家都在談論她的美麗。"],"beer":["Adults may drink \u0000, but children may not.","beer","成年人可以喝啤酒，小孩不行。"],"beginner":["This class is for \u0000 only.","beginners","這門課只給新手上。"],"behave":["The children \u0000 well at the party.","behaved","孩子們在派對上很守規矩。"],"besides":["\u0000 English, she also studies Chinese.","Besides","除了英文，她也學中文。"],"beyond":["The mountains lie \u0000 the river.","beyond","那些山在河的另一邊。"],"bill":["The waiter brought us the \u0000.","bill","服務生把帳單拿給我們。"],"biology":["\u0000 is my favorite science subject.","Biology","生物是我最喜歡的科學科目。"],"bitter":["This medicine tastes very \u0000.","bitter","這個藥嚐起來很苦。"],"blame":["Do not \u0000 him for the accident.","blame","不要為了那場意外怪他。"],"blank":["Fill in the \u0000 with the correct word.","blank","用正確的字填入空格。"],"bless":["May the weather \u0000 our trip.","bless","希望天氣保佑我們的旅行。"],"blood":["The doctor checked his \u0000.","blood","醫生檢查了他的血液。"],"blouse":["Her \u0000 is light blue.","blouse","她的上衣是淺藍色的。"],"board":["We \u0000 the train at eight.","boarded","我們八點上了火車。"],"bomb":["The old \u0000 was found under the ground.","bomb","那顆舊炸彈在地下被發現。"],"bone":["The dog carried a \u0000 in its mouth.","bone","狗嘴裡叼著一根骨頭。"],"bookcase":["My \u0000 is full of comic books.","bookcase","我的書架上滿是漫畫書。"],"bother":["Sorry to \u0000 you so late.","bother","抱歉這麼晚打擾你。"],"bowling":["We went \u0000 after dinner.","bowling","我們晚餐後去打保齡球。"],"branch":["A bird sat on the \u0000.","branch","一隻鳥停在樹枝上。"],"brave":["The \u0000 man saved the child.","brave","那位勇敢的男子救了那個孩子。"],"brick":["The wall is made of \u0000.","brick","那面牆是用磚塊砌的。"],"broad":["The river here is very \u0000.","broad","這裡的河很寬。"],"broadcast":["The game was \u0000 on the radio.","broadcast","那場比賽在收音機上播出。"],"brunch":["We had \u0000 at eleven.","brunch","我們十一點吃早午餐。"],"bucket":["He filled the \u0000 with water.","bucket","他把水桶裝滿水。"],"buffet":["The hotel offers a breakfast \u0000.","buffet","那家旅館提供自助式早餐。"],"bundle":["She carried a \u0000 of old clothes.","bundle","她抱著一捆舊衣服。"],"burger":["He ordered a \u0000 and juice.","burger","他點了一個漢堡和果汁。"],"burst":["The balloon \u0000 with a loud sound.","burst","氣球砰的一聲爆開。"],"button":["Push this \u0000 to start the machine.","button","按這個按鈕啟動機器。"],"cabbage":["This \u0000 is big and fresh.","cabbage","這顆包心菜又大又新鮮。"],"cable":["We watch movies on \u0000 television.","cable","我們看有線電視上的電影。"],"cafeteria":["Students eat lunch in the \u0000.","cafeteria","學生在自助餐廳吃午餐。"],"calendar":["The \u0000 hangs beside the door.","calendar","日曆掛在門旁邊。"],"calm":["Please stay \u0000 and wait here.","calm","請保持鎮定並在這裡等。"],"campus":["Our \u0000 has many old trees.","campus","我們校園裡有很多老樹。"],"cancel":["They \u0000 the trip because of rain.","canceled","他們因為下雨取消了旅行。"],"cancer":["His grandfather died of \u0000.","cancer","他爺爺死於癌症。"],"captain":["The \u0000 led his team to victory.","captain","隊長帶領隊伍獲勝。"],"careless":["A \u0000 mistake cost him the game.","careless","一個粗心的錯誤讓他輸了比賽。"],"carpet":["The \u0000 in the room is soft.","carpet","房間裡的地毯很柔軟。"],"carrot":["Rabbits like to eat \u0000.","carrots","兔子喜歡吃胡蘿蔔。"],"cartoon":["My little brother loves \u0000.","cartoons","我弟弟很喜歡卡通。"],"cash":["I paid for the shoes in \u0000.","cash","我用現金付了鞋錢。"],"cause":["Nobody knows the \u0000 of the fire.","cause","沒有人知道火災的原因。"],"ceiling":["A lamp hangs from the \u0000.","ceiling","一盞燈從天花板垂下來。"],"central":["The \u0000 park is near our school.","central","中央公園在我們學校附近。"],"century":["This temple is over a \u0000 old.","century","這座寺廟有超過一世紀的歷史。"],"cereal":["She eats \u0000 with milk each morning.","cereal","她每天早上吃麥片配牛奶。"],"certain":["I am \u0000 that he will come.","certain","我確定他會來。"],"channel":["Please change to another \u0000.","channel","請轉到另一個頻道。"],"character":["My favorite \u0000 in the story is brave.","character","我最喜歡故事裡那個勇敢的角色。"],"charge":["The store \u0000 us too much.","charged","那家店向我們收太多錢了。"],"chart":["The \u0000 shows our test results.","chart","那張圖表顯示我們的考試結果。"],"chase":["The cat \u0000 a mouse into the yard.","chased","貓追著老鼠跑進院子。"],"chemistry":["\u0000 is harder than biology for me.","Chemistry","對我來說化學比生物難。"],"childhood":["She spent her \u0000 in the country.","childhood","她的童年在鄉下度過。"],"childish":["His \u0000 words made us laugh.","childish","他幼稚的話讓我們發笑。"],"childlike":["She has a \u0000 smile.","childlike","她有天真爛漫的笑容。"],"chin":["He rested his \u0000 on his hand.","chin","他把下巴靠在手上。"],"choice":["You have made a wise \u0000.","choice","你做了明智的選擇。"],"chubby":["The \u0000 baby is very cute.","chubby","那個圓胖的寶寶很可愛。"],"clever":["She is \u0000 at solving problems.","clever","她很會解決問題。"],"climate":["The \u0000 here is warm all year.","climate","這裡的氣候全年溫暖。"],"closet":["Hang your coat in the \u0000.","closet","把你的大衣掛在衣櫥裡。"],"cloud":["A dark \u0000 covered the sun.","cloud","一朵烏雲遮住了太陽。"],"coach":["Our \u0000 trains us every afternoon.","coach","我們的教練每天下午訓練我們。"],"coast":["They live near the east \u0000.","coast","他們住在東海岸附近。"],"cockroach":["A \u0000 ran under the refrigerator.","cockroach","一隻蟑螂跑到冰箱底下。"],"college":["His sister studies at a \u0000.","college","他姊姊在大學念書。"],"colorful":["The garden is full of \u0000 flowers.","colorful","花園裡開滿了色彩繽紛的花。"],"command":["The captain gave a clear \u0000.","command","隊長下了明確的命令。"],"comment":["The teacher wrote a \u0000 on my paper.","comment","老師在我的作業上寫了評語。"],"company":["My father works for a large \u0000.","company","我爸爸在一家大公司工作。"],"compare":["\u0000 these two pictures carefully.","Compare","仔細比較這兩張圖片。"],"complain":["She \u0000 about the noise.","complained","她抱怨那個噪音。"],"complete":["Please \u0000 the form and sign it.","complete","請填完表格並簽名。"],"completion":["The new bridge is near \u0000.","completion","那座新橋快要完工了。"],"concern":["Her health is our biggest \u0000.","concern","她的健康是我們最大的關心。"],"confident":["He is \u0000 about the test.","confident","他對考試很有信心。"],"confuse":["The two words often \u0000 students.","confuse","這兩個字常讓學生混淆。"],"consider":["Please \u0000 my idea carefully.","consider","請仔細考慮我的想法。"],"considerate":["She is \u0000 to everyone.","considerate","她對每個人都很體貼。"],"contact lens":["She put in her \u0000 carefully.","contact lens","她小心地戴上隱形眼鏡。"],"continue":["We \u0000 walking after the rain.","continued","雨後我們繼續走。"],"contract":["They signed the \u0000 this morning.","contract","他們今天早上簽了合約。"],"control":["He could not \u0000 his anger.","control","他無法控制他的怒氣。"],"convenience store":["I bought milk at the \u0000.","convenience store","我在便利商店買了牛奶。"],"conversation":["Their \u0000 lasted two hours.","conversation","他們的談話持續了兩小時。"],"corn":["The farmer grows \u0000 on his land.","corn","那個農夫在他的土地上種玉米。"],"cotton":["This shirt is made of \u0000.","cotton","這件襯衫是棉做的。"],"cough":["He has a bad \u0000 today.","cough","他今天咳得很厲害。"],"couple":["A young \u0000 sat by the window.","couple","一對年輕情侶坐在窗邊。"],"courage":["It takes \u0000 to tell the truth.","courage","說實話需要勇氣。"],"court":["They play tennis on the school \u0000.","court","他們在學校球場打網球。"],"crab":["We caught a small \u0000 at the beach.","crab","我們在海邊抓到一隻小螃蟹。"],"crayon":["The child drew a house with \u0000.","crayons","那個孩子用蠟筆畫了一間房子。"],"cream":["She put \u0000 in her coffee.","cream","她在咖啡裡加了奶油。"],"create":["The artist \u0000 a beautiful design.","created","那位藝術家創造了美麗的圖案。"],"credit card":["He paid with a \u0000.","credit card","他用信用卡付款。"],"crime":["Stealing is a serious \u0000.","crime","偷竊是嚴重的犯罪。"],"crowd":["A large \u0000 waited outside.","crowd","一大群人在外面等著。"],"crowded":["The train was \u0000 this morning.","crowded","今天早上火車很擁擠。"],"cruel":["It is \u0000 to leave a dog alone.","cruel","把狗單獨留下很殘忍。"],"culture":["We learn about Chinese \u0000 in class.","culture","我們在課堂上學中國文化。"],"cure":["The doctor \u0000 him in a week.","cured","醫生一星期就把他治好了。"],"curious":["Children are \u0000 about everything.","curious","孩子對每件事都好奇。"],"current":["The \u0000 rule is not fair.","current","現行的規定不公平。"],"curtain":["Please close the \u0000 at night.","curtain","晚上請把窗簾拉上。"],"curve":["The road has a sharp \u0000 here.","curve","這條路在這裡有個急彎。"],"custom":["This \u0000 is very old in Taiwan.","custom","這個習俗在臺灣很古老。"],"customer":["The \u0000 asked about the price.","customer","那位顧客詢問價格。"],"daily":["Reading is part of my \u0000 life.","daily","閱讀是我日常生活的一部分。"],"damage":["The typhoon caused great \u0000.","damage","颱風造成了嚴重的損害。"],"danger":["The sign tells us about the \u0000.","danger","那個標誌告訴我們有危險。"],"dawn":["We started walking at \u0000.","dawn","我們在黎明時開始走。"],"deaf":["Her grandfather is \u0000 in one ear.","deaf","她爺爺有一隻耳朵聾了。"],"death":["His \u0000 made the whole town sad.","death","他的死讓全鎮的人難過。"],"debate":["The two teams had a lively \u0000.","debate","那兩隊進行了熱烈的辯論。"],"decision":["It was a difficult \u0000 for him.","decision","那對他來說是艱難的決定。"],"decorate":["We \u0000 the room with balloons.","decorated","我們用氣球布置房間。"],"decrease":["Our class size \u0000 this year.","decreased","我們班的人數今年減少了。"],"deep":["The water in this lake is \u0000.","deep","這座湖的水很深。"],"deer":["A \u0000 ran into the forest.","deer","一隻鹿跑進森林。"],"degree":["Today it is thirty \u0000 outside.","degrees","今天外面三十度。"],"deliver":["The mailman \u0000 letters every morning.","delivers","郵差每天早上送信。"],"department":["She works in the sales \u0000.","department","她在業務部門工作。"],"depend":["Children \u0000 on their parents.","depend","孩子依賴他們的父母。"],"describe":["Please \u0000 what you saw.","describe","請描述你看到的事。"],"desert":["Few plants grow in the \u0000.","desert","沙漠裡很少植物生長。"],"design":["The \u0000 of this bag is simple.","design","這個包包的設計很簡單。"],"desire":["His \u0000 to win is strong.","desire","他求勝的渴望很強烈。"],"dessert":["We had ice cream for \u0000.","dessert","我們吃冰淇淋當甜點。"],"detect":["The machine can \u0000 smoke.","detect","這台機器可以偵測煙霧。"],"develop":["The town \u0000 very quickly.","developed","那個城鎮發展得很快。"],"dial":["\u0000 this number for help.","Dial","撥這個號碼求助。"],"diamond":["The ring has a small \u0000.","diamond","那枚戒指上有一顆小鑽石。"],"diary":["She writes in her \u0000 every night.","diary","她每晚寫日記。"],"diet":["A healthy \u0000 is important for us.","diet","健康的飲食對我們很重要。"],"difference":["The \u0000 between them is small.","difference","它們之間的差別很小。"],"difficulty":["He had \u0000 with the last question.","difficulty","他在最後一題遇到困難。"],"diligent":["\u0000 students always finish their work.","Diligent","勤勉的學生總是完成工作。"],"dinosaur":["The museum has a \u0000 bone.","dinosaur","博物館有一根恐龍骨頭。"],"diplomat":["His father works as a \u0000.","diplomat","他父親擔任外交官。"],"direct":["This is the most \u0000 way home.","direct","這是回家最直接的路。"],"direction":["We walked in the wrong \u0000.","direction","我們走錯了方向。"],"disappear":["The sun \u0000 behind the clouds.","disappeared","太陽消失在雲後面。"],"discover":["They \u0000 an ancient temple.","discovered","他們發現了一座古寺。"],"discuss":["We \u0000 the plan after class.","discussed","我們下課後討論了那個計畫。"],"discussion":["Our \u0000 lasted about an hour.","discussion","我們的討論持續了大約一小時。"],"dishonest":["Nobody likes a \u0000 person.","dishonest","沒有人喜歡不誠實的人。"],"distance":["We walked a short \u0000 to school.","distance","我們走了一小段路到學校。"],"distant":["A \u0000 mountain stood behind the town.","distant","一座遠方的山立在小鎮後面。"],"divide":["Please \u0000 the cake into six pieces.","divide","請把蛋糕分成六塊。"],"dizzy":["I felt \u0000 after the ride.","dizzy","坐完那個遊樂設施我覺得頭暈。"],"dolphin":["A \u0000 can swim very fast.","dolphin","海豚可以游得很快。"],"donkey":["The \u0000 carried a heavy bag.","donkey","那隻驢子背了一個重袋子。"],"double":["She ordered a \u0000 cheese burger.","double","她點了一個雙倍起司漢堡。"],"doubt":["I \u0000 that he will come.","doubt","我懷疑他會不會來。"],"doughnut":["He ate two \u0000 for breakfast.","doughnuts","他早餐吃了兩個甜甜圈。"],"downstairs":["My father is waiting \u0000.","downstairs","我爸爸在樓下等。"],"downtown":["We went \u0000 to buy shoes.","downtown","我們去市區買鞋。"],"drama":["Our class put on a short \u0000.","drama","我們班演了一齣短劇。"],"dresser":["Her clothes are in the \u0000.","dresser","她的衣服在衣櫃裡。"],"dumb":["He felt \u0000 after the mistake.","dumb","犯錯之後他覺得自己很笨。"],"duty":["It is your \u0000 to help others.","duty","幫助別人是你的義務。"],"eagle":["An \u0000 flew over the hill.","eagle","一隻老鷹飛過小山。"],"earn":["He \u0000 money by washing cars.","earns","他靠洗車賺錢。"],"ease":["This medicine will \u0000 the pain.","ease","這個藥可以減輕疼痛。"],"edge":["Do not stand near the \u0000.","edge","不要站在邊緣附近。"],"education":["\u0000 is important for children.","Education","教育對孩子很重要。"],"effort":["She made a great \u0000 to win.","effort","她為了贏付出很大的努力。"],"elder":["My \u0000 brother works in a bank.","elder","我哥哥在銀行工作。"],"elect":["The students \u0000 a new leader.","elected","學生選出了新的隊長。"],"electric":["We bought an \u0000 fan.","electric","我們買了一台電風扇。"],"embarrass":["His question \u0000 me.","embarrassed","他的問題讓我很尷尬。"],"emotion":["She could not hide her \u0000.","emotion","她無法隱藏自己的情緒。"],"emphasize":["The teacher \u0000 this rule.","emphasized","老師強調了這條規則。"],"employ":["The shop \u0000 five workers.","employs","那家店僱用五名員工。"],"empty":["The box is \u0000 now.","empty","那個盒子現在是空的。"],"enemy":["He is not my \u0000.","enemy","他不是我的敵人。"],"energetic":["The young dog is very \u0000.","energetic","那隻小狗精力充沛。"],"energy":["The children have a lot of \u0000.","energy","孩子們精力充沛。"],"engine":["The \u0000 of the car is loud.","engine","那輛車的引擎很吵。"],"entrance":["We waited at the \u0000.","entrance","我們在入口等。"],"environment":["We should keep our \u0000 clean.","environment","我們應該保持環境乾淨。"],"envy":["I \u0000 her beautiful voice.","envy","我羨慕她美妙的聲音。"],"equal":["Two and three is not \u0000 to six.","equal","二加三不等於六。"],"error":["There is an \u0000 in your answer.","error","你的答案有一個錯誤。"],"especially":["I like fruit, \u0000 watermelon.","especially","我喜歡水果，特別是西瓜。"],"everywhere":["Books were \u0000 in his room.","everywhere","他房間裡到處都是書。"],"evil":["The \u0000 man hurt many people.","evil","那個邪惡的人傷害了很多人。"],"exam":["Our \u0000 is next Monday.","exam","我們的考試在下星期一。"],"excite":["The good news \u0000 everyone.","excited","那個好消息讓大家很興奮。"],"exist":["Dinosaurs do not \u0000 now.","exist","恐龍現在已經不存在了。"],"exit":["The \u0000 is behind you.","exit","出口在你後面。"],"expect":["We \u0000 ten guests tonight.","expect","我們預計今晚有十位客人。"],"explain":["Please \u0000 this word to me.","explain","請跟我解釋這個字。"],"express":["He could not \u0000 his feeling.","express","他無法表達他的感受。"],"extra":["I need an \u0000 chair.","extra","我需要一張多的椅子。"],"fair":["The teacher is \u0000 to everyone.","fair","老師對每個人都公平。"],"false":["This answer is \u0000.","false","這個答案是錯的。"],"fancy":["She wore a \u0000 dress to the party.","fancy","她穿了一件花俏的洋裝去派對。"],"fantastic":["The show last night was \u0000.","fantastic","昨晚的表演很棒。"],"fashionable":["Her new coat is very \u0000.","fashionable","她的新大衣很時尚。"],"faucet":["Please turn off the \u0000.","faucet","請把水龍頭關掉。"],"fault":["The accident was not his \u0000.","fault","那場意外不是他的錯。"],"fear":["The child has a \u0000 of dogs.","fear","那個孩子怕狗。"],"fee":["The \u0000 for this class is low.","fee","這門課的費用很低。"],"female":["A \u0000 doctor helped us.","female","一位女醫生幫了我們。"],"fence":["A white \u0000 is around the yard.","fence","院子四周有一道白色柵欄。"],"film":["The \u0000 last night was very good.","film","昨晚那部電影很好看。"],"final":["The \u0000 question was quite easy.","final","最後一題相當容易。"],"fit":["These shoes do not \u0000 me.","fit","這雙鞋不合我的腳。"],"flag":["The \u0000 is red and white.","flag","那面旗子是紅白色的。"],"flashlight":["He used a \u0000 in the dark.","flashlight","他在黑暗中用手電筒。"],"flat tire":["A \u0000 stopped our car.","flat tire","爆胎讓我們的車停了下來。"],"flight":["Our \u0000 leaves at nine.","flight","我們的班機九點起飛。"],"flour":["She needs \u0000 to make bread.","flour","她需要麵粉來做麵包。"],"flu":["He stayed home with the \u0000.","flu","他得了流感待在家。"],"focus":["Please \u0000 on your homework.","focus","請專心寫你的功課。"],"fog":["The \u0000 made the road hard to see.","fog","霧讓路很難看清楚。"],"foggy":["It is \u0000 this morning.","foggy","今天早上有霧。"],"fool":["Do not \u0000 your little brother.","fool","不要愚弄你弟弟。"],"foolish":["His \u0000 idea made us worry.","foolish","他愚蠢的想法讓我們擔心。"],"football":["They play \u0000 on Saturday.","football","他們星期六打美式足球。"],"forest":["Many animals live in the \u0000.","forest","森林裡住著很多動物。"],"forgive":["Please \u0000 me for being late.","forgive","請原諒我遲到。"],"form":["Fill in this \u0000 with a pen.","form","用筆填這張表格。"],"formal":["He wore \u0000 clothes to dinner.","formal","他穿正式服裝去晚餐。"],"former":["Our \u0000 teacher moved to another city.","former","我們的前任老師搬到別的城市了。"],"forward":["She stepped \u0000 and smiled.","forward","她向前走一步並微笑。"],"frank":["To be \u0000, I do not agree.","frank","坦白說，我不同意。"],"freedom":["Birds in the sky have \u0000.","freedom","天空中的鳥擁有自由。"],"freezer":["Put the meat in the \u0000.","freezer","把肉放進冷凍庫。"],"freezing":["The water is \u0000 cold.","freezing","那水冰得要命。"],"friendship":["Their \u0000 began at school.","friendship","他們的友誼從學校開始。"],"frighten":["The loud sound \u0000 the baby.","frightened","那個巨響嚇到了寶寶。"],"furniture":["The \u0000 in this room is old.","furniture","這個房間的傢俱很舊。"],"gain":["He \u0000 a lot from the trip.","gained","他從那趟旅行中收穫很多。"],"garage":["The car is in the \u0000.","garage","車子在車庫裡。"],"gather":["The students \u0000 on the playground.","gathered","學生們在操場上集合。"],"general":["The \u0000 rule is easy to follow.","general","這條普遍規則很容易遵守。"],"generous":["She is \u0000 to her friends.","generous","她對朋友很慷慨。"],"genius":["People say he is a \u0000.","genius","大家說他是天才。"],"gentle":["The nurse has a \u0000 voice.","gentle","那位護士聲音很溫柔。"],"gentleman":["The \u0000 opened the door for us.","gentleman","那位紳士替我們開門。"],"gesture":["He made a \u0000 with his hand.","gesture","他用手做了一個手勢。"],"goal":["My \u0000 is to speak English well.","goal","我的目標是把英文說好。"],"god":["Some people pray to their \u0000.","god","有些人向他們的神祈禱。"],"gold":["Her \u0000 ring is very old.","gold","她的金戒指很舊了。"],"golden":["The evening sky turned \u0000.","golden","傍晚的天空變成金色。"],"golf":["My uncle plays \u0000 on weekends.","golf","我叔叔週末打高爾夫球。"],"government":["The \u0000 built a new road.","government","政府蓋了一條新路。"],"granddaughter":["His \u0000 is five years old.","granddaughter","他的孫女五歲。"],"grandson":["Her \u0000 is only three years old.","grandson","她的孫子才三歲。"],"greedy":["The \u0000 man wanted more money.","greedy","那個貪心的人想要更多錢。"],"greet":["She \u0000 us at the door.","greeted","她在門口迎接我們。"],"guard":["Two men \u0000 the front gate.","guard","兩個人看守前門。"],"guest":["Our \u0000 will arrive at six.","guests","我們的客人六點會到。"],"guide":["A \u0000 showed us the old temple.","guide","一位嚮導帶我們看那座古寺。"],"gun":["The police officer carries a \u0000.","gun","那位警察帶著一把槍。"],"haircut":["He got a \u0000 yesterday.","haircut","他昨天理了頭髮。"],"hairdresser":["The \u0000 washed my hair.","hairdresser","美髮師幫我洗頭。"],"hall":["We met in the school \u0000.","hall","我們在學校大廳見面。"],"hammer":["He fixed the box with a \u0000.","hammer","他用鎚子修好那個盒子。"],"handkerchief":["She keeps a \u0000 in her bag.","handkerchief","她包包裡放著一條手帕。"],"handle":["The \u0000 of the door is broken.","handle","門把壞了。"],"hanger":["Put your coat on the \u0000.","hanger","把你的大衣掛在衣架上。"],"heater":["We turn on the \u0000 in winter.","heater","我們冬天開暖氣。"],"height":["That building has a \u0000 of thirty meters.","height","那棟建築高三十公尺。"],"helicopter":["A \u0000 flew over our house.","helicopter","一架直升機飛過我們家上空。"],"hero":["He is a \u0000 to the children.","hero","他是孩子們心中的英雄。"],"highway":["The \u0000 was busy this morning.","highway","今天早上公路很忙碌。"],"hip":["She hurt her \u0000 when she fell.","hip","她跌倒時傷到了臀部。"],"hire":["The company will \u0000 five people.","hire","那家公司會僱用五個人。"],"hole":["My socks have a small \u0000.","hole","我的襪子破了一個小洞。"],"homesick":["She felt \u0000 at summer camp.","homesick","她在夏令營時想家。"],"honesty":["We should learn \u0000 from him.","honesty","我們應該向他學習誠實。"],"horrible":["The weather was \u0000 last week.","horrible","上星期天氣糟透了。"],"host":["Our \u0000 cooked a big dinner.","host","我們的主人煮了一頓大餐。"],"housework":["She does \u0000 every morning.","housework","她每天早上做家事。"],"hug":["The mother gave her son a \u0000.","hug","那位媽媽抱了她兒子一下。"],"human":["Every \u0000 needs water and food.","human","每個人都需要水和食物。"],"humble":["The rich man is very \u0000.","humble","那位有錢人很謙虛。"],"humid":["The weather is hot and \u0000.","humid","天氣又熱又潮濕。"],"humor":["His \u0000 makes us laugh.","humor","他的幽默讓我們發笑。"],"humorous":["Our teacher is a \u0000 person.","humorous","我們老師是個幽默的人。"],"hunger":["The dog cried from \u0000.","hunger","那隻狗餓得叫了起來。"],"hunter":["The \u0000 walked into the forest.","hunter","那個獵人走進森林。"],"ignore":["Do not \u0000 your parents' advice.","ignore","不要忽視父母的忠告。"],"ill":["He was \u0000 for three days.","ill","他病了三天。"],"imagine":["I cannot \u0000 life without music.","imagine","我無法想像沒有音樂的生活。"],"impolite":["It is \u0000 to shout here.","impolite","在這裡大叫很沒禮貌。"],"importance":["We learned the \u0000 of water.","importance","我們了解到水的重要性。"],"impossible":["It is \u0000 to finish today.","impossible","今天不可能完成。"],"improve":["My English \u0000 a lot this year.","improved","我的英文今年進步很多。"],"include":["The price \u0000 breakfast.","includes","價格包含早餐。"],"income":["His \u0000 is enough for the family.","income","他的收入夠養家。"],"increase":["The price of rice \u0000 last month.","increased","米價上個月漲了。"],"independent":["She is an \u0000 young woman.","independent","她是個獨立的年輕女子。"],"indicate":["The sign \u0000 the way out.","indicates","那個標誌指出出口的方向。"],"influence":["His teacher had a great \u0000 on him.","influence","他的老師對他影響很大。"],"information":["I need more \u0000 about the class.","information","我需要更多關於這門課的資訊。"],"ink":["The pen has no \u0000 left.","ink","那支筆沒有墨水了。"],"insist":["He \u0000 on paying the bill.","insisted","他堅持要付帳。"],"inspire":["Her story \u0000 many students.","inspired","她的故事鼓舞了許多學生。"],"instant":["She made \u0000 noodles for lunch.","instant","她午餐煮了泡麵。"],"instrument":["The doctor used a small \u0000.","instrument","醫生用了一個小儀器。"],"intelligent":["He is an \u0000 boy.","intelligent","他是個聰明的男孩。"],"international":["This is an \u0000 school.","international","這是一所國際學校。"],"interrupt":["Please do not \u0000 me now.","interrupt","請現在不要打斷我。"],"introduce":["Let me \u0000 my friend to you.","introduce","讓我把我的朋友介紹給你。"],"invent":["Who \u0000 the telephone?","invented","誰發明了電話？"],"invitation":["I got an \u0000 to her party.","invitation","我收到她派對的邀請。"],"iron":["My mother \u0000 my shirt every morning.","irons","我媽媽每天早上燙我的襯衫。"],"jam":["She likes bread with strawberry \u0000.","jam","她喜歡麵包配草莓果醬。"],"jazz":["My father enjoys \u0000 music.","jazz","我爸爸喜歡爵士樂。"],"jealous":["He was \u0000 of his brother.","jealous","他嫉妒他哥哥。"],"jeep":["They drove a \u0000 up the hill.","jeep","他們開吉普車上山。"],"joke":["His \u0000 made everyone laugh.","joke","他的笑話讓大家發笑。"],"journalist":["The \u0000 wrote about our school.","journalist","那位記者寫了我們學校。"],"judge":["The \u0000 asked him many questions.","judge","法官問了他很多問題。"],"ketchup":["He put \u0000 on the French fries.","ketchup","他在薯條上加番茄醬。"],"kilometer":["The park is two \u0000 away.","kilometers","公園在兩公里外。"],"kindergarten":["My niece goes to \u0000.","kindergarten","我姪女上幼稚園。"],"kingdom":["The story happened in an old \u0000.","kingdom","那個故事發生在一個古老的王國。"],"kitten":["The \u0000 is playing with a ball.","kitten","小貓正在玩球。"],"lack":["The plants died from \u0000 of water.","lack","那些植物因缺水而死。"],"lady":["A kind \u0000 helped me find the way.","lady","一位親切的女士幫我找到路。"],"lamb":["The little \u0000 followed its mother.","lamb","小羊跟著牠的媽媽。"],"latter":["Of the two books, I like the \u0000.","latter","那兩本書我比較喜歡後者。"],"law":["Everyone must follow the \u0000.","law","每個人都必須遵守法律。"],"lay":["She \u0000 the baby on the bed.","laid","她把寶寶放在床上。"],"leaf":["A yellow \u0000 fell from the tree.","leaf","一片黃葉從樹上落下。"],"level":["The water \u0000 in the river is high.","level","河裡的水位很高。"],"lick":["The dog \u0000 my hand.","licked","那隻狗舔我的手。"],"lift":["He \u0000 the heavy box with both hands.","lifted","他用雙手舉起那個重箱子。"],"lightning":["We saw \u0000 during the storm.","lightning","我們在暴風雨中看見閃電。"],"likely":["It is \u0000 to rain tonight.","likely","今晚可能會下雨。"],"limit":["This test has a time \u0000.","limit","這個考試有時間限制。"],"link":["The two problems have a clear \u0000.","link","這兩個問題有明顯的關聯。"],"liter":["She drinks two \u0000 of water daily.","liters","她每天喝兩公升的水。"],"loaf":["He bought a \u0000 of bread.","loaf","他買了一條麵包。"],"local":["We ate at a \u0000 restaurant.","local","我們在一家當地的餐廳吃飯。"],"lock":["Please \u0000 the door before you leave.","lock","離開前請鎖門。"],"locker":["My books are in my \u0000.","locker","我的書在我的置物櫃裡。"],"loser":["Nobody wants to be a \u0000.","loser","沒有人想當輸家。"],"ma'am":["","Excuse me, ma'am, is this your seat?","女士，不好意思，這是您的座位嗎？"],"magazine":["He reads a \u0000 on the bus.","magazine","他在公車上看雜誌。"],"magician":["The \u0000 made a rabbit appear.","magician","魔術師變出一隻兔子。"],"main":["The \u0000 problem is the price.","main","主要的問題是價格。"],"major":["Music is his \u0000 interest.","major","音樂是他主要的興趣。"],"male":["A \u0000 teacher teaches our class.","male","一位男老師教我們班。"],"mall":["We went shopping at the \u0000.","mall","我們去購物中心買東西。"],"manager":["The \u0000 talked to the workers.","manager","經理跟工人談話。"],"mango":["This \u0000 is sweet and fresh.","mango","這顆芒果又甜又新鮮。"],"manner":["His \u0000 at the table is good.","manner","他的餐桌禮儀很好。"],"marry":["She will \u0000 him next spring.","marry","她明年春天要和他結婚。"],"marvelous":["The show last night was \u0000.","marvelous","昨晚的表演很了不起。"],"master":["She is a \u0000 of the guitar.","master","她是吉他高手。"],"match":["Your shoes \u0000 your dress.","match","你的鞋子和洋裝很搭。"],"maximum":["The \u0000 number of students is thirty.","maximum","學生人數最多三十人。"],"measure":["Please \u0000 this desk with a ruler.","measure","請用尺量這張書桌。"],"mechanic":["The \u0000 fixed our car.","mechanic","那位技工修好了我們的車。"],"member":["She joined the music club as a \u0000.","member","她加入音樂社成為社員。"],"memory":["That day is a happy \u0000 for me.","memory","那天對我來說是快樂的回憶。"],"men's room":["The \u0000 is near the exit.","men's room","男廁在出口附近。"],"metal":["This box is made of \u0000.","metal","這個盒子是金屬做的。"],"meter":["The wall is three \u0000 high.","meters","那面牆高三公尺。"],"method":["This \u0000 is easy to learn.","method","這個方法很容易學。"],"microwave":["Heat the soup in the \u0000.","microwave","用微波爐把湯加熱。"],"middle":["She sat in the \u0000 of the room.","middle","她坐在房間中央。"],"midnight":["He went to bed after \u0000.","midnight","他午夜之後才上床。"],"minor":["This is only a \u0000 problem.","minor","這只是個小問題。"],"minus":["Ten \u0000 three is seven.","minus","十減三是七。"],"mirror":["She looked at herself in the \u0000.","mirror","她照鏡子看自己。"],"mix":["\u0000 the flour and water together.","Mix","把麵粉和水混合。"],"model":["He built a \u0000 of an airplane.","model","他做了一架飛機模型。"],"monster":["The child was afraid of the \u0000.","monster","那個孩子怕怪物。"],"mosquito":["A \u0000 bit my arm.","mosquito","一隻蚊子咬了我的手臂。"],"motion":["The boat's \u0000 made me dizzy.","motion","船的搖動讓我頭暈。"],"movement":["His \u0000 was quick and light.","movement","他的動作又快又輕。"],"musician":["The \u0000 played for two hours.","musician","那位音樂家演奏了兩小時。"],"napkin":["Please give me a clean \u0000.","napkin","請給我一條乾淨的餐巾。"],"narrow":["This road is too \u0000 for trucks.","narrow","這條路對卡車來說太窄了。"],"nation":["Our \u0000 is famous for its food.","nation","我們國家以美食聞名。"],"natural":["We should protect \u0000 things.","natural","我們應該保護天然的事物。"],"naughty":["The \u0000 boy hid my pen.","naughty","那個頑皮的男孩藏了我的筆。"],"necessary":["Water is \u0000 for all life.","necessary","水對所有生命都是必要的。"],"necklace":["Her \u0000 is made of gold.","necklace","她的項鍊是金做的。"],"needle":["Be careful with that sharp \u0000.","needle","小心那根尖針。"],"negative":["His answer was \u0000.","negative","他的回答是否定的。"],"neither":["","Neither answer is correct.","兩個答案都不對。"],"nephew":["My \u0000 is six years old.","nephew","我姪子六歲。"],"nest":["There are three eggs in the \u0000.","nest","巢裡有三顆蛋。"],"net":["The fisherman pulled up his \u0000.","net","漁夫把網子拉上來。"],"nice-looking":["That \u0000 young man is my cousin.","nice-looking","那個好看的年輕人是我表哥。"],"niece":["My \u0000 loves to draw.","niece","我姪女喜歡畫畫。"],"noisy":["The classroom is \u0000 today.","noisy","今天教室很吵。"],"none":["\u0000 of the students were late.","None","沒有一個學生遲到。"],"nor":["","He does not smoke, nor does he drink.","他不抽菸，也不喝酒。"],"novel":["She is reading a long \u0000.","novel","她正在讀一本長篇小說。"],"nut":["The bird ate a small \u0000.","nut","那隻鳥吃了一顆小果實。"],"obey":["Children should \u0000 the school rules.","obey","孩子應該遵守校規。"],"object":["Many people \u0000 to the new plan.","object","很多人反對那個新計畫。"],"ocean":["The \u0000 looks calm today.","ocean","今天海面看起來很平靜。"],"oneself":["One should take care of \u0000.","oneself","人應該照顧好自己。"],"onion":["She cut an \u0000 for the soup.","onion","她切了一顆洋蔥煮湯。"],"operation":["The \u0000 took three hours.","operation","那場手術花了三小時。"],"opinion":["In my \u0000, the plan is good.","opinion","依我看，這個計畫很好。"],"ordinary":["It was just an \u0000 day.","ordinary","那只是平常的一天。"],"oven":["She baked the bread in the \u0000.","oven","她用烤箱烤麵包。"],"overpass":["We crossed the road by the \u0000.","overpass","我們走天橋過馬路。"],"overseas":["His brother works \u0000.","overseas","他哥哥在海外工作。"],"owner":["The \u0000 of this dog is my neighbor.","owner","這隻狗的主人是我的鄰居。"],"pain":["He felt a sharp \u0000 in his leg.","pain","他覺得腿上一陣劇痛。"],"painter":["The \u0000 finished the wall today.","painter","油漆匠今天把牆刷完了。"],"pajamas":["He wears blue \u0000 to bed.","pajamas","他穿藍色睡衣睡覺。"],"pale":["Her face turned \u0000 after the news.","pale","聽到消息後她的臉變得蒼白。"],"pan":["Put some oil in the \u0000.","pan","在平底鍋裡放一些油。"],"panda":["The \u0000 is eating leaves.","panda","貓熊正在吃葉子。"],"pardon":["\u0000 me, I did not hear you.","Pardon","抱歉，我沒聽見你說的話。"],"parking lot":["The \u0000 is behind the store.","parking lot","停車場在商店後面。"],"parrot":["The \u0000 can say a few words.","parrot","那隻鸚鵡會說幾個字。"],"partner":["She is my \u0000 in this game.","partner","她是我這場遊戲的夥伴。"],"passenger":["The \u0000 waited on the bus.","passengers","乘客們在公車上等著。"],"path":["We walked along a small \u0000.","path","我們沿著小徑走。"],"patient":["The doctor talked to the \u0000.","patient","醫生和病人談話。"],"pattern":["This shirt has a simple \u0000.","pattern","這件襯衫有簡單的圖案。"],"pause":["She \u0000 before she answered.","paused","她回答之前停頓了一下。"],"peace":["Everyone hopes for \u0000.","peace","每個人都希望和平。"],"peaceful":["The village is quiet and \u0000.","peaceful","那個村莊安靜又祥和。"],"pepper":["Add some \u0000 to the soup.","pepper","在湯裡加一些胡椒。"],"perfect":["Her English is not \u0000 yet.","perfect","她的英文還不完美。"],"period":["We have four \u0000 this morning.","periods","我們今天早上有四堂課。"],"personal":["This is my \u0000 notebook.","personal","這是我個人的筆記本。"],"physics":["\u0000 is harder than chemistry.","Physics","物理比化學難。"],"pigeon":["A \u0000 landed on the roof.","pigeon","一隻鴿子停在屋頂上。"],"pile":["A \u0000 of books sat on the desk.","pile","書桌上放著一堆書。"],"pillow":["This \u0000 is soft and clean.","pillow","這個枕頭又軟又乾淨。"],"pineapple":["\u0000 is my favorite fruit.","Pineapple","鳳梨是我最喜歡的水果。"],"plain":["She likes \u0000 and simple clothes.","plain","她喜歡樸素簡單的衣服。"],"platform":["We waited on the \u0000 for the train.","platform","我們在月台上等火車。"],"pleasant":["Our walk in the park was \u0000.","pleasant","我們在公園的散步很愉快。"],"pleased":["She was \u0000 with her test result.","pleased","她對考試結果很滿意。"],"plus":["Five \u0000 four is nine.","plus","五加四是九。"],"poem":["He wrote a short \u0000 for his mother.","poem","他為媽媽寫了一首短詩。"],"pollute":["Factories should not \u0000 the river.","pollute","工廠不該污染這條河。"],"pollution":["Air \u0000 is a serious problem.","pollution","空氣污染是嚴重的問題。"],"pop music":["She listens to \u0000 every day.","pop music","她每天聽流行音樂。"],"population":["This town has a small \u0000.","population","這個城鎮人口很少。"],"positive":["She gave a \u0000 answer.","positive","她給了肯定的回答。"],"potato":["We had \u0000 with our steak.","potatoes","我們吃牛排配馬鈴薯。"],"powder":["She put some \u0000 in the water.","powder","她在水裡加了一些粉。"],"praise":["The teacher \u0000 his hard work.","praised","老師讚美他的努力。"],"president":["The \u0000 spoke to the students.","president","校長向學生們講話。"],"pressure":["He feels \u0000 before every exam.","pressure","他每次考試前都感到壓力。"],"priest":["The \u0000 lives near the church.","priest","那位神父住在教堂附近。"],"primary":["Health is our \u0000 concern.","primary","健康是我們主要關心的事。"],"principal":["Our \u0000 is a kind woman.","principal","我們校長是個親切的女士。"],"principle":["He never breaks his own \u0000.","principle","他從不違背自己的原則。"],"print":["Please \u0000 your name here.","print","請在這裡用印刷體寫下你的名字。"],"printer":["The \u0000 in the office is broken.","printer","辦公室的印表機壞了。"],"private":["They keep a \u0000 garden behind the house.","private","他們在房子後面有一座私人花園。"],"produce":["This farm \u0000 fresh milk.","produces","這座農場生產新鮮牛奶。"],"production":["The factory stopped \u0000 last week.","production","那家工廠上星期停止生產。"],"professor":["The \u0000 teaches at a college.","professor","那位教授在大學任教。"],"progress":["She has made good \u0000 in English.","progress","她的英文進步很多。"],"project":["Our class finished the \u0000 together.","project","我們班一起完成了那個計畫。"],"promise":["He \u0000 to call me tonight.","promised","他答應今晚打電話給我。"],"pronounce":["Can you \u0000 this word for me?","pronounce","你可以幫我唸這個字嗎？"],"protect":["We must \u0000 these old trees.","protect","我們必須保護這些老樹。"],"provide":["The school \u0000 free lunch.","provides","學校提供免費午餐。"],"pump":["He used a \u0000 to fill the tire.","pump","他用打氣機把輪胎充氣。"],"punish":["The teacher did not \u0000 him.","punish","老師沒有處罰他。"],"purpose":["His \u0000 was clear to everyone.","purpose","他的目的大家都很清楚。"],"purse":["She keeps her coins in a \u0000.","purse","她把硬幣放在錢包裡。"],"quit":["He \u0000 his job last month.","quit","他上個月辭職了。"],"raincoat":["Wear your \u0000, it is raining.","raincoat","穿上雨衣，正在下雨。"],"rather":["I would \u0000 stay home tonight.","rather","我今晚寧可待在家。"],"reach":["She cannot \u0000 the top shelf.","reach","她構不到最上面的架子。"],"realize":["I did not \u0000 my mistake.","realize","我沒有察覺自己的錯誤。"],"reason":["Tell me the \u0000 for your choice.","reason","告訴我你選擇的理由。"],"receive":["I \u0000 your letter yesterday.","received","我昨天收到你的信。"],"record":["Please \u0000 the number here.","record","請把號碼記錄在這裡。"],"recover":["He \u0000 from the flu quickly.","recovered","他很快從流感中康復。"],"rectangle":["Draw a \u0000 on the paper.","rectangle","在紙上畫一個長方形。"],"recycle":["We \u0000 paper and bottles.","recycle","我們回收紙張和瓶子。"],"refuse":["He \u0000 my help.","refused","他拒絕了我的幫忙。"],"regret":["She \u0000 saying those words.","regrets","她後悔說了那些話。"],"reject":["The company \u0000 his plan.","rejected","那家公司拒絕了他的計畫。"],"relative":["Many \u0000 came to the party.","relatives","很多親戚來參加派對。"],"remind":["Please \u0000 me to call her.","remind","請提醒我打電話給她。"],"repair":["He can \u0000 old radios.","repair","他會修理舊收音機。"],"report":["She wrote a \u0000 about animals.","report","她寫了一篇關於動物的報告。"],"respect":["We \u0000 our teachers.","respect","我們尊敬我們的老師。"],"responsible":["He is \u0000 for the money.","responsible","他負責這筆錢。"],"result":["The game \u0000 surprised us.","result","比賽結果讓我們驚訝。"],"return":["Please \u0000 this book next week.","return","請下星期還這本書。"],"review":["We \u0000 our lessons every weekend.","review","我們每個週末複習功課。"],"revise":["The teacher \u0000 my sentence.","revised","老師修改了我的句子。"],"rob":["Two men \u0000 the small store.","robbed","兩個男人搶了那家小店。"],"role":["He plays an important \u0000 in our team.","role","他在我們隊上扮演重要角色。"],"roof":["The \u0000 of the house is red.","roof","那間房子的屋頂是紅色的。"],"rub":["She \u0000 her eyes and stood up.","rubbed","她揉了揉眼睛站起來。"],"rubber":["These shoes have \u0000 bottoms.","rubber","這雙鞋的鞋底是橡膠做的。"],"rude":["It is \u0000 to shout at people.","rude","對人大吼很無禮。"],"ruin":["The heavy rain \u0000 our picnic.","ruined","大雨毀了我們的野餐。"],"rush":["Do not \u0000, we have time.","rush","不要急，我們還有時間。"],"safety":["We must think about \u0000 first.","safety","我們必須先想到安全。"],"sailor":["The \u0000 works on a big ship.","sailor","那位水手在一艘大船上工作。"],"sample":["The clerk gave us a free \u0000.","sample","店員給了我們一份免費樣品。"],"sand":["The children played in the \u0000.","sand","孩子們在沙子裡玩。"],"satisfy":["The meal did not \u0000 him.","satisfy","那頓飯沒有讓他滿意。"],"saucer":["Put the cup on the \u0000.","saucer","把杯子放在淺碟上。"],"scarf":["She wears a red \u0000 in winter.","scarf","她冬天圍紅圍巾。"],"scene":["The last \u0000 of the film was sad.","scene","電影的最後一幕很悲傷。"],"scenery":["The \u0000 here is beautiful.","scenery","這裡的風景很美。"],"scientist":["The \u0000 studies plants.","scientist","那位科學家研究植物。"],"score":["His \u0000 on the test was high.","score","他的考試分數很高。"],"seafood":["We ate \u0000 by the sea.","seafood","我們在海邊吃海鮮。"],"search":["They \u0000 the room for the key.","searched","他們在房間裡找那把鑰匙。"],"secondary":["The cost is only a \u0000 problem.","secondary","費用只是次要的問題。"],"secret":["Please keep this a \u0000.","secret","請把這件事保密。"],"section":["Read the first \u0000 of the book.","section","讀這本書的第一節。"],"seek":["They \u0000 help from the police.","seek","他們向警察求助。"],"seem":["She \u0000 tired today.","seems","她今天似乎很累。"],"select":["Please \u0000 one of these colors.","select","請從這些顏色中選一個。"],"selfish":["Do not be \u0000 with your toys.","selfish","不要對你的玩具那麼自私。"],"semester":["This \u0000 ends in June.","semester","這個學期六月結束。"],"sense":["Dogs have a good \u0000 of smell.","sense","狗的嗅覺很好。"],"servant":["The \u0000 opened the front door.","servant","僕人打開了前門。"],"serve":["The waiter \u0000 us quickly.","served","服務生很快為我們服務。"],"service":["The \u0000 at this hotel is good.","service","這家旅館的服務很好。"],"sheet":["Give me a \u0000 of paper.","sheet","給我一張紙。"],"shelf":["The books are on the top \u0000.","shelf","那些書在最上面的架子上。"],"shoot":["He \u0000 the ball into the goal.","shot","他把球射進球門。"],"shore":["We walked along the \u0000.","shore","我們沿著岸邊走。"],"shower":["I take a \u0000 every night.","shower","我每天晚上淋浴。"],"shrimp":["This \u0000 soup tastes great.","shrimp","這道蝦湯很好喝。"],"shut":["Please \u0000 the door quietly.","shut","請輕輕把門關上。"],"silence":["We sat in \u0000 for a while.","silence","我們沉默地坐了一會兒。"],"silent":["The classroom became \u0000.","silent","教室變得安靜無聲。"],"silly":["He asked a \u0000 question.","silly","他問了一個傻問題。"],"silver":["She wears a \u0000 ring.","silver","她戴著一枚銀戒指。"],"similar":["Our ideas are quite \u0000.","similar","我們的想法相當相似。"],"sincere":["His words were \u0000.","sincere","他的話很誠懇。"],"single":["Not a \u0000 student was absent.","single","沒有一個學生缺席。"],"sink":["The heavy stone \u0000 in the water.","sank","那塊重石頭沉入水中。"],"ski":["They \u0000 in the mountains in winter.","ski","他們冬天在山上滑雪。"],"skill":["Cooking is a useful \u0000.","skill","做菜是一項有用的技能。"],"skin":["The baby has soft \u0000.","skin","那個寶寶皮膚很柔嫩。"],"skinny":["The \u0000 dog needs more food.","skinny","那隻瘦狗需要更多食物。"],"sleepy":["I feel \u0000 after lunch.","sleepy","午餐後我覺得想睡。"],"slice":["She cut the bread into \u0000.","slices","她把麵包切成片。"],"slippers":["He wears \u0000 at home.","slippers","他在家穿拖鞋。"],"snail":["A \u0000 moved across the leaf.","snail","一隻蝸牛爬過葉子。"],"sneakers":["His new \u0000 are white.","sneakers","他的新球鞋是白色的。"],"sneaky":["The \u0000 cat took the fish.","sneaky","那隻鬼鬼祟祟的貓叼走了魚。"],"soap":["Wash your hands with \u0000.","soap","用肥皂洗手。"],"social":["We joined a \u0000 activity.","social","我們參加了一項社交活動。"],"society":["Every person is part of \u0000.","society","每個人都是社會的一部分。"],"soda":["He drank a cold \u0000.","soda","他喝了一罐冰汽水。"],"soft drink":["A cold \u0000 is what she wants.","soft drink","她想要的是一杯冰冷飲。"],"softball":["Our team plays \u0000 on Sunday.","softball","我們隊星期天打壘球。"],"solve":["Can you \u0000 this problem?","solve","你能解決這個問題嗎？"],"soul":["Music touches the \u0000.","soul","音樂觸動靈魂。"],"sour":["These lemons are very \u0000.","sour","這些檸檬很酸。"],"soy sauce":["Add a little \u0000 to the fish.","soy sauce","在魚上加一點醬油。"],"speaker":["The \u0000 talked about the environment.","speaker","演講者談到環境。"],"speech":["His \u0000 was short and clear.","speech","他的演講簡短又清楚。"],"speed":["The train moved at high \u0000.","speed","火車高速行駛。"],"spirit":["The team played with great \u0000.","spirit","那支隊伍打得很有精神。"],"spot":["We found a quiet \u0000 for lunch.","spot","我們找到一個安靜的地方吃午餐。"],"state":["He \u0000 his opinion clearly.","stated","他清楚地陳述他的意見。"],"stationery":["She bought \u0000 for school.","stationery","她買了上學用的文具。"],"steal":["Someone \u0000 my bike last night.","stole","昨晚有人偷了我的腳踏車。"],"steam":["\u0000 came out of the pot.","Steam","蒸氣從鍋子裡冒出來。"],"step":["He took one \u0000 forward.","step","他向前走了一步。"],"stingy":["The \u0000 man never shares.","stingy","那個小氣的人從不分享。"],"stomachache":["She has a \u0000 today.","stomachache","她今天胃痛。"],"stone":["A large \u0000 lay on the road.","stone","一塊大石頭躺在路上。"],"storm":["The \u0000 lasted all night.","storm","暴風雨持續了一整夜。"],"stormy":["We stayed home on that \u0000 night.","stormy","那個暴風雨的夜晚我們待在家。"],"stove":["She cooks soup on the \u0000.","stove","她在爐子上煮湯。"],"stream":["A small \u0000 runs behind the house.","stream","一條小溪流過房子後面。"],"strike":["The clock \u0000 twelve.","struck","時鐘敲了十二下。"],"style":["I like the \u0000 of this coat.","style","我喜歡這件大衣的風格。"],"subway":["We take the \u0000 to work.","subway","我們搭地鐵上班。"],"succeed":["He worked hard and \u0000.","succeeded","他努力工作並且成功了。"],"success":["Her \u0000 made her parents proud.","success","她的成功讓父母很驕傲。"],"such":["","I have never seen such a big dog.","我從沒見過這麼大的狗。"],"sudden":["His \u0000 question surprised me.","sudden","他突然的問題讓我驚訝。"],"suggest":["She \u0000 a different plan.","suggested","她建議了另一個計畫。"],"suit":["He wore a black \u0000 to the meeting.","suit","他穿黑色西裝去開會。"],"super":["Your plan sounds \u0000 to me.","super","你的計畫聽起來超棒的。"],"survive":["The old tree \u0000 the typhoon.","survived","那棵老樹在颱風後存活下來。"],"swallow":["He \u0000 the medicine with water.","swallowed","他配水把藥吞下去。"],"swan":["A white \u0000 swam across the lake.","swan","一隻白天鵝游過湖面。"],"swimsuit":["She packed her \u0000 for the trip.","swimsuit","她為旅行打包了泳衣。"],"symbol":["The heart is a \u0000 of love.","symbol","心是愛的象徵。"],"system":["Our school has a new computer \u0000.","system","我們學校有新的電腦系統。"],"table tennis":["We play \u0000 after school.","table tennis","我們放學後打乒乓球。"],"talent":["Her \u0000 for music is clear.","talent","她的音樂天分很明顯。"],"talkative":["My little sister is very \u0000.","talkative","我妹妹很愛說話。"],"tangerine":["These \u0000 are sweet and cheap.","tangerines","這些橘子又甜又便宜。"],"tank":["The fish \u0000 is next to the window.","tank","魚缸在窗戶旁邊。"],"teapot":["She filled the \u0000 with hot water.","teapot","她把茶壺裝滿熱水。"],"tear":["\u0000 ran down her face.","Tears","眼淚從她臉上流下來。"],"temperature":["The \u0000 dropped last night.","temperature","昨晚溫度下降了。"],"tent":["We put up a \u0000 near the river.","tent","我們在河邊搭了一頂帳篷。"],"term":["This \u0000 ends in January.","term","這個學期一月結束。"],"terrific":["Your idea sounds \u0000.","terrific","你的主意聽起來很棒。"],"textbook":["Open your \u0000 to page five.","textbook","把課本翻到第五頁。"],"Thanksgiving":["They eat turkey on \u0000.","Thanksgiving","他們感恩節吃火雞。"],"therefore":["It rained; \u0000, we stayed home.","therefore","下雨了，因此我們待在家。"],"thief":["The \u0000 took her purse.","thief","小偷拿走了她的錢包。"],"through":["We walked \u0000 the park together.","through","我們一起走過那座公園。"],"thumb":["My \u0000 hurts after using the hammer.","thumb","用完鎚子後我的拇指很痛。"],"thunder":["The \u0000 woke the baby.","thunder","雷聲吵醒了寶寶。"],"till":["Wait here \u0000 I come back.","till","在這裡等到我回來。"],"tiny":["A \u0000 bird sat on the branch.","tiny","一隻小小的鳥停在樹枝上。"],"tip":["He left a \u0000 for the waiter.","tip","他留了小費給服務生。"],"title":["The \u0000 of the book is short.","title","那本書的書名很短。"],"tofu":["My mother cooks \u0000 with vegetables.","tofu","我媽媽用蔬菜煮豆腐。"],"tongue":["The dog's \u0000 is pink.","tongue","那隻狗的舌頭是粉紅色的。"],"toothache":["He has a \u0000 today.","toothache","他今天牙痛。"],"toothbrush":["My \u0000 is blue and new.","toothbrush","我的牙刷是藍色的新牙刷。"],"toward":["She walked \u0000 the door.","toward","她朝門口走去。"],"tower":["The \u0000 near the sea is very old.","tower","海邊那座塔很古老。"],"trace":["The police found no \u0000 of him.","trace","警方找不到他的蹤跡。"],"trade":["The two countries \u0000 with each other.","trade","那兩個國家彼此貿易。"],"tradition":["Making dumplings is a family \u0000.","tradition","包餃子是家族傳統。"],"traditional":["We wore \u0000 clothes that day.","traditional","那天我們穿傳統服裝。"],"trap":["The mouse ran into the \u0000.","trap","老鼠跑進了陷阱。"],"travel":["They \u0000 by train every summer.","travel","他們每年夏天搭火車旅行。"],"treasure":["The old map showed the \u0000.","treasure","那張舊地圖顯示了寶藏的位置。"],"trousers":["His \u0000 are too long.","trousers","他的長褲太長了。"],"trumpet":["He plays the \u0000 in the band.","trumpet","他在樂團裡吹小喇叭。"],"truth":["Please tell me the \u0000.","truth","請告訴我實話。"],"tube":["The \u0000 is full of water.","tube","那根管子裡都是水。"],"tunnel":["The train went through a long \u0000.","tunnel","火車穿過一條長隧道。"],"ugly":["The old chair looks \u0000.","ugly","那張舊椅子看起來很醜。"],"underline":["Please \u0000 the correct answer.","underline","請在正確答案下畫線。"],"underpass":["We crossed the road by the \u0000.","underpass","我們走地下道過馬路。"],"underwear":["She washed her \u0000 by hand.","underwear","她用手洗內衣。"],"unique":["Every child is \u0000.","unique","每個孩子都是獨特的。"],"universe":["There are many stars in the \u0000.","universe","宇宙裡有很多星星。"],"university":["His brother studies at a \u0000.","university","他哥哥在大學念書。"],"upon":["The cat jumped \u0000 the desk.","upon","貓跳到書桌上。"],"upper":["Her room is on the \u0000 floor.","upper","她的房間在較高的樓層。"],"upstairs":["My father is reading \u0000.","upstairs","我爸爸在樓上看書。"],"usual":["He came home at the \u0000 time.","usual","他在平常的時間回家。"],"Valentine":["She gave him a \u0000 card.","Valentine","她給了他一張情人節卡片。"],"valley":["A small river runs through the \u0000.","valley","一條小河流過山谷。"],"valuable":["This old book is very \u0000.","valuable","這本舊書很有價值。"],"value":["Health has great \u0000.","value","健康有很大的價值。"],"vendor":["A \u0000 sells fruit near the station.","vendor","一個小販在車站附近賣水果。"],"victory":["Their \u0000 made everyone happy.","victory","他們的勝利讓大家很開心。"],"village":["He grew up in a small \u0000.","village","他在一個小村莊長大。"],"vinegar":["Add a little \u0000 to the salad.","vinegar","在沙拉裡加一點醋。"],"visitor":["We had two \u0000 this morning.","visitors","我們今天早上有兩位訪客。"],"vocabulary":["Reading helps us build \u0000.","vocabulary","閱讀幫助我們累積字彙。"],"volleyball":["They play \u0000 on the beach.","volleyball","他們在海灘上打排球。"],"vote":["Students will \u0000 for a new leader.","vote","學生將投票選出新的隊長。"],"waist":["She put the belt around her \u0000.","waist","她把皮帶繫在腰上。"],"Walkman":["He listened to music on his \u0000.","Walkman","他用隨身聽聽音樂。"],"war":["Many people lost their homes in the \u0000.","war","很多人在戰爭中失去家園。"],"waste":["Do not \u0000 your time on this.","waste","不要在這件事上浪費時間。"],"waterfall":["We took a photo by the \u0000.","waterfall","我們在瀑布旁拍了照。"],"weekday":["She works only on \u0000.","weekdays","她只在工作日上班。"],"weight":["What is the \u0000 of this box?","weight","這個箱子的重量是多少？"],"wheel":["One \u0000 of the bike is broken.","wheel","腳踏車的一個輪子壞了。"],"while":["She sang \u0000 she washed the dishes.","while","她一邊洗碗一邊唱歌。"],"whole":["He ate the \u0000 cake by himself.","whole","他一個人吃掉了整個蛋糕。"],"wide":["The river here is very \u0000.","wide","這裡的河很寬。"],"wild":["\u0000 animals live in this forest.","Wild","野生動物住在這座森林裡。"],"wing":["The bird hurt its left \u0000.","wing","那隻鳥傷了左邊的翅膀。"],"winner":["The \u0000 got a gold cup.","winner","贏家得到一個金杯。"],"wok":["She cooks vegetables in a \u0000.","wok","她用炒菜鍋炒蔬菜。"],"wolf":["A \u0000 ran into the woods.","wolf","一隻狼跑進樹林。"],"women's room":["The \u0000 is on the left.","women's room","女廁在左邊。"],"wood":["This table is made of \u0000.","wood","這張桌子是木頭做的。"],"woods":["Some kids were playing in the \u0000.","woods","有些孩子在樹林裡玩。"],"worm":["A bird caught a \u0000 in the yard.","worm","一隻鳥在院子裡抓到一條蟲。"],"wound":["The \u0000 on his arm is small.","wound","他手臂上的傷口很小。"],"wrist":["She wears a watch on her \u0000.","wrist","她手腕上戴著手錶。"],"yell":["Do not \u0000 at your little brother.","yell","不要對你弟弟大吼。"],"ambitious":["He is an \u0000 young man.","ambitious","他是個有野心的年輕人。"],"accomplish":["She \u0000 her goal this year.","accomplished","她今年達成了目標。"],"curiosity":["Children learn through \u0000.","curiosity","孩子透過好奇心學習。"],"determination":["His \u0000 helped him win.","determination","他的決心幫助他獲勝。"],"enthusiasm":["She talked about the plan with \u0000.","enthusiasm","她熱情地談論那個計畫。"],"inevitable":["Change is \u0000 in life.","inevitable","人生中的改變是不可避免的。"],"magnificent":["The old temple looks \u0000.","magnificent","那座古寺看起來宏偉。"],"overwhelm":["The work \u0000 him.","overwhelmed","那份工作讓他不知所措。"],"persistent":["He is \u0000 about his dream.","persistent","他對自己的夢想堅持不懈。"],"remarkable":["Her progress this year is \u0000.","remarkable","她今年的進步很顯著。"],"sophisticated":["This machine is very \u0000.","sophisticated","這台機器很複雜。"],"tremendous":["The show was a \u0000 success.","tremendous","那場表演大獲成功。"],"unprecedented":["The heat this summer is \u0000.","unprecedented","今年夏天的熱是史無前例的。"],"versatile":["Our team needs a \u0000 player.","versatile","我們隊需要一個多才多藝的球員。"],"vivid":["He described the place in \u0000 words.","vivid","他用生動的話描述那個地方。"],"nonetheless":["It was hard; \u0000, he finished.","nonetheless","那很難，儘管如此他還是完成了。"],"innovative":["Their \u0000 idea surprised everyone.","innovative","他們創新的想法讓大家驚訝。"],"resilient":["Children are often \u0000.","resilient","孩子通常很有韌性。"],"perspective":["Try to see it from my \u0000.","perspective","試著從我的角度來看。"],"profound":["His \u0000 words changed my life.","profound","他深刻的話改變了我的人生。"],"authentic":["This is \u0000 Chinese food.","authentic","這是道地的中國菜。"],"controversial":["The new rule is \u0000.","controversial","那條新規定有爭議。"],"efficient":["She is an \u0000 worker.","efficient","她是個有效率的工作者。"],"thorough":["The doctor did a \u0000 check.","thorough","醫生做了徹底的檢查。"],"actually":["I \u0000 agree with you.","actually","我其實同意你。"],"anymore":["She does not play basketball \u0000.","anymore","她不再打籃球了。"],"beverage":["The store sells hot \u0000.","beverages","那家店賣熱飲。"],"boarding pass":["Please show me your \u0000.","boarding pass","請給我看你的登機證。"],"Celsius":["The water boils at one hundred \u0000.","Celsius","水在攝氏一百度沸騰。"],"challenge":["This test is a real \u0000.","challenge","這場考試是個真正的挑戰。"],"chef":["The \u0000 cooked a wonderful meal.","chef","主廚做了一頓很棒的餐點。"],"chore":["Washing dishes is my daily \u0000.","chore","洗碗是我每天的家務。"],"compete":["Ten students will \u0000 tomorrow.","compete","十個學生明天要競賽。"],"fishing rod":["He bought a new \u0000.","fishing rod","他買了一支新釣竿。"],"flash":["A light \u0000 in the dark room.","flashed","黑暗的房間裡閃過一道光。"],"flight attendant":["The \u0000 brought us water.","flight attendant","空服員給我們送水。"],"hometown":["My \u0000 is a quiet village.","hometown","我的家鄉是個安靜的村莊。"],"ingredient":["Sugar is the main \u0000 here.","ingredient","糖是這裡的主要食材。"],"lab":["We did a test in the \u0000.","lab","我們在實驗室做了測驗。"],"mood":["She is in a good \u0000 today.","mood","她今天心情很好。"],"normal":["His temperature is \u0000 now.","normal","他的體溫現在正常了。"],"open-minded":["Our teacher is \u0000.","open-minded","我們老師心胸開闊。"],"original":["The \u0000 plan was simpler.","original","原本的計畫比較簡單。"],"passport":["Do not lose your \u0000.","passport","不要弄丟你的護照。"],"pole":["The flag hangs on a tall \u0000.","pole","旗子掛在一根高竿上。"],"register":["Please \u0000 for the class today.","register","請今天登記這門課。"],"relax":["He \u0000 by listening to music.","relaxes","他靠聽音樂放鬆。"],"sandal":["She wears \u0000 in summer.","sandals","她夏天穿涼鞋。"],"sharp":["The meeting begins at nine \u0000.","sharp","會議九點準時開始。"],"sneaker":["One \u0000 is under the bed.","sneaker","一隻運動鞋在床底下。"],"swipe":["\u0000 your card at the gate.","Swipe","在閘門刷你的卡。"],"tough":["The last question was \u0000.","tough","最後一題很難。"],"vet":["We took our dog to the \u0000.","vet","我們帶狗去看獸醫。"],"waterproof":["This watch is \u0000.","waterproof","這支手錶是防水的。"],"get up":["","I get up at six every morning.","我每天早上六點起床。"],"teeth":["Brush your \u0000 before bed.","teeth","睡前刷牙。"],"video game":["He plays \u0000s on weekends.","video game","他週末玩電玩遊戲。"],"do the dishes":["I \u0000 after dinner.","do the dishes","我晚餐後洗碗盤。"],"anytime":["You can call me \u0000.","anytime","你隨時可以打給我。"],"how often":["","How often do you go swimming?","你多久去游泳一次？"],"following":["","Answer the following questions carefully.","仔細回答下列問題。"],"may/might":["","She may come, or she might not.","她可能會來，也可能不會。"],"toilet seat":["Please clean the \u0000.","toilet seat","請把馬桶座清乾淨。"],"for example":["","Some fruits, for example apples, are cheap.","有些水果，舉例來說蘋果，很便宜。"],"runner":["The \u0000 won the race easily.","runner","那位跑者輕鬆贏得比賽。"],"over there":["","Your bag is over there.","你的袋子在那邊。"],"take care of":["Please \u0000 my dog.","take care of","請照顧我的狗。"],"play the role of":["She will \u0000 a nurse.","play the role of","她將扮演護士的角色。"],"pancake":["We had \u0000 for breakfast.","pancakes","我們早餐吃鬆餅。"],"how many":["","How many books do you have?","你有多少本書？"],"of course":["","Of course you can join us.","你當然可以加入我們。"],"batter":["Mix the \u0000 before you cook it.","batter","下鍋前先把麵糊拌勻。"],"surf the Internet":["He likes to \u0000 at night.","surf the Internet","他喜歡晚上上網。"],"leftovers":["We ate the \u0000 for lunch.","leftovers","我們午餐吃了剩菜。"],"in the end":["","In the end, they became good friends.","最後他們成了好朋友。"],"amazing":["This is an \u0000 story.","amazing","這是個令人驚喜的故事。"],"bring/brought":["","He brought his notebook to class.","他把筆記本帶到課堂上。"],"buy/bought":["","She bought a new pair of shoes.","她買了一雙新鞋。"],"lead/led":["","He led the group to the temple.","他帶領那群人到寺廟。"],"suitcase":["Her \u0000 is heavy and large.","suitcase","她的手提箱又重又大。"],"throw/threw...away":["","He threw the old bag away.","他把舊袋子扔掉了。"],"plastic":["Please do not use \u0000 bags.","plastic","請不要使用塑膠袋。"],"one of a kind":["Her painting is \u0000.","one of a kind","她的畫作獨一無二。"],"keep/kept":["","She kept the letter for many years.","她把那封信保留了很多年。"],"swim/swam":["","They swam across the river last summer.","他們去年夏天游過那條河。"],"arrogant":["Nobody likes an \u0000 person.","arrogant","沒有人喜歡傲慢的人。"],"compassionate":["The nurse is kind and \u0000.","compassionate","那位護士親切又有同情心。"],"deteriorate":["His health began to \u0000.","deteriorate","他的健康開始惡化。"],"eloquent":["The speaker was clear and \u0000.","eloquent","那位演講者清楚又有口才。"],"flourish":["Their small business began to \u0000.","flourish","他們的小生意開始興旺。"],"gratitude":["She wrote a letter of \u0000.","gratitude","她寫了一封感謝信。"],"hypothesis":["The scientist tested his \u0000.","hypothesis","那位科學家測試了他的假設。"],"integrity":["We admire her \u0000.","integrity","我們敬佩她的誠正。"],"justify":["Nothing can \u0000 such a choice.","justify","沒有什麼能證明這種選擇是正當的。"],"legitimate":["His reason to leave is \u0000.","legitimate","他離開的理由是正當的。"],"meticulous":["He is \u0000 about his work.","meticulous","他對工作一絲不苟。"],"notorious":["That road is \u0000 for accidents.","notorious","那條路以事故多而惡名昭彰。"],"obstacle":["Fear is the biggest \u0000.","obstacle","恐懼是最大的障礙。"],"paradox":["His answer sounds like a \u0000.","paradox","他的回答聽起來像個悖論。"],"plausible":["His story sounds \u0000.","plausible","他的故事聽起來似乎有理。"],"prestigious":["She studies at a \u0000 university.","prestigious","她在一所有聲望的大學念書。"],"reluctant":["He was \u0000 to speak.","reluctant","他不情願開口。"],"scrutinize":["The teacher \u0000 every answer.","scrutinized","老師仔細檢查每個答案。"],"speculate":["People \u0000 about the reason.","speculate","人們推測原因。"],"subsequent":["The \u0000 days were rainy.","subsequent","隨後幾天都在下雨。"],"tedious":["The work was long and \u0000.","tedious","那份工作又長又乏味。"],"thrive":["Plants \u0000 in warm weather.","thrive","植物在溫暖的天氣裡茁壯。"],"ultimate":["Peace is our \u0000 goal.","ultimate","和平是我們的終極目標。"],"vulnerable":["Young birds are \u0000 to cold.","vulnerable","雛鳥容易受寒。"],"adversity":["She stayed strong in \u0000.","adversity","她在逆境中保持堅強。"],"arbitrary":["The rule seems \u0000 to us.","arbitrary","那條規定對我們來說很武斷。"],"compelling":["He gave a \u0000 reason.","compelling","他提出了一個有說服力的理由。"],"contemplate":["He sat quietly and \u0000.","contemplated","他安靜地坐著沉思。"],"deprive":["Do not \u0000 them of their rest.","deprive","不要剝奪他們的休息。"],"discrepancy":["The two reports show a \u0000.","discrepancy","那兩份報告顯示出差異。"],"distinctive":["Her voice is \u0000.","distinctive","她的聲音很獨特。"],"empirical":["His idea needs \u0000 support.","empirical","他的想法需要經驗上的支持。"],"facilitate":["A good plan \u0000 our work.","facilitates","好的計畫使我們的工作更便利。"],"hinder":["Heavy rain \u0000 the search.","hindered","大雨阻礙了搜尋。"],"inherent":["Curiosity is \u0000 in children.","inherent","好奇心是孩子與生俱來的。"],"intricate":["The design of this box is \u0000.","intricate","這個盒子的設計錯綜複雜。"],"optimistic":["She is \u0000 about the future.","optimistic","她對未來很樂觀。"],"pessimistic":["Try not to be so \u0000.","pessimistic","盡量不要那麼悲觀。"],"precarious":["His job is \u0000 right now.","precarious","他的工作目前不穩定。"],"prevalent":["This custom is \u0000 in the south.","prevalent","這個習俗在南部很普遍。"],"rigorous":["The school has \u0000 rules.","rigorous","那所學校有嚴謹的規定。"],"skeptical":["He is \u0000 about the news.","skeptical","他對那則消息抱持懷疑。"],"tangible":["We need \u0000 results.","tangible","我們需要有形的結果。"],"transparent":["The glass door is \u0000.","transparent","那扇玻璃門是透明的。"],"unanimous":["The decision was \u0000.","unanimous","那個決定是全體一致的。"],"underlying":["Nobody saw the \u0000 problem.","underlying","沒有人看見潛在的問題。"]};
+
+var DAILY_SKIP = {"I":1,"Miss":1,"Mr.":1,"Mrs.":1,"Ms.":1,"OK":1,"a (an)":1,"a few":1,"a little":1,"a lot":1,"a.m.":1,"again":1,"all":1,"also":1,"always":1,"and":1,"another":1,"any":1,"as":1,"at":1,"be":1,"because":1,"both":1,"bring/brought":1,"but":1,"buy/bought":1,"by":1,"can":1,"do":1,"each":1,"eight":1,"either":1,"ever":1,"every":1,"few":1,"five":1,"following":1,"for":1,"for example":1,"four":1,"from":1,"get up":1,"have":1,"he":1,"hello":1,"here":1,"hey":1,"hi":1,"how":1,"how many":1,"how much":1,"how often":1,"if":1,"in":1,"in the end":1,"it":1,"just":1,"keep/kept":1,"later":1,"lead/led":1,"less":1,"ma'am":1,"many":1,"may":1,"may/might":1,"more":1,"most":1,"much":1,"must":1,"neither":1,"never":1,"nine":1,"no":1,"nor":1,"not":1,"now":1,"o'clock":1,"of":1,"of course":1,"often":1,"on":1,"once":1,"one":1,"only":1,"or":1,"other":1,"over there":1,"p.m.":1,"seven":1,"shall":1,"she":1,"should":1,"sir":1,"six":1,"so":1,"some":1,"sometimes":1,"soon":1,"still":1,"such":1,"swim/swam":1,"ten":1,"than":1,"that":1,"the":1,"then":1,"there":1,"these":1,"they":1,"this":1,"those":1,"three":1,"throw/threw...away":1,"to":1,"too":1,"two":1,"usually":1,"very":1,"we":1,"what":1,"when":1,"where":1,"which":1,"who":1,"whose":1,"why":1,"will":1,"with":1,"without":1,"yes":1,"yet":1,"you":1};
+
 
 var GRAMMAR_BANK = [
   { sentence: "She ___ to school every day.", options: ["go", "goes", "going", "gone"], correct: "goes", tip: "主詞是第三人稱單數(she)，動詞要加 s", level: "basic", zh: "她每天去上學。" },
@@ -3752,34 +3774,71 @@ var DIFFICULTIES = [
 var BUILD = "v2026.09.04c";
 
 // ------------------------------------------------------------------
-// 今日單字（新增）
-// 用「日期」當種子從 WORD_BANK 挑一個字，所以同一天所有人看到的都一樣。
-// 只讀取 WORD_BANK，不新增、不刪除、不排序，關卡內容完全不受影響。
+// 每日一句（原「今日單字」改版）
+// 一天一句，句中挖掉當天的目標單字，中文翻譯直接給，按「看答案」才填回去。
+// 同一天全世界看到同一句（用 UTC+8 的天數當索引）。
+// 只讀取 WORD_BANK / EX_BANK，不新增、不刪除、不排序，關卡內容完全不受影響。
 // ------------------------------------------------------------------
-var DAILY_LEVELS = { basic: 1, advanced: 1 };   // 地獄字不放今日單字
+var DAILY_LEVELS = { basic: 1, advanced: 1 };   // 每日挑戰仍沿用；地獄字不出題
+
 function taipeiDayNumber() {
   // 用 UTC+8 算今天是第幾天，避免使用者裝置時區不同而看到不同的字
   var ms = Date.now() + 8 * 3600 * 1000;
   return Math.floor(ms / 86400000);
 }
+
+// 每日一句的輪替池：有挖空模板、且不在 DAILY_SKIP 裡的字。
+// 用固定種子打散一次，之後照天數取餘數，等於乾淨地輪一圈，
+// 不像雜湊取餘那樣會隨機撞到重複。1990 個字 ≈ 5.5 年不重複。
+var DAILY_POOL = (function () {
+  var pool = [];
+  for (var i = 0; i < WORD_BANK.length; i++) {
+    var en = WORD_BANK[i].en;
+    if (DAILY_SKIP[en]) continue;
+    var e = EX_BANK[en];
+    if (!e || !e[0]) continue;          // 沒有挖空模板就不進池
+    pool.push(i);
+  }
+  var a = 20260101;
+  function rnd() {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+  for (var j = pool.length - 1; j > 0; j--) {
+    var k = Math.floor(rnd() * (j + 1));
+    var tmp = pool[j]; pool[j] = pool[k]; pool[k] = tmp;
+  }
+  return pool;
+})();
+
 function dailyWord() {
-  var pool = WORD_BANK.filter(function (w) { return DAILY_LEVELS[w.level]; });
-  if (!pool.length) return null;
-  // 把天數打散，避免連續幾天的字剛好排在一起
+  if (!DAILY_POOL.length) return null;
   var n = taipeiDayNumber();
-  var h = (n * 2654435761) % 4294967296;
-  h = (h ^ (h >>> 13)) >>> 0;
-  return pool[h % pool.length];
+  return WORD_BANK[DAILY_POOL[((n % DAILY_POOL.length) + DAILY_POOL.length) % DAILY_POOL.length]];
+}
+function dailySentence() {
+  var w = dailyWord();
+  if (!w) return null;
+  var e = EX_BANK[w.en];
+  if (!e) return null;
+  return { word: w, tmpl: e[0], hidden: e[1], zh: e[2], full: e[0].replace("\u0000", e[1]) };
 }
 var dailyRevealed = false;
-function revealDaily() { dailyRevealed = true; render(); }
+function revealDaily() {
+  dailyRevealed = true;
+  var d = dailySentence();
+  if (d) speak(d.full);
+  render();
+}
 function practiceDaily() {
   var w = dailyWord();
   if (w) jumpToWord(w.en);
 }
 function speakDaily() {
-  var w = dailyWord();
-  if (w) speak(w.en);
+  var d = dailySentence();
+  if (d) speak(d.full);
 }
 
 // ------------------------------------------------------------------
@@ -3990,19 +4049,24 @@ function chalPanelHtml() {
 // ------------------------------------------------------------------
 function homePanelHtml() {
   var html = "";
-  var w = dailyWord();
+  var d = dailySentence();
+  var w = d ? d.word : null;
 
-  if (w) {
+  if (d) {
+    var parts = d.tmpl.split("\u0000");
+    var slot = dailyRevealed
+      ? '<span class="home-daily-fill">' + esc(d.hidden) + '</span>'
+      : '<span class="home-daily-blank"></span>';
     html += '<div class="home-daily">';
-    html += '  <div class="home-daily-tag">今 日 單 字</div>';
-    html += '  <div class="home-daily-en">' + esc(w.en) + '</div>';
+    html += '  <div class="home-daily-tag">每 日 一 句</div>';
+    html += '  <div class="home-daily-sent">' + esc(parts[0]) + slot + esc(parts[1] || '') + '</div>';
+    html += '  <div class="home-daily-zh">' + esc(d.zh) + '</div>';
     var meta = w.pos ? (esc(w.pos) + (levelLabel(w) ? ' \u00B7 ' + levelLabel(w) : '')) : (levelLabel(w) || '');
     html += '  <div class="home-daily-meta">' + meta + '</div>';
-    html += '  <div class="home-daily-zh">' + (dailyRevealed ? esc(w.zh) : '') + '</div>';
     html += '  <div class="home-daily-row">';
-    html += '    <button class="home-daily-btn ghost" onclick="speakDaily()">\uD83D\uDD0A 發音</button>';
+    html += '    <button class="home-daily-btn ghost" onclick="speakDaily()">\uD83D\uDD0A 唸整句</button>';
     if (!dailyRevealed) {
-      html += '  <button class="home-daily-btn" onclick="revealDaily()">看中文</button>';
+      html += '  <button class="home-daily-btn" onclick="revealDaily()">看答案</button>';
     } else {
       html += '  <button class="home-daily-btn" onclick="practiceDaily()">去練這個字</button>';
     }
@@ -6588,6 +6652,7 @@ function lbPanelHtml() {
 var NEWS = [
   { pin: true, text: "\uD83D\uDCAC <b>遇到問題？</b><a href=\"javascript:void(0)\" onclick=\"closeNews();rpOpen()\" style=\"color:#0E8F82\">點這裡回報</a>，會自動附上診斷資料，也可以加截圖" },
   { pin: true, text: "\uD83D\uDCF1 <b>把它裝到手機桌面</b>：開起來比較快，沒網路也能用，發音也比較正常<br><span class=\"news-steps\">Android：用 Chrome 開啟 \u2192 右上角 \u22EE \u2192 安裝應用程式<br>iPhone：用 Safari 開啟 \u2192 下方分享鍵 \u2192 加入主畫面</span>" },
+  { date: "2026/09/06", text: "\u270F\uFE0F <b>今日單字改成每日一句</b>：每天一句挖空，中文當提示" },
   { date: "2026/09/04", text: "\uD83C\uDFC6 <b>闖關榜開放了</b>：依總星數排名，要不要上榜自己決定" },
   { date: "2026/09/03", text: "\u26A1 <b>新增今日挑戰</b>：每天 10 題，全台灣同一份，答完看得到全台平均分" }
 ];
