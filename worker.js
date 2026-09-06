@@ -256,16 +256,17 @@ async function save(env, rawAid, rawEv, rawMode) {
 
     // 只接受預期的值，其他一律丟掉
     const aid = rawAid.slice(0, 32);
-    const ev = (rawEv === "open" || rawEv === "mode" || rawEv === "diff") ? rawEv : null;
+    const ev = (rawEv === "open" || rawEv === "mode" || rawEv === "diff" || rawEv === "pwa") ? rawEv : null;
     if (!ev) return;
 
     // 模式與難度共用 mode 欄位。既有查詢都有 WHERE ev='mode'，
     // 所以難度事件不會污染任何現有的數字。
     const ALLOWED = ["home", "flash", "quiz", "grammar", "scramble", "adventure", "badges", "bee"];
     const DIFFS = ["basic", "advanced", "hell", "all"];
-    const list = ev === "diff" ? DIFFS : ALLOWED;
+    const PWAS = ["yes", "no"];
+    const list = ev === "diff" ? DIFFS : (ev === "pwa" ? PWAS : ALLOWED);
     const mode = rawMode && list.indexOf(rawMode) >= 0 ? rawMode : null;
-    if (ev === "diff" && !mode) return;
+    if ((ev === "diff" || ev === "pwa") && !mode) return;
 
     const ts = Date.now();
     const day = new Date(ts + TZ_OFFSET).toISOString().slice(0, 10);
@@ -717,6 +718,44 @@ async function stats(env) {
   } catch (e) { cohort = {}; }
   cohort.cutoff = cutoff;
 
+  // 安裝率：近 7 天有回報過 pwa 事件的人裡，有多少是從主畫面開的。
+  // 同一個人可能兩種都回報過（先用瀏覽器、後來裝了），以「曾經 yes」為準。
+  let pwa = {};
+  try {
+    pwa = await env.DB.prepare(
+      `SELECT COUNT(*) AS people,
+              SUM(CASE WHEN inst = 1 THEN 1 ELSE 0 END) AS installed
+         FROM (SELECT aid, MAX(CASE WHEN mode='yes' THEN 1 ELSE 0 END) AS inst
+                 FROM events
+                WHERE ev = 'pwa'
+                  AND day >= date('now','+8 hours','-7 days')
+                GROUP BY aid)`
+    ).first() || {};
+  } catch (e) { pwa = {}; }
+
+  // 裝了的人 vs 沒裝的人，回訪表現差多少。
+  // 只看第一次來至少 7 天前的人，理由跟上面的同期群一樣。
+  let pwaCohort = [];
+  try {
+    const pc = await env.DB.prepare(
+      `SELECT inst,
+              COUNT(*) AS people,
+              SUM(CASE WHEN days >= 2 THEN 1 ELSE 0 END) AS d2,
+              SUM(CASE WHEN days >= 5 THEN 1 ELSE 0 END) AS d5,
+              ROUND(AVG(days), 1) AS avgd
+         FROM (SELECT e.aid,
+                      MIN(e.day) AS fd,
+                      COUNT(DISTINCT e.day) AS days,
+                      MAX(CASE WHEN e.ev='pwa' AND e.mode='yes' THEN 1 ELSE 0 END) AS inst
+                 FROM events e
+                WHERE e.aid IN (SELECT DISTINCT aid FROM events WHERE ev='pwa')
+                GROUP BY e.aid)
+        WHERE fd <= ?
+        GROUP BY inst`
+    ).bind(cutoff).all();
+    pwaCohort = (pc && pc.results) || [];
+  } catch (e) { pwaCohort = []; }
+
   // 最常錯的字。門檻 100 次是必要的：只出現 3 次、錯 2 次的字
   // 答錯率是 67%，會直接壓過真正的難字。
   let hardWords = [], wordTotal = {};
@@ -763,6 +802,8 @@ async function stats(env) {
     diffs: diffs,
     diffPeople: diffPeople,
     cohort: cohort,
+    pwa: pwa,
+    pwaCohort: pwaCohort,
     hardWords: hardWords,
     wordTotal: wordTotal,
     reportCount: reportCount,
@@ -964,6 +1005,34 @@ fetch("/admin/data").then(function(r){return r.json()}).then(function(d){
       h+='<tr><td>'+x[0]+'</td><td class="n">'+nz(x[1])+'</td><td class="n hot">'+pct(x[1]||0,N)+'</td></tr>';
     });
     h+='</table>';
+  }
+
+  /* --- 安裝率 --- */
+  if(d.pwa&&d.pwa.people){
+    var pw=d.pwa,PN=pw.people,PI=nz(pw.installed);
+    h+='<h2>裝到主畫面</h2>';
+    h+='<p class="hint">近 7 天回報過的 <b>'+PN+'</b> 人裡，有多少是從主畫面開啟的（也就是裝成 App）。'
+      +'裝了的人資料不容易被瀏覽器清掉，所以他們的留存才是比較接近真實的數字。</p>';
+    h+='<div class="cards">'
+      + card(PI,"已安裝","從主畫面開啟的人","")
+      + card(PN-PI,"未安裝","用瀏覽器開的人","")
+      + card(pct(PI,PN),"安裝率","已安裝 ÷ 回報人數","")
+      + '</div>';
+    if(d.pwaCohort&&d.pwaCohort.length){
+      h+='<table><tr><th>族群</th><th>人數</th><th>回來 2 天以上</th><th>回來 5 天以上</th><th>平均天數</th></tr>';
+      d.pwaCohort.slice().sort(function(a,b){return (b.inst||0)-(a.inst||0);}).forEach(function(r){
+        var N=r.people||0;
+        h+='<tr><td>'+(r.inst?'已安裝':'未安裝')+'</td><td class="n">'+N+'</td>'
+          +'<td class="n hot">'+pct(r.d2||0,N)+'</td>'
+          +'<td class="n hot">'+pct(r.d5||0,N)+'</td>'
+          +'<td class="n">'+nz(r.avgd)+'</td></tr>';
+      });
+      h+='</table>';
+      h+='<p class="hint">兩邊差距如果很明顯，那「引導安裝」就是最值得做的一件事。'
+        +'如果差不多，代表安裝沒那麼關鍵，力氣該花在別的地方。<br>'
+        +'注意：<b>沒裝的人被低估了</b>——他們的 ID 被清掉之後會被算成新的人，'
+        +'所以真實差距會比表上看到的小。</p>';
+    }
   }
 
   /* --- 最常錯的字 --- */

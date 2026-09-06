@@ -3771,7 +3771,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.09.06a";
+var BUILD = "v2026.09.06b";
 
 // ------------------------------------------------------------------
 // 每日一句（原「今日單字」改版）
@@ -6749,6 +6749,22 @@ setTimeout(function () { if (newsUnseen()) openNews(); }, 900);
 
   // --- 開啟頁面 ---
   hit("open", null);
+
+  // --- 是不是從主畫面（安裝後）開啟的 ---
+  // standalone = 使用者把它加到主畫面、以 App 形式開啟。
+  // 這個值決定資料會不會被瀏覽器清掉，所以留存要分開看。
+  // 只是多送一個事件，沒有新增任何 localStorage key。
+  try {
+    var standalone = false;
+    if (window.matchMedia &&
+        (window.matchMedia("(display-mode: standalone)").matches ||
+         window.matchMedia("(display-mode: fullscreen)").matches ||
+         window.matchMedia("(display-mode: minimal-ui)").matches)) {
+      standalone = true;
+    }
+    if (window.navigator && window.navigator.standalone === true) standalone = true; // iOS Safari
+    hit("pwa", standalone ? "yes" : "no");
+  } catch (e) { /* 靜默 */ }
 
   // --- 包裝 setMode：原函式完全不動，只在前面加一行紀錄 ---
   if (typeof window.setMode === "function") {
