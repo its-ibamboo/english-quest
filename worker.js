@@ -9,7 +9,7 @@
  * 隱私：只存匿名隨機 ID、模式、時間。不存 IP、不存 UA、不存任何個人資訊。
  */
 
-const BUILD = "v2026.09.04c";            // 跟 index.html 的版本號一起往上帶
+const BUILD = "v2026.10.14a";            // 跟 index.html 的版本號一起往上帶
 const TZ_OFFSET = 8 * 60 * 60 * 1000;   // 台北時間
 
 export default {
@@ -130,14 +130,20 @@ export default {
           await env.DB.prepare("UPDATE board SET nick = '匿名玩家', ava = '' WHERE aid = ?").bind(id).run();
         } else if (act === "hide") {
           await env.DB.prepare("UPDATE board SET hidden = 1 WHERE aid = ?").bind(id).run();
-        } else if (act === "show") {
-          await env.DB.prepare("UPDATE board SET hidden = 0 WHERE aid = ?").bind(id).run();
+        } else if (act === "show" || act === "ok") {
+          // 放行 = 3：之後重新上傳也不會再被自動擋
+          await env.DB.prepare("UPDATE board SET hidden = 3 WHERE aid = ?").bind(id).run();
         }
         return Response.redirect(url.origin + "/board/admin", 302);
       }
       await ensureBoard(env);
       const all = await env.DB.prepare(
-        "SELECT aid, nick, ava, stars, cleared, badges, hidden FROM board ORDER BY stars DESC LIMIT 200"
+        `SELECT aid, nick, ava, stars, cleared, badges, hidden,
+                (SELECT COUNT(*) FROM events e
+                  WHERE e.aid = board.aid AND e.ev = 'mode' AND e.mode = 'adventure') AS adv,
+                (SELECT COUNT(*) FROM events e
+                  WHERE e.aid = board.aid AND e.ev = 'open') AS opens
+           FROM board ORDER BY (hidden = 2) DESC, stars DESC LIMIT 200`
       ).all();
       return new Response(boardAdminPage(all.results || []), {
         headers: { "content-type": "text/html; charset=utf-8" } });
@@ -409,7 +415,7 @@ async function dailyChallenge(env, day, rawScore, aid) {
 }
 
 // 問題回報。密碼沒設環境變數時用這個。
-const REPORTS_PW = "1234";
+const REPORTS_PW = "073957097";
 const REPORT_MAX = 60;          // 最多留幾筆，滿了丟掉最舊的（圖片很佔空間）
 
 const REPORT_HITS = new Map();
@@ -468,27 +474,36 @@ function esc(x) {
   });
 }
 function boardAdminPage(list) {
+  const pending = list.filter(function (r) { return r.hidden === 2; }).length;
   const rows = list.map(function (r) {
-    return `<tr>
-      <td>${esc(r.nick)}${r.hidden ? ' <span style="color:#D9705E">（已隱藏）</span>' : ""}</td>
+    const id = encodeURIComponent(r.aid);
+    const tag = r.hidden === 1 ? ' <span style="color:#D9705E">（已隱藏）</span>'
+              : r.hidden === 2 ? ' <span style="color:#E8C14A">（待審）</span>'
+              : r.hidden === 3 ? ' <span style="color:#6FBF9A">（已放行）</span>' : "";
+    const btn = r.hidden === 2
+      ? `<a href="/board/admin?act=ok&aid=${id}" style="color:#6FBF9A">放行</a>　
+         <a href="/board/admin?act=hide&aid=${id}" style="color:#D9705E">隱藏</a>`
+      : `<a href="/board/admin?act=${r.hidden === 1 ? "show" : "hide"}&aid=${id}"
+           style="color:#D9705E">${r.hidden === 1 ? "取消隱藏" : "隱藏"}</a>`;
+    return `<tr${r.hidden === 2 ? ' style="background:#2A2615"' : ""}>
+      <td>${esc(r.nick)}${tag}<div style="font-size:11px;opacity:.5">${esc(r.aid)}</div></td>
       <td style="text-align:right">${r.stars} ⭐</td>
       <td style="text-align:right">${r.cleared}</td>
+      <td style="text-align:right">${r.adv} / ${r.opens}</td>
       <td style="text-align:right;white-space:nowrap">
-        <a href="/board/admin?act=anon&aid=${encodeURIComponent(r.aid)}"
-           style="color:#D9A441">改匿名</a>　
-        <a href="/board/admin?act=${r.hidden ? "show" : "hide"}&aid=${encodeURIComponent(r.aid)}"
-           style="color:#D9705E">${r.hidden ? "取消隱藏" : "隱藏"}</a>
+        <a href="/board/admin?act=anon&aid=${id}" style="color:#D9A441">改匿名</a>　${btn}
       </td></tr>`;
   }).join("");
   return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>闖關榜管理</title></head>
 <body style="background:#141613;color:#E8EAE4;font-family:system-ui,-apple-system,'Noto Sans TC',sans-serif;padding:14px;max-width:720px;margin:0 auto">
-<h1 style="font-size:20px">闖關榜管理（${list.length} 人）</h1>
+<h1 style="font-size:20px">闖關榜管理（${list.length} 人${pending ? `，<span style="color:#E8C14A">${pending} 筆待審</span>` : ""}）</h1>
+<p style="font-size:13px;opacity:.6">「待審」= 通關數跟實際進闖關地圖的次數對不上，系統自動先不上榜。「闖關/開啟」是後台記到的次數：通關很多、闖關卻是 0，多半是改了瀏覽器資料。真的玩的人（例如擋廣告外掛把統計擋掉）按「放行」，之後不會再被擋。</p>
 <p style="font-size:13px;opacity:.6">學生端沒有撤下鍵。有人要求移除時，用「隱藏」；名字不妥時用「改匿名」。隱藏之後不列入排名，也不佔名次。</p>
 <table style="width:100%;border-collapse:collapse;font-size:14px">
-<tr style="opacity:.6;font-size:12px"><th style="text-align:left">暱稱</th><th style="text-align:right">星</th><th style="text-align:right">通關</th><th></th></tr>
-${rows || '<tr><td colspan="4" style="opacity:.6;padding:14px 0">還沒有人上榜。</td></tr>'}
+<tr style="opacity:.6;font-size:12px"><th style="text-align:left">暱稱</th><th style="text-align:right">星</th><th style="text-align:right">通關</th><th style="text-align:right">闖關/開啟</th><th></th></tr>
+${rows || '<tr><td colspan="5" style="opacity:.6;padding:14px 0">還沒有人上榜。</td></tr>'}
 </table>
 <p style="margin-top:20px"><a href="/admin" style="color:#D9A441">← 回統計頁</a></p>
 </body></html>`;
@@ -545,7 +560,15 @@ ${list.length ? `<form method="POST" action="/reports/del?id=*" style="margin-to
 
 // 闖關榜。一個裝置一列，upsert，不會無限成長。
 // 三個數字都有上限（星 321 / 關 107 / 徽章 10），超出就當作無效 ——
-// 有上限就沒有炫耀價值，作弊者最多跟高手同分，所以不必再做別的防護。
+// 有上限就沒有炫耀價值，作弊者最多跟高手同分。
+// v2026.10.14a：實際發生改 localStorage 直接 321 星上榜，所以加了自動待審（見 lbSuspicious）。
+//
+// hidden 欄位的值：
+//   0 = 正常上榜
+//   1 = 後台手動隱藏
+//   2 = 自動待審（通關數對不上闖關紀錄）—— 不上榜，等後台放行
+//   3 = 後台放行過 —— 上榜，之後重新上傳不再檢查
+const LB_SHOWN = "hidden IN (0, 3)";
 const LB_LIMIT = { stars: 321, cleared: 107, badges: 10 };
 const LB_NICK_BAD = /[@＠]|[a-zA-Z0-9_.]{6,}|加我|私訊|密我|賴|來找我|聯絡/;
 
@@ -563,6 +586,22 @@ function lbInt(v, max) {
   const n = parseInt(v, 10);
   return (n >= 0 && n <= max) ? n : null;
 }
+// 通關 10 關以上，但後台記到「進入闖關地圖」的次數太少 → 待審。
+// 門檻刻意放很寬：每 20 關只要求進過地圖 1 次（107 關 → 5 次），
+// 真的玩的人一定遠超過這個數字；改資料的人通常是 0。
+async function lbSuspicious(env, aid, cleared) {
+  if (cleared < 10) return false;
+  try {
+    const r = await env.DB.prepare(
+      `SELECT COUNT(*) AS n FROM events WHERE aid = ? AND ev = 'mode' AND mode = 'adventure'`
+    ).bind(aid).first();
+    const adv = (r && r.n) || 0;
+    return adv < Math.max(1, Math.floor(cleared / 20));
+  } catch (e) {
+    return false; // 查詢壞掉就不擋，不能讓正常玩家上不了榜
+  }
+}
+
 async function leaderboard(env, q) {
   await ensureBoard(env);
   const aid = q.get("aid") || "";
@@ -574,28 +613,33 @@ async function leaderboard(env, q) {
     const badges = lbInt(q.get("badges"), LB_LIMIT.badges);
     const ava = (q.get("ava") || "").slice(0, 20).replace(/[^a-z]/g, "");
     if (stars !== null && cleared !== null && badges !== null) {
+      // 手動隱藏(1)和已放行(3)維持不變；其他情況每次上傳都重新檢查
+      const old = await env.DB.prepare("SELECT hidden FROM board WHERE aid = ?").bind(aid).first();
+      let hidden;
+      if (old && (old.hidden === 1 || old.hidden === 3)) hidden = old.hidden;
+      else hidden = (await lbSuspicious(env, aid, cleared)) ? 2 : 0;
       await env.DB.prepare(
-        `INSERT INTO board (aid, nick, ava, stars, cleared, badges, t) VALUES (?,?,?,?,?,?,?)
-         ON CONFLICT(aid) DO UPDATE SET nick=?2, ava=?3, stars=?4, cleared=?5, badges=?6, t=?7`
-      ).bind(aid, nick, ava, stars, cleared, badges, Date.now()).run();
+        `INSERT INTO board (aid, nick, ava, stars, cleared, badges, t, hidden) VALUES (?,?,?,?,?,?,?,?)
+         ON CONFLICT(aid) DO UPDATE SET nick=?2, ava=?3, stars=?4, cleared=?5, badges=?6, t=?7, hidden=?8`
+      ).bind(aid, nick, ava, stars, cleared, badges, Date.now(), hidden).run();
     }
   }
 
-  // 前 20 名。hidden=1 是後台隱藏起來的，不列入也不佔名次。
+  // 前 20 名。隱藏(1)和待審(2)都不列入，也不佔名次。
   const top = await env.DB.prepare(
     `SELECT nick, ava, stars, cleared, badges FROM board
-      WHERE hidden = 0 ORDER BY stars DESC, cleared DESC, t ASC LIMIT 20`
+      WHERE ${LB_SHOWN} ORDER BY stars DESC, cleared DESC, t ASC LIMIT 20`
   ).all();
 
   // 自己的名次：算出「分數比我高的人數 + 1」，不必把整張榜撈下來。
   let rank = null;
   if (aid) {
     const me = await env.DB.prepare(
-      "SELECT stars, cleared, t FROM board WHERE aid = ? AND hidden = 0"
+      `SELECT stars, cleared, t FROM board WHERE aid = ? AND ${LB_SHOWN}`
     ).bind(aid).first();
     if (me) {
       const r = await env.DB.prepare(
-        `SELECT COUNT(*) AS n FROM board WHERE hidden = 0 AND (
+        `SELECT COUNT(*) AS n FROM board WHERE ${LB_SHOWN} AND (
            stars > ?1 OR (stars = ?1 AND cleared > ?2)
            OR (stars = ?1 AND cleared = ?2 AND t < ?3))`
       ).bind(me.stars, me.cleared, me.t).first();
