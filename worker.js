@@ -800,24 +800,39 @@ async function stats(env) {
     pwaCohort = (pc && pc.results) || [];
   } catch (e) { pwaCohort = []; }
 
-  // 最常錯的字。門檻 100 次是必要的：只出現 3 次、錯 2 次的字
-  // 答錯率是 67%，會直接壓過真正的難字。
+  // 最常錯的字：全部單字（闖關＋單字測驗＋今日挑戰）取前 HARD_TOP 名。
+  // 排序用 Wilson 信賴下限，不用硬門檻：出現 3 次錯 2 次的字，下限只有 ~21%，
+  // 會自動排在「出現 140 次錯 29 次」後面；次數越多、分數越接近真實答錯率。
+  // HARD_MIN 只擋掉出現一兩次的純雜訊。
   let hardWords = [], wordTotal = {};
   try {
     const hw = await env.DB.prepare(
-      `SELECT en, shown, wrong,
-              ROUND(wrong * 100.0 / shown, 1) AS pct
-         FROM word_stats
-        WHERE shown >= 100
-        ORDER BY pct DESC, shown DESC
-        LIMIT 30`
-    ).all();
-    hardWords = hw.results || [];
+      "SELECT en, shown, wrong FROM word_stats WHERE shown >= ?"
+    ).bind(HARD_MIN).all();
+    const rows = (hw.results || []).map(function (r) {
+      return {
+        en: r.en, shown: r.shown, wrong: r.wrong,
+        pct: Math.round(r.wrong * 1000 / r.shown) / 10,
+        score: wilsonLow(r.wrong, r.shown)
+      };
+    });
+    rows.sort(function (a, b) { return b.score - a.score || b.shown - a.shown; });
+    hardWords = rows.slice(0, HARD_TOP);
+
+    // 標出每個字來自哪一關、哪天的今日挑戰。抓不到就不標，榜單照樣顯示。
+    const meta = await wordOrigins(env);
+    if (meta) {
+      hardWords.forEach(function (r) {
+        const m = meta[r.en];
+        if (m) { r.stage = m.stage; r.lvl = m.lvl; r.chal = m.chal || null; }
+      });
+    }
+
     wordTotal = await env.DB.prepare(
       `SELECT COUNT(*) AS words, SUM(shown) AS shown, SUM(wrong) AS wrong,
-              SUM(CASE WHEN shown >= 100 THEN 1 ELSE 0 END) AS ready
+              SUM(CASE WHEN shown >= ? THEN 1 ELSE 0 END) AS ready
          FROM word_stats`
-    ).first() || {};
+    ).bind(HARD_MIN).first() || {};
   } catch (e) { hardWords = []; wordTotal = {}; }
 
   // 未處理的回報筆數。只給數字，內容要密碼才看得到。
@@ -855,6 +870,81 @@ async function stats(env) {
     total: total || {}
   };
 }
+
+// ---------- 最常錯的字：排序與來源標記 ----------
+const HARD_TOP = 50;   // 榜單取前幾名
+const HARD_MIN = 10;   // 至少出現幾次才列入計算（只擋雜訊）
+const CHAL_START = "2026-09-03";   // 今日挑戰上線日
+
+// 答錯率的 Wilson 95% 信賴下限。次數少的字會被往下壓，次數多的接近真實比例。
+function wilsonLow(wrong, n) {
+  if (!n) return 0;
+  const z = 1.96, p = wrong / n, z2 = z * z;
+  return (p + z2 / (2 * n) - z * Math.sqrt((p * (1 - p) + z2 / (4 * n)) / n)) / (1 + z2 / n);
+}
+
+// 以下三個函式必須跟 index.html 裡的 seededRandom / seededShuffle / buildStages /
+// chalQuestions 保持一致；那邊改了出題規則，這邊要跟著改，否則標記會錯（榜單本身不受影響）。
+function eqSeededShuffle(arr, seed) {
+  let s = seed;
+  const rand = function () { s = (s * 1103515245 + 12345) & 0x7fffffff; return s / 0x7fffffff; };
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    const t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+let ORIGIN_CACHE = null;   // 同一個 Worker 實例內重複使用，不用每次重抓
+
+// 回傳 { 單字: { stage: 第幾關, lvl: 等級, chal: [今日挑戰日期...] } }
+// WORD_BANK 直接從線上的 index.html 讀，永遠跟前端同一份。
+async function wordOrigins(env) {
+  if (ORIGIN_CACHE && ORIGIN_CACHE.day === eqToday()) return ORIGIN_CACHE.map;
+  try {
+    if (!env.ASSETS) return null;
+    const res = await env.ASSETS.fetch(new Request("https://assets.local/index.html"));
+    if (!res.ok) return null;
+    const html = await res.text();
+    const start = html.indexOf("var WORD_BANK = [");
+    const end = html.indexOf("\n];", start);
+    if (start < 0 || end < 0) return null;
+    const body = html.slice(start, end);
+    const bank = [];
+    const re = /\{\s*en:\s*"([^"]*)"[^}]*?level:\s*"([a-z]+)"/g;
+    let m;
+    while ((m = re.exec(body))) bank.push({ en: m[1], level: m[2] });
+    if (bank.length < 1000) return null;   // 解析失敗就別亂標
+
+    const map = {};
+    // 闖關：同 buildStages()，STAGE_SIZE = 20
+    let idx = 0;
+    ["basic", "advanced", "hell"].forEach(function (lvl, li) {
+      const words = eqSeededShuffle(bank.filter(function (w) { return w.level === lvl; }), 20260710 + li);
+      for (let i = 0; i < words.length; i += 20) {
+        idx++;
+        words.slice(i, i + 20).forEach(function (w) { map[w.en] = { stage: idx, lvl: lvl }; });
+      }
+    });
+
+    // 今日挑戰：同 chalQuestions()，從上線日算到今天
+    const pool = bank.filter(function (w) { return w.level === "basic" || w.level === "advanced"; });
+    const d0 = Math.floor(Date.parse(CHAL_START + "T00:00:00Z") / 86400000);
+    const d1 = Math.floor((Date.now() + TZ_OFFSET) / 86400000);
+    for (let d = d0; d <= d1; d++) {
+      const label = new Date(d * 86400000).toISOString().slice(5, 10).replace("-", "/");
+      eqSeededShuffle(pool, d * 7919).slice(0, 10).forEach(function (w) {
+        const e = map[w.en] || (map[w.en] = {});
+        (e.chal || (e.chal = [])).push(label);
+      });
+    }
+
+    ORIGIN_CACHE = { day: eqToday(), map: map };
+    return map;
+  } catch (e) { return null; }
+}
+function eqToday() { return new Date(Date.now() + TZ_OFFSET).toISOString().slice(0, 10); }
 
 function json(o) {
   return new Response(JSON.stringify(o), {
@@ -1082,22 +1172,28 @@ fetch("/admin/data").then(function(r){return r.json()}).then(function(d){
   /* --- 最常錯的字 --- */
   h+='<h2>最常錯的字</h2>';
   var wt=d.wordTotal||{};
-  h+='<p class="hint">排名用的是<b>答錯率</b>（答錯 ÷ 出現），不是答錯次數。答錯過的字之後會更常被抽到，只看次數的話排出來的是「被抽到最多的字」。</p>';
+  h+='<p class="hint">全部單字（闖關、單字測驗、今日挑戰）取答錯率最高的前 50 名。排序有考慮出現次數：次數太少的字答錯率不可靠，會自動往後排，所以不一定照「答錯率」欄位由大到小。出現不到 10 次的字不列入。</p>';
   if(wt.words){
     h+='<div class="cards">'
       + card(nz(wt.words),"已收集單字","有紀錄的字數（滿 2122 就是全部）","")
-      + card(nz(wt.ready),"已達門檻","出現滿 100 次、可以進榜的字","")
+      + card(nz(wt.ready),"列入排名","出現滿 10 次、參與排名的字","")
       + card(wt.shown?pct(wt.wrong||0,wt.shown):"—","整體答錯率","全部答錯 ÷ 全部出現",(wt.wrong||0)+" 錯 / "+(wt.shown||0)+" 次")
       + '</div>';
   }
   if(d.hardWords&&d.hardWords.length){
-    h+='<div class="wrap"><table><tr><th>單字</th><th>答錯率</th><th>答錯</th><th>出現</th></tr>';
-    d.hardWords.forEach(function(r){
-      h+='<tr><td>'+r.en+'</td><td class="n hot">'+r.pct+'%</td><td class="n">'+r.wrong+'</td><td class="n">'+r.shown+'</td></tr>';
+    var LV={basic:"基礎",advanced:"進階",hell:"地獄"};
+    h+='<div class="wrap"><table><tr><th>#</th><th>單字</th><th>答錯率</th><th>答錯</th><th>出現</th></tr>';
+    d.hardWords.forEach(function(r,i){
+      var src=[];
+      if(r.stage) src.push("第 "+r.stage+" 關"+(LV[r.lvl]?"・"+LV[r.lvl]:""));
+      if(r.chal&&r.chal.length) src.push("挑戰 "+r.chal.join("、"));
+      h+='<tr><td class="n">'+(i+1)+'</td><td>'+r.en
+        +(src.length?'<div style="font-size:11.5px;opacity:.6;margin-top:2px">'+src.join("｜")+'</div>':'')
+        +'</td><td class="n hot">'+r.pct+'%</td><td class="n">'+r.wrong+'</td><td class="n">'+r.shown+'</td></tr>';
     });
     h+='</table></div>';
   }else{
-    h+='<p class="hint">還沒有單字出現滿 100 次。以目前流量估計約需兩週，在那之前這裡是空的，屬正常。</p>';
+    h+='<p class="hint">還沒有單字出現滿 10 次。</p>';
   }
 
   /* --- 複製偵測 --- */
