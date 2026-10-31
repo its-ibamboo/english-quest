@@ -9,7 +9,7 @@
  * 隱私：只存匿名隨機 ID、模式、時間。不存 IP、不存 UA、不存任何個人資訊。
  */
 
-const BUILD = "v2026.10.14a";            // 跟 index.html 的版本號一起往上帶
+const BUILD = "v2026.10.31a";            // 跟 index.html 的版本號一起往上帶
 const TZ_OFFSET = 8 * 60 * 60 * 1000;   // 台北時間
 
 export default {
@@ -817,10 +817,14 @@ async function stats(env) {
       };
     });
     rows.sort(function (a, b) { return b.score - a.score || b.shown - a.shown; });
-    hardWords = rows.slice(0, HARD_TOP);
 
     // 標出每個字來自哪一關、哪天的今日挑戰。抓不到就不標，榜單照樣顯示。
+    // v2026.10.31a：地獄字不在國中小 2000 字內，不列入前 50 名（先排除再取前 50）
     const meta = await wordOrigins(env);
+    const ranked = meta
+      ? rows.filter(function (r) { return !(meta[r.en] && meta[r.en].lvl === "hell"); })
+      : rows;
+    hardWords = ranked.slice(0, HARD_TOP);
     if (meta) {
       hardWords.forEach(function (r) {
         const m = meta[r.en];
@@ -875,6 +879,8 @@ async function stats(env) {
 const HARD_TOP = 50;   // 榜單取前幾名
 const HARD_MIN = 10;   // 至少出現幾次才列入計算（只擋雜訊）
 const CHAL_START = "2026-09-03";   // 今日挑戰上線日
+const CHAL_ROT_START = "2026-11-02";   // 今日挑戰改輪播的日期（同 index.html）
+const CHAL_ROT_SEED = 20261102;
 
 // 答錯率的 Wilson 95% 信賴下限。次數少的字會被往下壓，次數多的接近真實比例。
 function wilsonLow(wrong, n) {
@@ -932,9 +938,18 @@ async function wordOrigins(env) {
     const pool = bank.filter(function (w) { return w.level === "basic" || w.level === "advanced"; });
     const d0 = Math.floor(Date.parse(CHAL_START + "T00:00:00Z") / 86400000);
     const d1 = Math.floor((Date.now() + TZ_OFFSET) / 86400000);
+    // v2026.10.31a：CHAL_ROT_START 起改成輪播（同 index.html 的 chalPickWords）
+    const rs = Math.floor(Date.parse(CHAL_ROT_START + "T00:00:00Z") / 86400000);
+    const rotOrder = eqSeededShuffle(pool, CHAL_ROT_SEED);
     for (let d = d0; d <= d1; d++) {
       const label = new Date(d * 86400000).toISOString().slice(5, 10).replace("-", "/");
-      eqSeededShuffle(pool, d * 7919).slice(0, 10).forEach(function (w) {
+      let picked;
+      if (d < rs) picked = eqSeededShuffle(pool, d * 7919).slice(0, 10);
+      else {
+        picked = [];
+        for (let i = 0; i < 10; i++) picked.push(rotOrder[((d - rs) * 10 + i) % rotOrder.length]);
+      }
+      picked.forEach(function (w) {
         const e = map[w.en] || (map[w.en] = {});
         (e.chal || (e.chal = [])).push(label);
       });
@@ -1172,7 +1187,7 @@ fetch("/admin/data").then(function(r){return r.json()}).then(function(d){
   /* --- 最常錯的字 --- */
   h+='<h2>最常錯的字</h2>';
   var wt=d.wordTotal||{};
-  h+='<p class="hint">全部單字（闖關、單字測驗、今日挑戰）取答錯率最高的前 50 名。排序有考慮出現次數：次數太少的字答錯率不可靠，會自動往後排，所以不一定照「答錯率」欄位由大到小。出現不到 10 次的字不列入。</p>';
+  h+='<p class="hint">全部單字（闖關、單字測驗、今日挑戰）取答錯率最高的前 50 名。排序有考慮出現次數：次數太少的字答錯率不可靠，會自動往後排，所以不一定照「答錯率」欄位由大到小。出現不到 10 次的字不列入。地獄字不在國中小 2000 字內，不列入。「原第 N 關」是舊玩家看到的關卡編號；10/31 之後的新玩家，同難度內的關卡順序是打亂的。</p>';
   if(wt.words){
     h+='<div class="cards">'
       + card(nz(wt.words),"已收集單字","有紀錄的字數（滿 2122 就是全部）","")
@@ -1185,7 +1200,7 @@ fetch("/admin/data").then(function(r){return r.json()}).then(function(d){
     h+='<div class="wrap"><table><tr><th>#</th><th>單字</th><th>答錯率</th><th>答錯</th><th>出現</th></tr>';
     d.hardWords.forEach(function(r,i){
       var src=[];
-      if(r.stage) src.push("第 "+r.stage+" 關"+(LV[r.lvl]?"・"+LV[r.lvl]:""));
+      if(r.stage) src.push("原第 "+r.stage+" 關"+(LV[r.lvl]?"・"+LV[r.lvl]:""));
       if(r.chal&&r.chal.length) src.push("挑戰 "+r.chal.join("、"));
       h+='<tr><td class="n">'+(i+1)+'</td><td>'+r.en
         +(src.length?'<div style="font-size:11.5px;opacity:.6;margin-top:2px">'+src.join("｜")+'</div>':'')

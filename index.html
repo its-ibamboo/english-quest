@@ -3771,7 +3771,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.09.06b";
+var BUILD = "v2026.10.31a";
 
 // ------------------------------------------------------------------
 // 每日一句（原「今日單字」改版）
@@ -3855,10 +3855,28 @@ var CHAL_KEY = "eq_daily";   // 新的 key，不碰既有五把
 function chalDayStr() {
   return new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
 }
+// v2026.10.31a：從 CHAL_ROT_START 起改成「輪播不重複」
+// 以前每天隨機抽 10 個，同一個字一個月可能被抽兩次，也有字半年都抽不到。
+// 現在把 basic + advanced 全部字用固定種子排成一條隊伍，每天往下取 10 個，
+// 約 205 天全部輪完一遍再從頭開始。全站同一天仍然完全一樣，不需要後端。
+// worker.js 的 wordOrigins() 有同一套規則（後台標記用），兩邊要一起改。
+var CHAL_ROT_START = "2026-11-02";
+var CHAL_ROT_SEED = 20261102;
+function chalDayNumberOf(ymd) {
+  return Math.floor(Date.parse(ymd + "T00:00:00Z") / 86400000);
+}
+function chalPickWords(pool, dayNum) {
+  var k = dayNum - chalDayNumberOf(CHAL_ROT_START);
+  if (k < 0) return seededShuffle(pool, dayNum * 7919).slice(0, CHAL_N);   // 舊規則
+  var order = seededShuffle(pool, CHAL_ROT_SEED);
+  var out = [];
+  for (var i = 0; i < CHAL_N; i++) out.push(order[(k * CHAL_N + i) % order.length]);
+  return out;
+}
 function chalQuestions() {
   var pool = WORD_BANK.filter(function (w) { return DAILY_LEVELS[w.level]; });
   var seed = taipeiDayNumber() * 7919;
-  var picked = seededShuffle(pool, seed).slice(0, CHAL_N);
+  var picked = chalPickWords(pool, taipeiDayNumber());
   return picked.map(function (correct, n) {
     var usedZh = {}; usedZh[correct.zh] = true;
     var cand = seededShuffle(pool, seed + n * 101);
@@ -3949,7 +3967,8 @@ function chalPick(i) {
   var ok = q.options[i].zh === q.correct.zh;
   CHAL.picked = i;
   CHAL.answers.push({ q: q, ok: ok });
-  WSTAT.hit(q.correct.en, !ok);   // 順便餵答錯率統計
+  // 順便餵答錯率統計。v2026.10.31a：只算當天第一次作答，重玩已經看過答案，不列入
+  if (!CHAL.replay && !CHAL.done) WSTAT.hit(q.correct.en, !ok);
   render();
 }
 function chalNext() {
@@ -4154,19 +4173,45 @@ function seededShuffle(arr, seed) {
   }
   return a;
 }
-function buildStages() {
+// v2026.10.31a：關卡排列分新舊玩家
+// · 舊玩家（已經有 eq_stage_progress）→ 永遠用原本的固定排列，一關都不變
+// · 新玩家 → 同一難度內「整關互換」順序（每關那 20 個字不拆），基礎／進階／地獄不跨換
+// 目的：讓每個字被玩到的機會平均，不再全部集中在前面幾關。
+// 決定一次就存進 eq_stage_order，之後不再改；不碰原本的五把 key。
+// 關卡編號、各難度關數、星星的存法都跟以前一樣，所以排行榜、徽章不受影響。
+var STAGE_ORDER_KEY = "eq_stage_order";
+function stageOrderSeed() {
+  try {
+    var saved = localStorage.getItem(STAGE_ORDER_KEY);
+    if (saved !== null) {
+      var n = parseInt(saved, 10);
+      return n > 0 ? n : 0;
+    }
+    // 第一次決定：有闖關紀錄就是舊玩家，用 0（原排列）
+    var seed = 0;
+    if (!localStorage.getItem("eq_stage_progress")) {
+      seed = 1 + Math.floor(Math.random() * 2000000000);
+    }
+    localStorage.setItem(STAGE_ORDER_KEY, String(seed));
+    return seed;
+  } catch (e) { return 0; }   // localStorage 不能用時，一律用原排列
+}
+function buildStages(orderSeed) {
   var stages = [];
   ["basic", "advanced", "hell"].forEach(function (lvl, lvlIdx) {
     var words = WORD_BANK.filter(function (w) { return w.level === lvl; });
     words = seededShuffle(words, 20260710 + lvlIdx);
+    var groups = [];
     for (var i = 0; i < words.length; i += STAGE_SIZE) {
-      stages.push({ level: lvl, words: words.slice(i, i + STAGE_SIZE) });
+      groups.push({ level: lvl, words: words.slice(i, i + STAGE_SIZE) });
     }
+    if (orderSeed) groups = seededShuffle(groups, orderSeed + lvlIdx * 7777);
+    groups.forEach(function (g) { stages.push(g); });
   });
   stages.forEach(function (s, i) { s.index = i + 1; });
   return stages;
 }
-var STAGES = buildStages();
+var STAGES = buildStages(stageOrderSeed());
 
 function shuffle(arr) {
   var a = arr.slice();
@@ -4672,6 +4717,11 @@ function startStage(stageIndex) {
 }
 
 function handleStageTimeout() {
+  // v2026.10.31a：時間到也算答錯（不會的字常常就是時間到），以前沒記，答錯率被低估
+  try {
+    var tq = state.stageQuestions[state.stageQPos];
+    if (tq && state.stageSelected === null) WSTAT.hit(tq.correct.en, true);
+  } catch (e) {}
   state.stageSelected = "__timeout__";
   state.stageHearts--;
   if (state.stageHearts <= 0) {
