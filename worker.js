@@ -9,7 +9,7 @@
  * 隱私：只存匿名隨機 ID、模式、時間。不存 IP、不存 UA、不存任何個人資訊。
  */
 
-const BUILD = "v2026.10.31a";            // 跟 index.html 的版本號一起往上帶
+const BUILD = "v2026.11.01a";            // 跟 index.html 的版本號一起往上帶
 const TZ_OFFSET = 8 * 60 * 60 * 1000;   // 台北時間
 
 export default {
@@ -53,7 +53,7 @@ export default {
     // 前端在瀏覽器裡累積，切換模式或離開頁面時整批送一次。
     // 不是每答一題打一次 —— 那會是現在請求量的幾十倍。
     if (url.pathname === "/w") {
-      if (env.DB) ctx.waitUntil(saveWords(env, url.searchParams.get("d")));
+      if (env.DB) ctx.waitUntil(saveWords(env, url.searchParams.get("d"), url.searchParams.get("m")));
       return new Response(GIF, {
         headers: {
           "Content-Type": "image/gif",
@@ -124,6 +124,18 @@ export default {
       }
       if (!env.DB) return new Response("no db", { status: 503 });
       const act = url.searchParams.get("act"), id = url.searchParams.get("aid") || "";
+      // v2026.11.01a：小遊戲排行榜的管理（act 前面加 g-，另外帶 game）
+      const gm = url.searchParams.get("game") || "";
+      if (act && id && act.indexOf("g-") === 0 && GAMES[gm]) {
+        await ensureGameTables(env);
+        const sqlMap = {
+          "g-anon": "UPDATE game_board SET nick = '匿名玩家', ava = '' WHERE game = ? AND aid = ?",
+          "g-hide": "UPDATE game_board SET hidden = 1 WHERE game = ? AND aid = ?",
+          "g-ok":   "UPDATE game_board SET hidden = 3 WHERE game = ? AND aid = ?"
+        };
+        if (sqlMap[act]) await env.DB.prepare(sqlMap[act]).bind(gm, id).run();
+        return Response.redirect(url.origin + "/board/admin#g-" + gm, 302);
+      }
       if (act && id) {
         await ensureBoard(env);
         if (act === "anon") {
@@ -145,7 +157,15 @@ export default {
                   WHERE e.aid = board.aid AND e.ev = 'open') AS opens
            FROM board ORDER BY (hidden = 2) DESC, stars DESC LIMIT 200`
       ).all();
-      return new Response(boardAdminPage(all.results || []), {
+      await ensureGameTables(env);
+      const gl = {};
+      for (const g of Object.keys(GAMES)) {
+        const r = await env.DB.prepare(
+          `SELECT aid, nick, score, cleared, secs, hidden, priv FROM game_board WHERE game = ?
+            ORDER BY (hidden = 2) DESC, score DESC LIMIT 100`).bind(g).all();
+        gl[g] = r.results || [];
+      }
+      return new Response(boardAdminPage(all.results || [], gl), {
         headers: { "content-type": "text/html; charset=utf-8" } });
     }
 
@@ -174,6 +194,19 @@ export default {
     if (url.pathname === "/lb") {
       if (!env.DB) return json({ top: [], rank: null });
       return json(await leaderboard(env, url.searchParams));
+    }
+
+    // ---------- 1.8 小遊戲排行榜（v2026.11.01a）----------
+    // /gs/start   開局號碼牌        /gs/submit  上傳成績（只在破紀錄時）
+    // /gs/board   查榜              /gs/profile 改名、不顯示我的成績
+    // /gs/cand    切切樂的「待確認名單」
+    if (url.pathname.indexOf("/gs/") === 0) {
+      if (!env.DB) return json({ error: "no db" });
+      try {
+        return json(await gameApi(env, url.pathname.slice(4), url.searchParams));
+      } catch (e) {
+        return json({ error: "fail" });
+      }
     }
 
     // ---------- 1.5 診斷頁 ----------
@@ -210,6 +243,7 @@ export default {
         out.push("複製偵測：" + (html.indexOf("var REPORT = ") >= 0 ? "有，已部署" : "沒有！部署的是舊版 index.html"));
         out.push("每日挑戰：" + (html.indexOf("var CHAL_KEY") >= 0 ? "有，已部署" : "沒有！部署的是舊版 index.html"));
         out.push("答錯率追蹤：" + (html.indexOf("var WSTAT") >= 0 ? "有，已部署" : "沒有！部署的是舊版 index.html"));
+        out.push("切切樂：" + (html.indexOf("var SLICE") >= 0 ? "有，已部署" : "沒有！部署的是舊版 index.html"));
       } catch (e) {
         out.push("讀不到 index.html → " + e.message);
       }
@@ -267,7 +301,7 @@ async function save(env, rawAid, rawEv, rawMode) {
 
     // 模式與難度共用 mode 欄位。既有查詢都有 WHERE ev='mode'，
     // 所以難度事件不會污染任何現有的數字。
-    const ALLOWED = ["home", "flash", "quiz", "grammar", "scramble", "adventure", "badges", "bee"];
+    const ALLOWED = ["home", "flash", "quiz", "grammar", "scramble", "adventure", "badges", "bee", "slice"];
     const DIFFS = ["basic", "advanced", "hell", "all"];
     const PWAS = ["yes", "no"];
     const list = ev === "diff" ? DIFFS : (ev === "pwa" ? PWAS : ALLOWED);
@@ -320,9 +354,17 @@ async function saveHost(env, rawHost) {
 const WORD_RE = /^[a-zA-Z][a-zA-Z '.\\-]{0,29}$/;
 const WORD_TABLE_CAP = 3000;
 
-async function saveWords(env, raw) {
+// v2026.11.01a：多帶一個模式 m。
+//   · stage / quiz / chal（看英文選中文的舊模式）→ 舊表 word_stats 照舊累加，另外記一份到 word_stats_m
+//   · slice（切切樂）→ 只記 word_stats_m，不碰舊表
+//   · 沒帶 m（還在用舊版的手機）→ 只記舊表，跟以前一模一樣
+const WORD_MODES = ["stage", "quiz", "chal", "slice"];
+const OLD_MODES = ["stage", "quiz", "chal"];
+
+async function saveWords(env, raw, rawMode) {
   try {
     if (typeof raw !== "string" || !raw) return;
+    const mode = WORD_MODES.indexOf(rawMode) >= 0 ? rawMode : null;
 
     await env.DB.prepare(
       `CREATE TABLE IF NOT EXISTS word_stats (
@@ -330,6 +372,15 @@ async function saveWords(env, raw) {
          shown INTEGER NOT NULL DEFAULT 0,
          wrong INTEGER NOT NULL DEFAULT 0)`
     ).run();
+    if (mode) {
+      await env.DB.prepare(
+        `CREATE TABLE IF NOT EXISTS word_stats_m (
+           en TEXT NOT NULL, mode TEXT NOT NULL,
+           shown INTEGER NOT NULL DEFAULT 0,
+           wrong INTEGER NOT NULL DEFAULT 0,
+           PRIMARY KEY (en, mode))`
+      ).run();
+    }
 
     const parts = raw.split("~").slice(0, 120);
     const rows = [];
@@ -346,18 +397,28 @@ async function saveWords(env, raw) {
     }
     if (!rows.length) return;
 
-    // 表已經夠大時就不再收新單字，只更新既有的，避免有人塞垃圾把表灌爆
-    const c = await env.DB.prepare("SELECT COUNT(*) AS n FROM word_stats").first();
-    const full = c && c.n >= WORD_TABLE_CAP;
-
-    const sql = full
-      ? "UPDATE word_stats SET shown = shown + ?2, wrong = wrong + ?3 WHERE en = ?1"
-      : `INSERT INTO word_stats (en, shown, wrong) VALUES (?1, ?2, ?3)
-         ON CONFLICT(en) DO UPDATE SET shown = shown + ?2, wrong = wrong + ?3`;
-
-    await env.DB.batch(rows.map(function (r) {
-      return env.DB.prepare(sql).bind(r[0], r[1], r[2]);
-    }));
+    const stmts = [];
+    // 舊表：舊模式或沒帶模式才寫
+    if (!mode || OLD_MODES.indexOf(mode) >= 0) {
+      // 表已經夠大時就不再收新單字，只更新既有的，避免有人塞垃圾把表灌爆
+      const c = await env.DB.prepare("SELECT COUNT(*) AS n FROM word_stats").first();
+      const full = c && c.n >= WORD_TABLE_CAP;
+      const sql = full
+        ? "UPDATE word_stats SET shown = shown + ?2, wrong = wrong + ?3 WHERE en = ?1"
+        : `INSERT INTO word_stats (en, shown, wrong) VALUES (?1, ?2, ?3)
+           ON CONFLICT(en) DO UPDATE SET shown = shown + ?2, wrong = wrong + ?3`;
+      rows.forEach(function (r) { stmts.push(env.DB.prepare(sql).bind(r[0], r[1], r[2])); });
+    }
+    if (mode) {
+      const c2 = await env.DB.prepare("SELECT COUNT(*) AS n FROM word_stats_m").first();
+      const full2 = c2 && c2.n >= WORD_TABLE_CAP * WORD_MODES.length;
+      const sql2 = full2
+        ? "UPDATE word_stats_m SET shown = shown + ?3, wrong = wrong + ?4 WHERE en = ?1 AND mode = ?2"
+        : `INSERT INTO word_stats_m (en, mode, shown, wrong) VALUES (?1, ?2, ?3, ?4)
+           ON CONFLICT(en, mode) DO UPDATE SET shown = shown + ?3, wrong = wrong + ?4`;
+      rows.forEach(function (r) { stmts.push(env.DB.prepare(sql2).bind(r[0], mode, r[1], r[2])); });
+    }
+    if (stmts.length) await env.DB.batch(stmts);
   } catch (e) {
     // 靜默：統計壞掉絕對不能影響使用者
   }
@@ -473,7 +534,36 @@ function esc(x) {
     return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
   });
 }
-function boardAdminPage(list) {
+function gameAdminHtml(gl) {
+  const NAME = { slice: "切切樂", bee: "拼字小蜜蜂" };
+  return Object.keys(gl).map(function (g) {
+    const list = gl[g], pend = list.filter(function (r) { return r.hidden === 2; }).length;
+    const rows = list.map(function (r) {
+      const id = encodeURIComponent(r.aid), base = `/board/admin?game=${g}&aid=${id}&act=`;
+      const tag = r.hidden === 1 ? ' <span style="color:#D9705E">（已隱藏）</span>'
+                : r.hidden === 2 ? ' <span style="color:#E8C14A">（待審）</span>'
+                : r.hidden === 3 ? ' <span style="color:#6FBF9A">（已放行）</span>' : "";
+      const pv = r.priv ? ' <span style="opacity:.6">（本人選擇不公開）</span>' : "";
+      const btn = r.hidden === 2
+        ? `<a href="${base}g-ok" style="color:#6FBF9A">放行</a>　<a href="${base}g-hide" style="color:#D9705E">隱藏</a>`
+        : r.hidden === 1 ? `<a href="${base}g-ok" style="color:#6FBF9A">取消隱藏</a>`
+        : `<a href="${base}g-hide" style="color:#D9705E">隱藏</a>`;
+      return `<tr${r.hidden === 2 ? ' style="background:#2A2615"' : ""}>
+        <td>${esc(r.nick)}${tag}${pv}<div style="font-size:11px;opacity:.5">${esc(r.aid)}</div></td>
+        <td style="text-align:right">${r.score}</td>
+        <td style="text-align:right">${r.cleared} / ${r.secs}s</td>
+        <td style="text-align:right;white-space:nowrap"><a href="${base}g-anon" style="color:#D9A441">改匿名</a>　${btn}</td></tr>`;
+    }).join("");
+    return `<h2 id="g-${g}" style="font-size:18px;margin-top:30px">${NAME[g] || g}排行榜（${list.length} 人${pend ? `，<span style="color:#E8C14A">${pend} 筆待審</span>` : ""}）</h2>
+<p style="font-size:13px;opacity:.6">成績是自動上傳的。「待審」＝分數超過題數上限、題數超過時間允許的量、或宣稱的遊戲時間比實際經過的還長。「題數/秒」可以自己判斷合不合理。</p>
+<table style="width:100%;border-collapse:collapse;font-size:14px">
+<tr style="opacity:.6;font-size:12px"><th style="text-align:left">暱稱</th><th style="text-align:right">分數</th><th style="text-align:right">題數/秒</th><th></th></tr>
+${rows || '<tr><td colspan="4" style="opacity:.6;padding:14px 0">還沒有成績。</td></tr>'}
+</table>`;
+  }).join("");
+}
+
+function boardAdminPage(list, gl) {
   const pending = list.filter(function (r) { return r.hidden === 2; }).length;
   const rows = list.map(function (r) {
     const id = encodeURIComponent(r.aid);
@@ -505,6 +595,7 @@ function boardAdminPage(list) {
 <tr style="opacity:.6;font-size:12px"><th style="text-align:left">暱稱</th><th style="text-align:right">星</th><th style="text-align:right">通關</th><th style="text-align:right">闖關/開啟</th><th></th></tr>
 ${rows || '<tr><td colspan="5" style="opacity:.6;padding:14px 0">還沒有人上榜。</td></tr>'}
 </table>
+${gl ? gameAdminHtml(gl) : ""}
 <p style="margin-top:20px"><a href="/admin" style="color:#D9A441">← 回統計頁</a></p>
 </body></html>`;
 }
@@ -800,43 +891,30 @@ async function stats(env) {
     pwaCohort = (pc && pc.results) || [];
   } catch (e) { pwaCohort = []; }
 
-  // 最常錯的字：全部單字（闖關＋單字測驗＋今日挑戰）取前 HARD_TOP 名。
-  // 排序用 Wilson 信賴下限，不用硬門檻：出現 3 次錯 2 次的字，下限只有 ~21%，
-  // 會自動排在「出現 140 次錯 29 次」後面；次數越多、分數越接近真實答錯率。
-  // HARD_MIN 只擋掉出現一兩次的純雜訊。
-  let hardWords = [], wordTotal = {};
+  // 最常錯的字（v2026.11.01a 新算法，見 rankWords）
+  // 闖關＋單字測驗＋今日挑戰＋切切樂全部算進來，但先扣掉各模式本身的難度，
+  // 排名用「換算成同一把尺之後的答錯率」的 95% 下限。地獄字不列入。
+  let hardWords = [], wordTotal = {}, wordModes = [];
   try {
-    const hw = await env.DB.prepare(
-      "SELECT en, shown, wrong FROM word_stats WHERE shown >= ?"
-    ).bind(HARD_MIN).all();
-    const rows = (hw.results || []).map(function (r) {
+    const meta = await wordOrigins(env);
+    const rk = await rankWords(env, meta);
+    hardWords = rk.rows.slice(0, HARD_TOP).map(function (r) {
+      const m = meta && meta[r.en];
       return {
-        en: r.en, shown: r.shown, wrong: r.wrong,
-        pct: Math.round(r.wrong * 1000 / r.shown) / 10,
-        score: wilsonLow(r.wrong, r.shown)
+        en: r.en, shown: r.n, wrong: r.w, slice: r.slice,
+        pct: Math.round(r.w * 1000 / r.n) / 10,          // 原始答錯率（全部直接加總）
+        est: Math.round(r.est * 1000) / 10,              // 換算答錯率
+        stage: m ? m.stage : undefined, lvl: m ? m.lvl : undefined, chal: m ? (m.chal || null) : null
       };
     });
-    rows.sort(function (a, b) { return b.score - a.score || b.shown - a.shown; });
-
-    // 標出每個字來自哪一關、哪天的今日挑戰。抓不到就不標，榜單照樣顯示。
-    // v2026.10.31a：地獄字不在國中小 2000 字內，不列入前 50 名（先排除再取前 50）
-    const meta = await wordOrigins(env);
-    const ranked = meta
-      ? rows.filter(function (r) { return !(meta[r.en] && meta[r.en].lvl === "hell"); })
-      : rows;
-    hardWords = ranked.slice(0, HARD_TOP);
-    if (meta) {
-      hardWords.forEach(function (r) {
-        const m = meta[r.en];
-        if (m) { r.stage = m.stage; r.lvl = m.lvl; r.chal = m.chal || null; }
-      });
-    }
+    wordModes = rk.modes;
 
     wordTotal = await env.DB.prepare(
       `SELECT COUNT(*) AS words, SUM(shown) AS shown, SUM(wrong) AS wrong,
               SUM(CASE WHEN shown >= ? THEN 1 ELSE 0 END) AS ready
          FROM word_stats`
     ).bind(HARD_MIN).first() || {};
+    wordTotal.ready = rk.ready;
   } catch (e) { hardWords = []; wordTotal = {}; }
 
   // 未處理的回報筆數。只給數字，內容要密碼才看得到。
@@ -862,6 +940,7 @@ async function stats(env) {
     modes7: modes7.results || [],
     retention: retention.results || [],
     chal: chal,
+    wordModes: wordModes,
     diffs: diffs,
     diffPeople: diffPeople,
     cohort: cohort,
@@ -960,6 +1039,253 @@ async function wordOrigins(env) {
   } catch (e) { return null; }
 }
 function eqToday() { return new Date(Date.now() + TZ_OFFSET).toISOString().slice(0, 10); }
+
+// =====================================================================
+// v2026.11.01a 最常錯的字：跨模式排名
+// ---------------------------------------------------------------------
+// 問題：切切樂有時間壓力、字卡會掉，同一個字在切切樂的答錯率一定比闖關高。
+//       直接加總的話，常在切切樂出現的字會被冤枉。
+// 做法：在 log-odds 尺度上扣掉「每個模式比參考模式難多少」，再合併。
+//   · 參考模式 = 舊的看英文選中文（舊表的歷史資料 + stage + quiz + chal）
+//   · 舊表 word_stats 裡「還沒分模式之前」的歷史資料，當成一個模式 "old"
+//       old = 舊表總數 − 新表裡 stage/quiz/chal 的數（因為新資料兩邊都會記）
+//   · 某模式的總量太少（< MODE_MIN 次）就先不扣，避免用雜訊去校正
+// 排名用估計值的 95% 下限（資料越少、下限越低，自然往後排）。
+// 用模擬資料比較過：搭配「待確認名單」時，比直接加總更接近真相。
+// =====================================================================
+const MODE_MIN = 300;
+const logit = function (p) { return Math.log(p / (1 - p)); };
+const sigm = function (x) { return 1 / (1 + Math.exp(-x)); };
+
+async function rankWords(env, meta) {
+  const legacy = await env.DB.prepare("SELECT en, shown, wrong FROM word_stats").all();
+  let byMode = { results: [] };
+  try { byMode = await env.DB.prepare("SELECT en, mode, shown, wrong FROM word_stats_m").all(); } catch (e) {}
+
+  const W = {};   // en → { old:[n,w], stage:[n,w], ... }
+  function cell(en) {
+    if (!W[en]) W[en] = { old: [0, 0], stage: [0, 0], quiz: [0, 0], chal: [0, 0], slice: [0, 0] };
+    return W[en];
+  }
+  (legacy.results || []).forEach(function (r) { const c = cell(r.en); c.old = [r.shown, r.wrong]; });
+  (byMode.results || []).forEach(function (r) {
+    if (WORD_MODES.indexOf(r.mode) < 0) return;
+    cell(r.en)[r.mode] = [r.shown, r.wrong];
+  });
+  // 舊表裡已經包含新的 stage/quiz/chal，扣掉才不會重複算
+  Object.keys(W).forEach(function (en) {
+    const c = W[en];
+    OLD_MODES.forEach(function (m) { c.old[0] -= c[m][0]; c.old[1] -= c[m][1]; });
+    c.old[0] = Math.max(0, c.old[0]); c.old[1] = Math.max(0, Math.min(c.old[1], c.old[0]));
+  });
+  const isHell = function (en) { return !!(meta && meta[en] && meta[en].lvl === "hell"); };
+  const MODES = ["old"].concat(WORD_MODES);
+
+  // 各模式的整體答錯率（不含地獄字）
+  const tot = {};
+  MODES.forEach(function (m) { tot[m] = [0, 0]; });
+  Object.keys(W).forEach(function (en) {
+    if (isHell(en)) return;
+    MODES.forEach(function (m) { tot[m][0] += W[en][m][0]; tot[m][1] += W[en][m][1]; });
+  });
+  let refN = 0, refW = 0;
+  ["old"].concat(OLD_MODES).forEach(function (m) { refN += tot[m][0]; refW += tot[m][1]; });
+  const refP = refN ? refW / refN : 0;
+  const off = {}, modesOut = [];
+  MODES.forEach(function (m) {
+    const n = tot[m][0], p = n ? tot[m][1] / n : 0;
+    const usable = n >= MODE_MIN && p > 0 && p < 1 && refP > 0 && refP < 1;
+    off[m] = usable ? logit(p) - logit(refP) : 0;
+    modesOut.push({ mode: m, shown: n, wrong: tot[m][1], pct: n ? Math.round(p * 1000) / 10 : 0,
+                    adj: usable ? Math.round(off[m] * 100) / 100 : null });
+  });
+
+  const rows = [];
+  let ready = 0;
+  Object.keys(W).forEach(function (en) {
+    if (isHell(en)) return;
+    let n = 0, w = 0, offSum = 0;
+    MODES.forEach(function (m) { n += W[en][m][0]; w += W[en][m][1]; offSum += W[en][m][0] * off[m]; });
+    if (n < HARD_MIN) return;
+    ready++;
+    const est = logit((w + 0.5) / (n + 1)) - offSum / n;
+    const se = Math.sqrt(1 / (w + 0.5) + 1 / (n - w + 0.5));
+    rows.push({ en: en, n: n, w: w, slice: W[en].slice[0], est: sigm(est), score: est - 1.96 * se });
+  });
+  rows.sort(function (a, b) { return b.score - a.score || b.n - a.n; });
+  return { rows: rows, modes: modesOut, ready: ready };
+}
+
+// =====================================================================
+// v2026.11.01a 小遊戲排行榜（切切樂、拼字小蜜蜂）
+// ---------------------------------------------------------------------
+// · 一台裝置在一個遊戲只留一筆最高分；不重置
+// · 名字是前端自動取的（形容詞＋動物＋兩位數字），可以改，一天一次（前端限制）
+// · priv = 1：玩家選了「不顯示我的成績」，別人看不到，但自己的名次照算
+// · hidden：0 正常 / 1 後台隱藏 / 2 自動待審 / 3 後台放行過（同闖關榜）
+// · 防作弊：
+//     1. 開局要拿號碼牌（/gs/start），上傳時交回，一張只能用一次
+//     2. 伺服器比對「號碼牌發出到現在」的真實時間，不能比宣稱的遊戲秒數短
+//     3. 分數不能超過題數能拿到的上限；題數不能超過時間允許的量
+//     不合理就照收但設成待審（hidden = 2），不上榜，等後台放行
+// =====================================================================
+const GAMES = {
+  // maxPer：每題最高分；minSec：每題至少要幾秒
+  slice: { maxPer: 45, minSec: 0.8 },     // (10 + 20 連擊) × 1.5 進階
+  bee:   { maxPer: 4200, minSec: 1.2 }    // 字長 14 × 10 × 連擊 5 × 魔王 3 × 難度倍率 2
+};
+const GB_SHOWN = "hidden IN (0, 3) AND priv = 0";
+
+async function ensureGameTables(env) {
+  await env.DB.batch([
+    env.DB.prepare(
+      `CREATE TABLE IF NOT EXISTS game_board (
+         game TEXT NOT NULL, aid TEXT NOT NULL, nick TEXT NOT NULL, ava TEXT,
+         score INTEGER NOT NULL DEFAULT 0, cleared INTEGER NOT NULL DEFAULT 0,
+         secs INTEGER NOT NULL DEFAULT 0, t INTEGER NOT NULL,
+         hidden INTEGER NOT NULL DEFAULT 0, priv INTEGER NOT NULL DEFAULT 0,
+         PRIMARY KEY (game, aid))`),
+    env.DB.prepare(
+      `CREATE TABLE IF NOT EXISTS game_runs (
+         tok TEXT PRIMARY KEY, aid TEXT NOT NULL, game TEXT NOT NULL, t INTEGER NOT NULL)`)
+  ]);
+}
+
+function gbAid(q) { const a = q.get("aid") || ""; return /^[a-z0-9-]{1,40}$/.test(a) ? a : ""; }
+function gbNick(v) {
+  v = String(v || "").trim().slice(0, 8);
+  return v && !LB_NICK_BAD.test(v) ? v : "";
+}
+function gbAva(v) { return String(v || "").slice(0, 20).replace(/[^a-z]/g, ""); }
+
+async function gameApi(env, act, q) {
+  const game = q.get("game") || "";
+  const aid = gbAid(q);
+
+  if (act === "cand") return { words: await candWords(env) };
+
+  if (!GAMES[game] && act !== "profile") return { error: "game" };
+  await ensureGameTables(env);
+  const now = Date.now();
+
+  if (act === "start") {
+    if (!aid) return { error: "aid" };
+    // 順便清掉一天以前沒用掉的號碼牌，表不會長大
+    await env.DB.prepare("DELETE FROM game_runs WHERE t < ?").bind(now - 86400000).run();
+    const tok = crypto.randomUUID().replace(/-/g, "").slice(0, 20);
+    await env.DB.prepare("INSERT INTO game_runs (tok, aid, game, t) VALUES (?, ?, ?, ?)")
+      .bind(tok, aid, game, now).run();
+    return { tok: tok };
+  }
+
+  if (act === "submit") {
+    const nick = gbNick(q.get("nick")), ava = gbAva(q.get("ava"));
+    const score = parseInt(q.get("score"), 10), cleared = parseInt(q.get("cleared"), 10), secs = parseInt(q.get("secs"), 10);
+    const priv = q.get("priv") === "1" ? 1 : 0;
+    if (!aid || !nick || !(score >= 0 && score <= 10000000) || !(cleared >= 0 && cleared <= 100000) || !(secs >= 0 && secs <= 86400)) {
+      return Object.assign({ ok: false, why: "bad" }, await gameBoard(env, game, aid));
+    }
+    const run = await env.DB.prepare("SELECT aid, game, t FROM game_runs WHERE tok = ?").bind(q.get("tok") || "").first();
+    if (!run || run.aid !== aid || run.game !== game) {
+      return Object.assign({ ok: false, why: "token" }, await gameBoard(env, game, aid));
+    }
+    await env.DB.prepare("DELETE FROM game_runs WHERE tok = ?").bind(q.get("tok")).run();   // 一張只能用一次
+
+    const G = GAMES[game], realSecs = (now - run.t) / 1000;
+    const suspicious =
+      secs > realSecs + 5 ||                       // 宣稱玩的時間比號碼牌發出到現在還長
+      score > cleared * G.maxPer ||                 // 分數超過題數上限
+      cleared > Math.max(3, secs / G.minSec);       // 太快
+    const old = await env.DB.prepare("SELECT score, hidden FROM game_board WHERE game = ? AND aid = ?").bind(game, aid).first();
+    if (old && old.score >= score) {
+      // 沒破自己的紀錄：只更新名字和公開設定
+      await env.DB.prepare("UPDATE game_board SET nick = ?, ava = ?, priv = ? WHERE game = ? AND aid = ?")
+        .bind(nick, ava, priv, game, aid).run();
+    } else {
+      let hidden = suspicious ? 2 : 0;
+      if (old && (old.hidden === 1 || old.hidden === 3)) hidden = suspicious && old.hidden === 3 ? 2 : old.hidden;
+      await env.DB.prepare(
+        `INSERT INTO game_board (game, aid, nick, ava, score, cleared, secs, t, hidden, priv) VALUES (?,?,?,?,?,?,?,?,?,?)
+         ON CONFLICT(game, aid) DO UPDATE SET nick=?3, ava=?4, score=?5, cleared=?6, secs=?7, t=?8, hidden=?9, priv=?10`
+      ).bind(game, aid, nick, ava, score, cleared, secs, now, hidden, priv).run();
+    }
+    return Object.assign({ ok: true, held: suspicious }, await gameBoard(env, game, aid));
+  }
+
+  if (act === "profile") {
+    // 改名、公開設定：所有遊戲一起改
+    if (!aid) return { error: "aid" };
+    const nick = gbNick(q.get("nick")), ava = gbAva(q.get("ava"));
+    const priv = q.get("priv") === "1" ? 1 : 0;
+    if (!nick) return { ok: false, why: "nick" };
+    await env.DB.prepare("UPDATE game_board SET nick = ?, ava = ?, priv = ? WHERE aid = ?").bind(nick, ava, priv, aid).run();
+    return GAMES[game] ? Object.assign({ ok: true }, await gameBoard(env, game, aid)) : { ok: true };
+  }
+
+  if (act === "board") return await gameBoard(env, game, aid);
+  return { error: "act" };
+}
+
+// 前 10 名 + 自己的名次 + 自己前後各兩名 + 前一名（「再 X 分就超過」）
+async function gameBoard(env, game, aid) {
+  const top = await env.DB.prepare(
+    `SELECT aid, nick, ava, score FROM game_board WHERE game = ? AND ${GB_SHOWN}
+      ORDER BY score DESC, t ASC LIMIT 10`).bind(game).all();
+  const total = await env.DB.prepare(
+    `SELECT COUNT(*) AS n FROM game_board WHERE game = ? AND ${GB_SHOWN}`).bind(game).first();
+  let me = null, near = [], above = null;
+  if (aid) {
+    const mine = await env.DB.prepare(
+      "SELECT score, t, hidden, priv FROM game_board WHERE game = ? AND aid = ?").bind(game, aid).first();
+    if (mine && (mine.hidden === 0 || mine.hidden === 3)) {
+      const r = await env.DB.prepare(
+        `SELECT COUNT(*) AS n FROM game_board WHERE game = ?1 AND ${GB_SHOWN} AND aid != ?2
+           AND (score > ?3 OR (score = ?3 AND t < ?4))`).bind(game, aid, mine.score, mine.t).first();
+      const rank = ((r && r.n) || 0) + 1;
+      me = { rank: rank, score: mine.score, priv: mine.priv };
+      if (rank > 1) {
+        const a = await env.DB.prepare(
+          `SELECT nick, ava, score FROM game_board WHERE game = ?1 AND ${GB_SHOWN} AND aid != ?2
+             AND (score > ?3 OR (score = ?3 AND t < ?4)) ORDER BY score ASC, t DESC LIMIT 1`
+        ).bind(game, aid, mine.score, mine.t).first();
+        if (a) above = { nick: a.nick, ava: a.ava, score: a.score, rank: rank - 1 };
+      }
+      if (rank > 10 && !mine.priv) {
+        const nb = await env.DB.prepare(
+          `SELECT aid, nick, ava, score FROM game_board WHERE game = ? AND ${GB_SHOWN}
+            ORDER BY score DESC, t ASC LIMIT 5 OFFSET ?`).bind(game, Math.max(10, rank - 3)).all();
+        near = (nb.results || []).map(function (x, i) {
+          return { nick: x.nick, ava: x.ava, score: x.score, rank: Math.max(10, rank - 3) + i + 1, mine: x.aid === aid };
+        });
+      }
+    } else if (mine) {
+      me = { rank: null, score: mine.score, held: mine.hidden === 2, priv: mine.priv };
+    }
+  }
+  return {
+    top: (top.results || []).map(function (x, i) {
+      return { nick: x.nick, ava: x.ava, score: x.score, rank: i + 1, mine: !!aid && x.aid === aid };
+    }),
+    total: (total && total.n) || 0, me: me, near: near, above: above
+  };
+}
+
+// 待確認名單：排名 30～90 名，加上看起來偏難（前 300 名）但資料還不到 30 次的字。
+// 切切樂每 3 題有 1 題從這裡抽，讓前 50 名更快穩定。一天算一次。
+let CAND_CACHE = null;
+async function candWords(env) {
+  if (CAND_CACHE && CAND_CACHE.day === eqToday()) return CAND_CACHE.words;
+  let words = [];
+  try {
+    const rk = await rankWords(env, await wordOrigins(env));
+    const pick = {};
+    rk.rows.slice(29, 90).forEach(function (r) { pick[r.en] = 1; });
+    rk.rows.slice(0, 300).forEach(function (r) { if (r.n < 30) pick[r.en] = 1; });
+    words = Object.keys(pick).slice(0, 200);
+  } catch (e) { words = []; }
+  CAND_CACHE = { day: eqToday(), words: words };
+  return words;
+}
 
 function json(o) {
   return new Response(JSON.stringify(o), {
@@ -1187,7 +1513,15 @@ fetch("/admin/data").then(function(r){return r.json()}).then(function(d){
   /* --- 最常錯的字 --- */
   h+='<h2>最常錯的字</h2>';
   var wt=d.wordTotal||{};
-  h+='<p class="hint">全部單字（闖關、單字測驗、今日挑戰）取答錯率最高的前 50 名。排序有考慮出現次數：次數太少的字答錯率不可靠，會自動往後排，所以不一定照「答錯率」欄位由大到小。出現不到 10 次的字不列入。地獄字不在國中小 2000 字內，不列入。「原第 N 關」是舊玩家看到的關卡編號；10/31 之後的新玩家，同難度內的關卡順序是打亂的。</p>';
+  h+='<p class="hint">闖關、單字測驗、今日挑戰、切切樂全部算進來。切切樂有時間壓力，同一個字在那邊比較容易錯，所以先換算成同一把尺：「換算答錯率」＝這個字在闖關大概會錯幾 %。排序用換算後的 95% 下限，次數太少的字會自動往後排。「原始」是全部直接加總的答錯率，給你參考。出現不到 10 次、還有地獄字（不在國中小 2000 字內）不列入。「原第 N 關」是舊玩家看到的關卡編號；10/31 之後的新玩家，同難度內的關卡順序是打亂的。</p>';
+  if(d.wordModes&&d.wordModes.length){
+    var MN={old:"舊資料（分模式前）",stage:"闖關",quiz:"單字測驗",chal:"今日挑戰",slice:"切切樂"};
+    h+='<div class="wrap"><table><tr><th>模式</th><th>出現</th><th>答錯率</th><th>校正</th></tr>';
+    d.wordModes.forEach(function(m){
+      h+='<tr><td>'+(MN[m.mode]||m.mode)+'</td><td class="n">'+nz(m.shown)+'</td><td class="n">'+(m.shown?m.pct+'%':'—')+'</td><td class="n">'+(m.adj===null?(m.shown?'資料不夠，先不校正':'—'):(m.adj>0?'+':'')+m.adj)+'</td></tr>';
+    });
+    h+='</table></div><p class="hint">「校正」是這個模式比「看英文選中文」難多少（log-odds）。正數＝比較容易錯，排名時會扣掉。一個模式累積滿 300 次才開始校正。</p>';
+  }
   if(wt.words){
     h+='<div class="cards">'
       + card(nz(wt.words),"已收集單字","有紀錄的字數（滿 2122 就是全部）","")
@@ -1197,14 +1531,14 @@ fetch("/admin/data").then(function(r){return r.json()}).then(function(d){
   }
   if(d.hardWords&&d.hardWords.length){
     var LV={basic:"基礎",advanced:"進階",hell:"地獄"};
-    h+='<div class="wrap"><table><tr><th>#</th><th>單字</th><th>答錯率</th><th>答錯</th><th>出現</th></tr>';
+    h+='<div class="wrap"><table><tr><th>#</th><th>單字</th><th>換算答錯率</th><th>原始</th><th>出現</th></tr>';
     d.hardWords.forEach(function(r,i){
       var src=[];
       if(r.stage) src.push("原第 "+r.stage+" 關"+(LV[r.lvl]?"・"+LV[r.lvl]:""));
       if(r.chal&&r.chal.length) src.push("挑戰 "+r.chal.join("、"));
       h+='<tr><td class="n">'+(i+1)+'</td><td>'+r.en
         +(src.length?'<div style="font-size:11.5px;opacity:.6;margin-top:2px">'+src.join("｜")+'</div>':'')
-        +'</td><td class="n hot">'+r.pct+'%</td><td class="n">'+r.wrong+'</td><td class="n">'+r.shown+'</td></tr>';
+        +'</td><td class="n hot">'+r.est+'%</td><td class="n">'+r.pct+'%<div style="font-size:11px;opacity:.6">'+r.wrong+' 錯</div></td><td class="n">'+r.shown+(r.slice?'<div style="font-size:11px;opacity:.6">切切樂 '+r.slice+'</div>':'')+'</td></tr>';
     });
     h+='</table></div>';
   }else{

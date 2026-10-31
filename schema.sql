@@ -79,3 +79,37 @@ CREATE TABLE IF NOT EXISTS board (
   t       INTEGER NOT NULL,   -- 最後上傳時間，同分時早的排前面
   hidden  INTEGER NOT NULL DEFAULT 0
 );
+
+-- v2026.11.01a：單字統計分模式（stage / quiz / chal / slice）
+-- 舊表 word_stats 照舊累加（舊模式），切切樂只記在這裡。Worker 會自動建立，這裡只是紀錄。
+CREATE TABLE IF NOT EXISTS word_stats_m (
+  en TEXT NOT NULL,
+  mode TEXT NOT NULL,
+  shown INTEGER NOT NULL DEFAULT 0,
+  wrong INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (en, mode)
+);
+
+-- v2026.11.01a：小遊戲排行榜（切切樂 slice、拼字小蜜蜂 bee）。一台裝置一個遊戲一列。
+-- hidden：0 正常 / 1 後台隱藏 / 2 自動待審 / 3 後台放行；priv = 1：本人選擇不公開
+CREATE TABLE IF NOT EXISTS game_board (
+  game TEXT NOT NULL,
+  aid TEXT NOT NULL,
+  nick TEXT NOT NULL,
+  ava TEXT,
+  score INTEGER NOT NULL DEFAULT 0,
+  cleared INTEGER NOT NULL DEFAULT 0,
+  secs INTEGER NOT NULL DEFAULT 0,
+  t INTEGER NOT NULL,
+  hidden INTEGER NOT NULL DEFAULT 0,
+  priv INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (game, aid)
+);
+
+-- 開局號碼牌（防作弊用），超過一天沒用掉的會自動刪掉
+CREATE TABLE IF NOT EXISTS game_runs (
+  tok TEXT PRIMARY KEY,
+  aid TEXT NOT NULL,
+  game TEXT NOT NULL,
+  t INTEGER NOT NULL
+);

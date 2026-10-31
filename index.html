@@ -598,9 +598,10 @@
     line-height: 1;
     margin-bottom: 8px;
   }
+  /* v2026.11.01a：原本用 filter: grayscale(1)。Android Chrome（三星等）在大尺寸彩色 emoji 套 filter
+     會畫成碎片或整個空白，所以改成只降透明度 */
   .badge-card.locked .badge-icon {
-    filter: grayscale(1);
-    opacity: 0.45;
+    opacity: 0.3;
   }
   .badge-card .badge-name {
     font-size: 14px;
@@ -636,6 +637,10 @@
    拼字小蜜蜂（新增功能，全部類名以 bee- 開頭，不影響原有樣式）
    ================================================================== */
 .bee-intro { text-align: center; padding: 6px 0 2px; }
+.bee-lbline { margin: 4px 0 10px; font-size: 13.5px; color: #6B7086; text-align: center; line-height: 1.6; }
+.bee-lbline b { color: #C97F00; font-size: 16px; }
+.bee-lbline span { display: block; font-size: 12px; }
+.bee-gb { width: 100%; display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; text-align: left; }
 .bee-intro p { font-size: 13px; color: #6B7086; line-height: 1.7; margin: 0 0 14px; }
 .bee-best { font-family: monospace; font-size: 13px; color: #C97F00; margin-bottom: 14px; }
 .bee-start-btn { padding: 13px 40px; border-radius: 999px; border: none; background: #0E8F82;
@@ -1058,6 +1063,32 @@
   .home-card .lb { font-size: 13px; font-weight: 600; letter-spacing: -0.5px; }
   .home-card .sb { font-size: 10px; color: #82869C; font-family: monospace; white-space: nowrap; }
   .home-card.soon { opacity: 0.55; cursor: default; background: #F1EEE7; }
+  .home-sec { width: 100%; display: flex; align-items: baseline; justify-content: space-between; margin: 4px 2px 8px; }
+  .home-sec b { font-size: 14px; color: #2A2A33; }
+  .home-sec span { font-size: 11.5px; color: #82869C; }
+  .home-grid.home-learn { grid-template-columns: 1fr 1fr; margin-bottom: 18px; }
+  .home-learn .home-card { flex-direction: row; align-items: center; gap: 10px; padding: 11px 12px; }
+  .home-learn .home-card .ic { font-size: 22px; }
+  .home-learn .home-card .tx { display: flex; flex-direction: column; gap: 1px; }
+  .home-game { position: relative; padding: 12px 9px 11px; }
+  .home-game .ic { font-size: 26px; margin-bottom: 4px; }
+  .home-game .lb { font-size: 13.5px; }
+  .home-game .sb { color: #C97F00; font-weight: 700; }
+  .home-new { position: absolute; top: 7px; right: 7px; background: #E0631C; color: #fff; font-size: 9.5px; font-weight: 800;
+    border-radius: 999px; padding: 1px 6px; font-family: inherit; }
+  .map-bar { width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 18px; }
+  .map-card { background: #fff; border: 1px solid #E7E5DE; border-radius: 14px; padding: 11px 12px; display: flex; align-items: center;
+    gap: 10px; text-align: left; font-family: inherit; color: #2A2A33; cursor: pointer; min-width: 0; }
+  .map-card:active { background: #F1EEE7; }
+  .map-card .ic { font-size: 24px; flex: none; }
+  .map-card .tx { min-width: 0; }
+  .map-card b { display: block; font-size: 14px; }
+  .map-card small { font-size: 11.5px; color: #82869C; }
+  .map-card small em { font-style: normal; color: #C97F00; font-weight: 700; }
+  .map-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px 4px; margin-top: 5px; font-size: 12px; line-height: 1; width: fit-content; }
+  .map-strip i { font-style: normal; }
+  .map-strip i.off { opacity: 0.25; }
+  .map-back { background: none; border: none; color: #0E8F82; font-size: 14px; padding: 0 0 12px; font-family: inherit; cursor: pointer; align-self: flex-start; }
   .home-card.soon .sb { color: #B5B8C4; }
   .home-stats {
     width: 100%;
@@ -3771,7 +3802,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.10.31a";
+var BUILD = "v2026.11.01a";
 
 // ------------------------------------------------------------------
 // 每日一句（原「今日單字」改版）
@@ -3968,7 +3999,7 @@ function chalPick(i) {
   CHAL.picked = i;
   CHAL.answers.push({ q: q, ok: ok });
   // 順便餵答錯率統計。v2026.10.31a：只算當天第一次作答，重玩已經看過答案，不列入
-  if (!CHAL.replay && !CHAL.done) WSTAT.hit(q.correct.en, !ok);
+  if (!CHAL.replay && !CHAL.done) WSTAT.hit(q.correct.en, !ok, "chal");
   render();
 }
 function chalNext() {
@@ -4113,29 +4144,49 @@ function homePanelHtml() {
   var cleared = Object.keys(STAGE_PROGRESS.stars).length;
   var earned = BADGE_DEFS.filter(function (b) { return !!BADGES.earned[b.id]; }).length;
 
-  var cards = [
-    { m: "flash",     ic: "\u26A1",             lb: "閃卡",       sb: "記單字" },
-    { m: "bee",       ic: "\uD83D\uDC1D",       lb: "拼字小蜜蜂", sb: "拼字遊戲" },
+  // v2026.11.01a：九宮格拆成「學習」和「遊戲」兩區；闖關榜、徽章搬進闖關地圖
+  var learn = [
+    { m: "flash",    ic: "\u26A1",       lb: "閃卡",     sb: "記單字" },
+    { m: "quiz",     ic: "\uD83D\uDCDD", lb: "單字測驗", sb: "四選一" },
+    { m: "grammar",  ic: "\uD83D\uDCD6", lb: "文法",     sb: GRAMMAR_BANK.length + " 題" },
+    { m: "scramble", ic: "\uD83D\uDD00", lb: "重組句子", sb: SCRAMBLE_BANK.length + " 句" }
+  ];
+  function gameSub(game, fallback) {
+    // 直接讀 eq_gb（首頁第一次畫的時候，排行榜那段程式還沒載入）
+    try {
+      var m = JSON.parse(localStorage.getItem("eq_gb") || "null");
+      var rk = m && m.rank && m.rank[game];
+      if (rk) return "第 " + rk + " 名";
+    } catch (e) {}
+    return fallback;
+  }
+  var sliceBest = 0;
+  try { sliceBest = +localStorage.getItem("eq_slice_best") || 0; } catch (e) {}
+  var games = [
     { m: "adventure", ic: "\uD83D\uDDFA\uFE0F", lb: "闖關地圖",   sb: cleared + "/" + STAGES.length + " 關" },
-    { m: "quiz",      ic: "\uD83D\uDCDD",       lb: "單字測驗",   sb: "四選一" },
-    { m: "grammar",   ic: "\uD83D\uDCD6",       lb: "文法",       sb: GRAMMAR_BANK.length + " 題" },
-    { m: "scramble",  ic: "\uD83D\uDD00",       lb: "重組句子",   sb: SCRAMBLE_BANK.length + " 句" },
-    { m: "badges",    ic: "\uD83C\uDFC5",       lb: "徽章",       sb: earned + "/" + BADGE_DEFS.length + " 個" }
+    { m: "bee",       ic: "\uD83D\uDC1D",       lb: "拼字小蜜蜂", sb: gameSub("bee", "拼字遊戲") },
+    { m: "slice",     ic: "\u2702\uFE0F",       lb: "單字切切樂", sb: gameSub("slice", sliceBest ? "最高 " + sliceBest : "劃開中文"), isNew: !sliceBest }
   ];
 
-  html += '<div class="home-grid">';
-  cards.forEach(function (c) {
+  html += '<div class="home-sec"><b>\uD83D\uDCDA 學習</b><span>背單字、練文法</span></div>';
+  html += '<div class="home-grid home-learn">';
+  learn.forEach(function (c) {
     html += '<button class="home-card" onclick="setMode(\'' + c.m + '\')">';
+    html += '<span class="ic">' + c.ic + '</span>';
+    html += '<span class="tx"><span class="lb">' + c.lb + '</span><span class="sb">' + c.sb + '</span></span>';
+    html += '</button>';
+  });
+  html += '</div>';
+  html += '<div class="home-sec"><b>\uD83C\uDFAE 遊戲</b><span>玩完有排行榜</span></div>';
+  html += '<div class="home-grid home-games">';
+  games.forEach(function (c) {
+    html += '<button class="home-card home-game" onclick="setMode(\'' + c.m + '\')">';
+    if (c.isNew) html += '<span class="home-new">NEW</span>';
     html += '<span class="ic">' + c.ic + '</span>';
     html += '<span class="lb">' + c.lb + '</span>';
     html += '<span class="sb">' + c.sb + '</span>';
     html += '</button>';
   });
-  html += '<button class="home-card" onclick="lbOpenBoard()">';
-  html += '<span class="ic">\uD83C\uDFC6</span>';
-  html += '<span class="lb">闖關榜</span>';
-  html += '<span class="sb">總星數排名</span>';
-  html += '</button>';
   html += '</div>';
 
   return html;
@@ -4149,7 +4200,8 @@ var MODES = [
   { key: "scramble", label: "重組句子" },
   { key: "adventure", label: "闖關地圖" },
   { key: "badges", label: "徽章" },
-  { key: "bee", label: "拼字小蜜蜂" }
+  { key: "bee", label: "拼字小蜜蜂" },
+  { key: "slice", label: "切切樂" }
 ];
 
 var STAGE_SIZE = 20;
@@ -4595,7 +4647,7 @@ function answerQuiz(optIndex) {
   if (state.selected !== null) return;
   var opt = state.question.options[optIndex];
   state.selected = opt.en;
-  WSTAT.hit(state.question.correct.en, opt.en !== state.question.correct.en);
+  WSTAT.hit(state.question.correct.en, opt.en !== state.question.correct.en, "quiz");
   if (opt.en === state.question.correct.en) {
     state.score++; state.streak++;
     updateBest();
@@ -4720,7 +4772,7 @@ function handleStageTimeout() {
   // v2026.10.31a：時間到也算答錯（不會的字常常就是時間到），以前沒記，答錯率被低估
   try {
     var tq = state.stageQuestions[state.stageQPos];
-    if (tq && state.stageSelected === null) WSTAT.hit(tq.correct.en, true);
+    if (tq && state.stageSelected === null) WSTAT.hit(tq.correct.en, true, "stage");
   } catch (e) {}
   state.stageSelected = "__timeout__";
   state.stageHearts--;
@@ -4736,7 +4788,7 @@ function answerStageQuestion(optIndex) {
   var q = state.stageQuestions[state.stageQPos];
   var opt = q.options[optIndex];
   state.stageSelected = opt.en;
-  WSTAT.hit(q.correct.en, opt.en !== q.correct.en);
+  WSTAT.hit(q.correct.en, opt.en !== q.correct.en, "stage");
   if (opt.en !== q.correct.en) {
     state.stageHearts--;
     if (state.stageHearts <= 0) {
@@ -4824,6 +4876,8 @@ function render() {
     html += '<p class="subtitle">已過 ' + clearedCount + ' / ' + STAGES.length + ' 關</p>';
   } else if (state.mode === "bee") {
     html += '<p class="subtitle">打字拼寫 · 射擊小遊戲</p>';
+  } else if (state.mode === "slice") {
+    html += '<p class="subtitle">劃開對的中文 · 有排行榜</p>';
   } else if (state.mode === "badges") {
     var earnedCount = BADGE_DEFS.filter(function (b) { return !!BADGES.earned[b.id]; }).length;
     html += '<p class="subtitle">已解鎖 ' + earnedCount + ' / ' + BADGE_DEFS.length + ' 個徽章</p>';
@@ -4857,7 +4911,7 @@ function render() {
     html += '</div>';
   }
 
-  if (state.mode !== "home" && state.mode !== "daily" && state.mode !== "board" && state.mode !== "adventure" && state.mode !== "badges" && state.mode !== "bee") {
+  if (state.mode !== "home" && state.mode !== "daily" && state.mode !== "board" && state.mode !== "adventure" && state.mode !== "badges" && state.mode !== "bee" && state.mode !== "slice") {
     html += '<div class="chip-row">';
     DIFFICULTIES.forEach(function (d) {
       var active = state.difficulty === d.key ? " active" : "";
@@ -4882,9 +4936,12 @@ function render() {
   } else if (state.mode === "daily") {
     html += chalPanelHtml();
   } else if (state.mode === "board") {
+    html += '<button class="map-back" onclick="setMode(\'adventure\')">\u2190 回闖關地圖</button>';
     html += lbPanelHtml();
   } else if (state.mode === "bee") {
     html += BEE.panelHtml();
+  } else if (state.mode === "slice") {
+    html += SLICE.panelHtml();
   } else if (state.mode === "flash") {
     var pool = wordPool();
     if (!pool.length) {
@@ -5027,7 +5084,7 @@ function render() {
 
   if (state.mode === "adventure") {
     if (state.stageIndex === null) {
-      html += '<button class="lb-btn ghost" style="margin:0 0 14px" onclick="lbOpenBoard()">\uD83C\uDFC6 看闖關榜</button>';
+      html += mapBarHtml();
       html += '<div class="stage-map">';
       var sectionLabels = { basic: "\u2600\uFE0F 基礎關卡", advanced: "\u2694\uFE0F 進階關卡", hell: "\uD83D\uDC51 地獄關卡" };
       ["basic", "advanced", "hell"].forEach(function (lvl) {
@@ -5115,6 +5172,7 @@ function render() {
   }
 
   if (state.mode === "badges") {
+    html += '<button class="map-back" onclick="setMode(\'adventure\')">\u2190 回闖關地圖</button>';
     var trackLabels = { clear: "軌道一\u30FB破關數", perfect: "軌道二\u30FB全滿星（每關 \u2B50\u2B50\u2B50）" };
     ["clear", "perfect"].forEach(function (track) {
       var list = BADGE_DEFS.filter(function (b) { return b.track === track; });
@@ -5174,6 +5232,7 @@ function render() {
   } catch (e) { /* 捲不動不影響任何功能 */ }
 
   if (state.mode !== "bee" && BEE.isOpen()) BEE.close();
+  try { if (state.mode !== "slice" && SLICE.isOpen()) SLICE.close(); } catch (e) {}
 
   if (focusedIsSearch) {
     var searchEl = document.getElementById("wordSearchInput");
@@ -5269,6 +5328,14 @@ var BEE = (function () {
   function baseHint(len) { return len >= 9 ? 3 : (len >= 6 ? 2 : 1); }
 
   var BEST = loadJSON("eq_bee_best", {});
+  // v2026.11.01a 排行榜：難度倍率（長字本來就比較多金幣，所以倍率不大），之後有資料可以再調
+  var LB_MULT = { rookie: 1, basic: 1.2, advanced: 1.5, hell: 2 };
+  // 只有預設設定才上榜：滑桿全部是預設值，提示是「逐漸浮現」或「無提示」
+  function isDefaultSetup() {
+    var keys = ["speed", "spawn", "maxOn", "growth", "perWave", "hearts", "bullet"];
+    for (var i = 0; i < keys.length; i++) if (P[keys[i]] !== DEFAULTS[keys[i]]) return false;
+    return P.hint === "fade" || P.hint === "none";
+  }
   var tier = "rookie";
   var G = null, rafId = null, lastT = 0, muted = false, AC = null;
   var wrap = null, fieldEl, overlayEl, hudHearts, hudWave, hudCoins,
@@ -5591,6 +5658,7 @@ var BEE = (function () {
   ];
   function screenTuner() {
     var h = '<div class="bee-tuner">';
+    h += '<p style="font-size:12.5px;color:#C97F00;margin:0 0 10px;">\u26A0\uFE0F 改了滑桿或改成「依長度」提示，成績就不會列入排行榜</p>';
     SLIDERS.forEach(function (s) {
       h += '<div class="bee-slider"><div class="bee-slider-head"><span>' + s.label
          + '</span><b id="beev_' + s.key + '">' + P[s.key] + s.unit + '</b></div>'
@@ -5648,6 +5716,7 @@ var BEE = (function () {
   function startGame() {
     var pool = poolFor(tier);
     if (!pool.length) return;
+    try { GB.start("bee"); } catch (e) {}   // v2026.11.01a：排行榜的開局號碼牌
     Array.prototype.slice.call(fieldEl.querySelectorAll(".bee-target,.bee-bullet,.bee-pop"))
          .forEach(function (n) { n.remove(); });
     G = {
@@ -6191,9 +6260,28 @@ var BEE = (function () {
       });
       h += '</div>';
     }
+    // v2026.11.01a：排行榜。分數 = 金幣 × 難度倍率；自訂設定（滑桿或提示）不列入
+    var lbScore = Math.round(G.coins * (LB_MULT[tier] || 1));
+    var fair = isDefaultSetup();
+    h += '<div class="bee-lbline">排行榜分數 <b>' + lbScore + '</b>'
+       + (LB_MULT[tier] > 1 ? '<span>（金幣 × ' + LB_MULT[tier] + '，' + tierOf(tier).label + '）</span>' : '')
+       + (fair ? '' : '<span>自訂設定的成績不列入排行榜</span>') + '</div>';
+    h += '<div class="bee-gb" id="beeGb"><div class="gb-empty">排行榜載入中…</div></div>';
     h += '<button class="bee-go" id="beeAgain">再玩一次</button>';
     h += '<button class="bee-link" id="beeBack">回到開始畫面</button>';
     overlayEl.innerHTML = h;
+    (function () {
+      var gbBox = overlayEl.querySelector("#beeGb");
+      function draw(res) {
+        if (!gbBox || !gbBox.isConnected) return;
+        gbBox.innerHTML = GB.html("bee", res);
+        GB.bind(gbBox, "bee", res, draw);
+      }
+      try {
+        GB.finish("bee", { score: lbScore, cleared: G.cleared, eligible: fair, why: "自訂設定的成績不列入排行榜" })
+          .then(draw, function () {});
+      } catch (e) {}
+    })();
     overlayEl.style.display = "flex";
     overlayEl.scrollTop = 0;
     showChrome(false);
@@ -6638,6 +6726,26 @@ function lbUpdateScore() {
   rpToast("成績已更新");
 }
 
+// v2026.11.01a：闖關地圖最上面的「闖關榜」「徽章」兩張卡（從首頁搬過來）
+function mapBarHtml() {
+  var st = lbMyStats(), lbTxt;
+  if (LB.me && LB.me.nick) {
+    if (LB.board === null && !LB.loading) { try { lbFetch(null); } catch (e) {} }
+    lbTxt = LB.rank ? '第 <em>' + LB.rank + '</em> 名\u30FB' + (LB.me.stars || 0) + ' \u2B50' : (LB.me.stars || 0) + ' \u2B50';
+  } else {
+    lbTxt = st.stars ? '還沒上榜\u30FB' + st.stars + ' \u2B50' : '過關拿星星就能上榜';
+  }
+  var earned = BADGE_DEFS.filter(function (b) { return !!BADGES.earned[b.id]; }).length;
+  var strip = BADGE_DEFS.map(function (b) {
+    return '<i' + (BADGES.earned[b.id] ? '' : ' class="off"') + '>' + b.icon + '</i>';
+  }).join("");
+  var h = '<div class="map-bar">';
+  h += '<button class="map-card" onclick="lbOpenBoard()"><span class="ic">\uD83C\uDFC6</span><span class="tx"><b>闖關榜</b><small>' + lbTxt + '</small></span></button>';
+  h += '<button class="map-card" onclick="setMode(\'badges\')"><span class="ic">\uD83C\uDFC5</span><span class="tx"><b>徽章 ' + earned + '/' + BADGE_DEFS.length + '</b><span class="map-strip">' + strip + '</span></span></button>';
+  h += '</div>';
+  return h;
+}
+
 function lbPanelHtml() {
   var st = lbMyStats(), h = "";
 
@@ -6702,6 +6810,7 @@ function lbPanelHtml() {
 var NEWS = [
   { pin: true, text: "\uD83D\uDCAC <b>遇到問題？</b><a href=\"javascript:void(0)\" onclick=\"closeNews();rpOpen()\" style=\"color:#0E8F82\">點這裡回報</a>，會自動附上診斷資料，也可以加截圖" },
   { pin: true, text: "\uD83D\uDCF1 <b>把它裝到手機桌面</b>：開起來比較快，沒網路也能用，發音也比較正常<br><span class=\"news-steps\">Android：用 Chrome 開啟 \u2192 右上角 \u22EE \u2192 安裝應用程式<br>iPhone：用 Safari 開啟 \u2192 下方分享鍵 \u2192 加入主畫面</span>" },
+  { date: "2026/11/01", text: "\u2702\uFE0F <b>新遊戲：單字切切樂</b>：劃開對的中文，破紀錄自動登上排行榜。拼字小蜜蜂也有排行榜了" },
   { date: "2026/09/06", text: "\u270F\uFE0F <b>今日單字改成每日一句</b>：每天一句挖空，中文當提示" },
   { date: "2026/09/04", text: "\uD83C\uDFC6 <b>闖關榜開放了</b>：依總星數排名，要不要上榜自己決定" },
   { date: "2026/09/03", text: "\u26A1 <b>新增今日挑戰</b>：每天 10 題，全台灣同一份，答完看得到全台平均分" }
@@ -6907,6 +7016,732 @@ setTimeout(function () { if (newsUnseen()) openNews(); }, 900);
 </div>
 
 <!-- ==================================================================
+     小遊戲排行榜（GB）＋ 單字切切樂（SLICE）  v2026.11.01a
+     · 兩個獨立 IIFE，CSS 全部 gb- / slice- 開頭，不影響原有樣式
+     · 新增 localStorage key：eq_gb（遊戲榜的名字與設定）、eq_slice_best、eq_slice_cand
+       原本的 eq_lb（闖關榜）完全不碰；第一次玩時，如果闖關榜已經有名字，就複製過來用
+     · 遊戲畫面掛在 body 上（render() 會重建 #root，掛裡面會被洗掉）
+     ================================================================== -->
+<style>
+/* ---------- 共用排行榜 ---------- */
+.gb-card { background: #fff; border: 1px solid #E8E2D4; border-radius: 16px; padding: 14px; text-align: left; }
+.gb-card h3 { margin: 0 0 10px; font-size: 15px; color: #2B2A28; }
+.gb-head { display: flex; justify-content: space-between; align-items: baseline; }
+.gb-head small { color: #8C8577; font-size: 12px; }
+.gb-me { display: flex; align-items: center; gap: 10px; }
+.gb-me .gb-av { width: 44px; height: 44px; border-radius: 12px; overflow: hidden; flex: none; }
+.gb-av svg { width: 100%; height: 100%; display: block; }
+.gb-me .gb-nm { flex: 1; font-weight: 800; font-size: 17px; color: #2B2A28; min-width: 0; }
+.gb-me .gb-nm small { display: block; font-weight: 400; font-size: 12px; color: #8C8577; }
+.gb-btn { border: 1px solid #E8E2D4; background: #F7F5F0; border-radius: 10px; padding: 7px 10px; font-size: 13.5px; color: #2B2A28; }
+.gb-rename { display: flex; gap: 8px; margin-top: 10px; }
+.gb-rename input { flex: 1; min-width: 0; font-size: 16px; padding: 9px 10px; border-radius: 10px; border: 2px solid #E8E2D4; }
+.gb-rename button { border: none; background: #C97F00; color: #fff; border-radius: 10px; padding: 0 14px; font-weight: 700; font-size: 15px; }
+.gb-msg { margin: 6px 0 0; font-size: 12.5px; color: #8C8577; }
+.gb-msg.bad { color: #D2544A; }
+.gb-tog { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; padding-top: 10px; border-top: 1px dashed #E8E2D4; font-size: 13.5px; color: #55514a; }
+.gb-tog small { color: #8C8577; }
+.gb-sw { width: 46px; height: 26px; border-radius: 13px; background: #D9D1BF; position: relative; border: none; flex: none; }
+.gb-sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .15s; }
+.gb-sw.on { background: #C97F00; } .gb-sw.on::after { left: 23px; }
+.gb-chase { background: #FFF1E6; border: 1px solid #F6C9A4; color: #B0501A; border-radius: 12px; padding: 9px 12px; font-size: 14.5px; font-weight: 700; text-align: center; }
+.gb-note { background: #F7F5F0; border-radius: 12px; padding: 9px 12px; font-size: 13px; color: #6B7086; text-align: center; line-height: 1.6; }
+.gb-row { display: flex; align-items: center; gap: 9px; padding: 7px 4px; border-bottom: 1px solid #F3EEE3; font-size: 15px; color: #2B2A28; }
+.gb-row:last-child { border-bottom: none; }
+.gb-row .gb-rk { width: 34px; text-align: right; font-weight: 800; color: #8C8577; font-variant-numeric: tabular-nums; }
+.gb-row .gb-av { width: 30px; height: 30px; border-radius: 8px; overflow: hidden; flex: none; }
+.gb-row .gb-nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gb-row .gb-sc { font-weight: 800; font-variant-numeric: tabular-nums; }
+.gb-row.mine { background: #FFF4DC; border-radius: 10px; }
+.gb-row.mine .gb-nm { font-weight: 800; color: #C97F00; }
+.gb-gap { text-align: center; color: #8C8577; letter-spacing: 4px; padding: 2px 0; }
+.gb-empty { text-align: center; color: #8C8577; font-size: 14px; padding: 12px 0; }
+
+/* ---------- 切切樂 ---------- */
+.slice-intro { text-align: center; padding: 6px 0 2px; }
+.slice-intro p { font-size: 13px; color: #6B7086; line-height: 1.7; margin: 0 0 14px; }
+.slice-intro .slice-best { font-family: monospace; font-size: 13px; color: #C97F00; margin-bottom: 14px; }
+.slice-start-btn { padding: 13px 40px; border-radius: 999px; border: none; background: #C97F00; color: #fff; font-size: 16px; font-weight: 700; }
+.slice-wrap { position: fixed; inset: 0; z-index: 9000; background: #FBF5E8; color: #2B2A28; overflow: hidden;
+  font-family: -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  overscroll-behavior: none; user-select: none; -webkit-user-select: none; touch-action: none; }
+.slice-wrap * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+.slice-cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.slice-hud { position: absolute; left: 0; right: 0; top: 0; padding: calc(10px + env(safe-area-inset-top)) 14px 0; pointer-events: none; }
+.slice-row { display: flex; justify-content: space-between; align-items: center; font-size: 15px; }
+.slice-hearts { letter-spacing: 2px; font-size: 18px; }
+.slice-score { font-weight: 800; font-size: 20px; color: #C97F00; }
+.slice-target { margin: 10px auto 0; text-align: center; background: #fff; border: 2px solid #E8DEC8; border-radius: 18px;
+  padding: 8px 18px 10px; width: fit-content; max-width: 78%; box-shadow: 0 4px 0 #EFE3C8; }
+.slice-target small { display: block; font-size: 12px; color: #8C8577; }
+.slice-target b { font-size: clamp(28px, 9vw, 42px); font-weight: 900; letter-spacing: .5px; word-break: break-word; }
+.slice-combo { text-align: center; margin-top: 6px; font-weight: 900; font-size: 18px; color: #E0631C; height: 22px; }
+.slice-topbtns { position: absolute; right: 10px; top: calc(46px + env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 6px; pointer-events: auto; }
+.slice-topbtns button { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #E8DEC8; background: #fff; font-size: 16px; padding: 0; }
+.slice-screen { position: absolute; inset: 0; overflow-y: auto; padding: calc(22px + env(safe-area-inset-top)) 18px 30px;
+  display: flex; flex-direction: column; gap: 14px; background: #FBF5E8; touch-action: pan-y; }
+.slice-screen h1 { margin: 6px 0 0; font-size: 30px; text-align: center; }
+.slice-sub { text-align: center; color: #8C8577; font-size: 14px; margin: 0; line-height: 1.6; }
+.slice-card { background: #fff; border: 1px solid #E8DEC8; border-radius: 16px; padding: 14px; }
+.slice-card h3 { margin: 0 0 10px; font-size: 15px; }
+.slice-seg { display: flex; gap: 8px; }
+.slice-seg button { flex: 1; padding: 12px 4px; border-radius: 12px; border: 2px solid #E8DEC8; background: #FBF5E8; font-size: 15px; font-weight: 600; color: #2B2A28; }
+.slice-seg button.sel { border-color: #C97F00; background: #FFF4DC; color: #C97F00; }
+.slice-how { font-size: 14px; line-height: 1.75; color: #55514a; margin: 0; padding-left: 18px; }
+.slice-go { padding: 16px; border: none; border-radius: 16px; background: #C97F00; color: #fff; font-size: 20px; font-weight: 800; }
+.slice-ghost { padding: 14px; border: 2px solid #E8DEC8; border-radius: 14px; background: #fff; font-size: 16px; font-weight: 600; color: #2B2A28; }
+.slice-link { background: none; border: none; color: #8C8577; font-size: 14px; padding: 6px; }
+.slice-bests { text-align: center; font-size: 14px; color: #8C8577; }
+.slice-res { text-align: center; padding-top: 6px; }
+.slice-res .slice-big { font-size: 64px; font-weight: 900; color: #C97F00; line-height: 1.1; }
+.slice-res .slice-lbl { color: #8C8577; font-size: 14px; }
+.slice-newbest { display: inline-block; margin-top: 6px; background: #E0631C; color: #fff; font-weight: 800; border-radius: 999px; padding: 4px 12px; font-size: 14px; }
+.slice-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.slice-stat { background: #fff; border: 1px solid #E8DEC8; border-radius: 14px; padding: 10px 6px; text-align: center; }
+.slice-stat b { display: block; font-size: 22px; }
+.slice-stat span { font-size: 12px; color: #8C8577; }
+.slice-missed { display: flex; flex-wrap: wrap; gap: 6px; }
+.slice-missed span { background: #FBF5E8; border: 1px solid #E8DEC8; border-radius: 10px; padding: 5px 9px; font-size: 14px; }
+.slice-missed span em { font-style: normal; color: #8C8577; margin-left: 4px; }
+.slice-btns { display: flex; gap: 10px; } .slice-btns button { flex: 1; }
+.slice-cd { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 110px; font-weight: 900; color: #C97F00; pointer-events: none; background: #FBF5E8; }
+</style>
+<script>
+/* =====================================================================
+   GB：小遊戲共用排行榜（切切樂、拼字小蜜蜂）
+   · 名字：eq_gb 有就用；沒有的話，闖關榜（eq_lb）有名字就複製一份；
+           再沒有就自動取「形容詞＋動物＋兩位數字」。在這裡改名不會改到闖關榜。
+   · 上傳：開局拿號碼牌（GB.start），結束時只有分數超過「已上傳的最高分」才送（GB.finish）
+   · priv：「不顯示我的成績」，別人看不到，自己的名次照算
+   ===================================================================== */
+var GB = (function () {
+  "use strict";
+  var KEY = "eq_gb";
+  var ADJ = ["飛快", "勇敢", "聰明", "開心", "害羞", "認真", "酷酷", "調皮", "愛睡", "貪吃", "溫柔", "冷靜",
+             "閃亮", "熱血", "迷糊", "安靜", "機靈", "樂觀", "神奇", "超強", "可愛", "努力", "好奇", "無敵"];
+  var NAMES = { slice: "切切樂", bee: "拼字小蜜蜂" };
+  var me = null, runs = {};
+  function load() { try { var v = localStorage.getItem(KEY); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(me)); } catch (e) {} }
+  function today() { return new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10); }
+  function aid() { try { return lbAid(); } catch (e) { return ""; } }
+  function online() { return location.protocol === "https:" || location.protocol === "http:"; }
+  function esc2(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function avSvg(id) { try { return (avaById(id) || AVATARS[0]).svg; } catch (e) { return ""; } }
+
+  function ensureMe() {
+    if (me) return me;
+    me = load();
+    if (me && me.nick) return me;
+    var lb = null;
+    try { lb = JSON.parse(localStorage.getItem("eq_lb") || "null"); } catch (e) {}
+    if (lb && lb.nick) {
+      me = { nick: lb.nick, ava: lb.ava || "", auto: false, priv: false, renamed: "", up: {} };
+    } else {
+      var an = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+      var n = ADJ[Math.floor(Math.random() * ADJ.length)] + an.name + ("0" + Math.floor(Math.random() * 100)).slice(-2);
+      me = { nick: n.slice(0, 8), ava: an.id, auto: true, priv: false, renamed: "", up: {} };
+    }
+    me.up = me.up || {};
+    save();
+    return me;
+  }
+
+  function api(path, params) {
+    if (!online()) return Promise.reject(new Error("offline"));
+    var q = Object.keys(params).map(function (k) { return k + "=" + encodeURIComponent(params[k]); }).join("&");
+    return fetch("/gs/" + path + "?" + q + "&_=" + Date.now()).then(function (r) { return r.json(); });
+  }
+
+  // 開局：拿號碼牌。拿不到（沒網路）這局就不能上榜，遊戲照玩
+  function start(game) {
+    runs[game] = { tok: null, t0: Date.now() };
+    var run = runs[game];
+    api("start", { aid: aid(), game: game }).then(function (j) { if (j && j.tok) run.tok = j.tok; }).catch(function () {});
+  }
+
+  // 結束：回傳 Promise<{ board, uploaded, why }>
+  function finish(game, o) {
+    ensureMe();
+    var run = runs[game] || { tok: null, t0: Date.now() };
+    runs[game] = null;
+    var secs = Math.round((Date.now() - run.t0) / 1000);
+    var prev = me.up[game] || 0;
+    var res = { uploaded: false, why: "", isBest: o.score > prev, eligible: o.eligible !== false };
+    if (!res.eligible) { res.why = o.why || ""; return board(game).then(function (b) { res.board = b; return res; }, function () { return res; }); }
+    if (!(o.score > prev)) return board(game).then(function (b) { res.board = b; return res; }, function () { res.why = "offline"; return res; });
+    if (!run.tok) { res.why = "notoken"; return board(game).then(function (b) { res.board = b; return res; }, function () { res.why = "offline"; return res; }); }
+    return api("submit", { aid: aid(), game: game, tok: run.tok, score: o.score, cleared: o.cleared, secs: secs,
+                           nick: me.nick, ava: me.ava, priv: me.priv ? 1 : 0 })
+      .then(function (j) {
+        if (j && j.ok) { me.up[game] = o.score; save(); res.uploaded = true; res.held = !!j.held; }
+        else res.why = (j && j.why) || "fail";
+        remember(game, j);
+        res.board = j; return res;
+      }, function () { res.why = "offline"; return res; });
+  }
+
+  function board(game) { return api("board", { aid: aid(), game: game }).then(function (b) { remember(game, b); return b; }); }
+  // 記住最近一次看到的名次，首頁遊戲卡顯示用（不用每次開首頁都連線）
+  function remember(game, b) {
+    if (!b || !b.top) return;
+    ensureMe(); me.rank = me.rank || {};
+    me.rank[game] = (b.me && b.me.rank) ? b.me.rank : null;
+    save();
+  }
+  function rankOf(game) { var m = load(); return m && m.rank ? m.rank[game] || null : null; }
+
+  function rename(v, game) {
+    ensureMe();
+    v = String(v || "").trim();
+    var chk = (typeof lbCheckNick === "function") ? lbCheckNick(v) : { ok: !!v, msg: "" };
+    if (!chk.ok) return Promise.resolve({ msg: chk.msg || "名字不能空白" });
+    if (me.renamed === today()) return Promise.resolve({ msg: "今天已經改過了，明天再改" });
+    me.nick = v; me.auto = false; me.renamed = today(); save();
+    return profile(game).then(function (b) { return { board: b }; }, function () { return { board: null }; });
+  }
+  function setPriv(v, game) {
+    ensureMe(); me.priv = !!v; save();
+    return profile(game);
+  }
+  function profile(game) {
+    return api("profile", { aid: aid(), game: game || "", nick: me.nick, ava: me.ava, priv: me.priv ? 1 : 0 })
+      .then(function (b) { if (game) remember(game, b); return b; });
+  }
+
+  // 結算畫面用的兩張卡：「你的名字」＋「排行榜」。res 是 finish() 的結果。
+  function html(game, res) {
+    ensureMe();
+    var b = res && res.board, h = "";
+    var whyText = {
+      notoken: "這局開始時沒有網路，成績沒有上傳",
+      offline: "現在沒有網路，排行榜看不到",
+      token: "這局的號碼牌失效了，成績沒有上傳",
+      bad: "成績格式不對，沒有上傳",
+      fail: "上傳失敗，下次破紀錄會再試"
+    };
+    if (res && res.held) h += '<div class="gb-note">這次的分數有點不尋常，要等管理員確認後才會出現在排行榜上</div>';
+    else if (res && res.why && whyText[res.why]) h += '<div class="gb-note">' + whyText[res.why] + '</div>';
+    else if (res && res.why) h += '<div class="gb-note">' + esc2(res.why) + '</div>';
+
+    if (b && b.me && b.me.rank && b.above) {
+      h += '<div class="gb-chase">再 ' + (b.above.score - b.me.score + 1) + ' 分，就超過「' + esc2(b.above.nick) + '」（第 ' + b.above.rank + ' 名）</div>';
+    } else if (b && b.me && b.me.rank === 1) {
+      h += '<div class="gb-chase">🏆 你是第 1 名！</div>';
+    }
+
+    h += '<div class="gb-card" data-gb-me="1">' +
+      '<div class="gb-me"><span class="gb-av">' + avSvg(me.ava) + '</span>' +
+      '<span class="gb-nm">' + esc2(me.nick) + '<small>' + (me.auto ? "系統幫你取的名字" : "排行榜上的名字") +
+        (b && b.me && b.me.rank ? "・第 " + b.me.rank + " 名" + (me.priv ? "（只有你看得到）" : "") : "") + '</small></span>' +
+      '<button class="gb-btn" data-gb="rename">✏️ 改名</button></div>' +
+      '<div class="gb-rename" data-gb="form" style="display:none"><input maxlength="8" placeholder="最多 8 個字" value="' + esc2(me.nick) + '">' +
+      '<button data-gb="ok">確定</button></div>' +
+      '<p class="gb-msg" data-gb="msg" style="display:none">一天只能改一次。不要用真實姓名。</p>' +
+      '<div class="gb-tog"><span>不顯示我的成績<br><small>打開後，別人在排行榜上看不到你</small></span>' +
+      '<button class="gb-sw' + (me.priv ? " on" : "") + '" data-gb="priv"></button></div>' +
+    '</div>';
+
+    h += '<div class="gb-card"><div class="gb-head"><h3>🏆 ' + (NAMES[game] || "") + '排行榜</h3>' +
+         (b && b.total ? '<small>共 ' + b.total + ' 人</small>' : '') + '</div>';
+    if (!b || !b.top) {
+      h += '<div class="gb-empty">連不上伺服器，稍後再看</div>';
+    } else if (!b.top.length) {
+      h += '<div class="gb-empty">還沒有人上榜，你可以是第一個</div>';
+    } else {
+      var row = function (x) {
+        return '<div class="gb-row' + (x.mine ? " mine" : "") + '"><span class="gb-rk">' + x.rank + '</span>' +
+          '<span class="gb-av">' + avSvg(x.ava) + '</span><span class="gb-nm">' + esc2(x.nick) + (x.mine ? "（你）" : "") + '</span>' +
+          '<span class="gb-sc">' + x.score + '</span></div>';
+      };
+      b.top.forEach(function (x) { h += row(x); });
+      if (b.near && b.near.length) { h += '<div class="gb-gap">⋯</div>'; b.near.forEach(function (x) { h += row(x); }); }
+    }
+    h += '</div>';
+    return h;
+  }
+
+  // 綁定按鈕。rerender(res) 由呼叫的遊戲提供，用新的排行榜重畫結算畫面
+  function bind(root, game, res, rerender) {
+    var card = root.querySelector('[data-gb-me]');
+    if (!card) return;
+    var form = card.querySelector('[data-gb="form"]'), msg = card.querySelector('[data-gb="msg"]');
+    card.querySelector('[data-gb="rename"]').onclick = function () {
+      form.style.display = "flex"; msg.style.display = "block";
+      var inp = form.querySelector("input"); inp.focus();
+    };
+    card.querySelector('[data-gb="ok"]').onclick = function () {
+      rename(form.querySelector("input").value, game).then(function (r) {
+        if (r.msg) { msg.textContent = r.msg; msg.className = "gb-msg bad"; return; }
+        if (r.board && r.board.top) res.board = r.board;
+        rerender(res);
+      });
+    };
+    card.querySelector('[data-gb="priv"]').onclick = function () {
+      setPriv(!me.priv, game).then(function (b) { if (b && b.top) res.board = b; rerender(res); },
+                                    function () { rerender(res); });
+    };
+  }
+
+  return { start: start, finish: finish, board: board, html: html, bind: bind, me: ensureMe, rankOf: rankOf };
+})();
+
+/* =====================================================================
+   SLICE：單字切切樂（單人）
+   · 上方出英文，中文字卡從下面拋上來，劃開對的那張
+   · 3 張卡排一列三欄；4 張排 2×2。同一欄的兩張同時拋，下排從更低處出發、
+     上排初速較快 → 距離只會越拉越開，不會重疊
+   · 判定：對的卡稍寬鬆；錯的卡要劃進卡片裡面，而且先記下來，
+     同一刀後來有劃到對的就算對（不記進統計）；手指放開都沒劃到對的才算錯；
+     同一刀劃進 2 張以上錯卡直接算錯（防亂掃）
+   · 進階字劃對 ×1.5 分
+   · 統計：WSTAT 模式 "slice"。每 3 題有 1 題從伺服器的「待確認名單」抽
+   ===================================================================== */
+var SLICE = (function () {
+  "use strict";
+  var WORDS = [];   // [en, zh, 0=基礎 1=進階]
+  (function () {
+    for (var i = 0; i < WORD_BANK.length; i++) {
+      var w = WORD_BANK[i];
+      if ((w.level === "basic" || w.level === "advanced") && w.zh) WORDS.push([w.en, w.zh, w.level === "basic" ? 0 : 1]);
+    }
+  })();
+  var BEST_KEY = "eq_slice_best", CAND_KEY = "eq_slice_cand";
+  var ADV_MULT = 1.5, GRAV = 650, WRONG_IN = 18;
+  var cfg = { level: 0, sound: true };
+  var wrap = null, cv, ctx, ui, hud, W = 0, H = 0, DPR = 1, g = null, raf = 0, last = 0;
+  var CAND = [];
+
+  function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function esc2(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function pool() { return cfg.level === 2 ? WORDS : WORDS.filter(function (w) { return w[2] === cfg.level; }); }
+  function say(en) { if (!cfg.sound) return; try { speak(en); } catch (e) {} }
+  function getBest() { try { return +localStorage.getItem(BEST_KEY) || 0; } catch (e) { return 0; } }
+  function setBest(v) { try { localStorage.setItem(BEST_KEY, String(v)); } catch (e) {} }
+  function today() { return new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10); }
+
+  // 待確認名單：一天抓一次，存在這支手機
+  function loadCand() {
+    var byEn = {};
+    WORDS.forEach(function (w, i) { byEn[w[0]] = i; });
+    function use(list) { CAND = (list || []).map(function (en) { return byEn[en]; }).filter(function (i) { return i !== undefined; }); }
+    try {
+      var c = JSON.parse(localStorage.getItem(CAND_KEY) || "null");
+      if (c && c.d === today()) { use(c.w); return; }
+      if (c) use(c.w);   // 先用舊的，等新的回來
+    } catch (e) {}
+    if (location.protocol !== "https:" && location.protocol !== "http:") return;
+    fetch("/gs/cand?_=" + Date.now()).then(function (r) { return r.json(); }).then(function (j) {
+      if (j && j.words) { use(j.words); try { localStorage.setItem(CAND_KEY, JSON.stringify({ d: today(), w: j.words })); } catch (e) {} }
+    }).catch(function () {});
+  }
+
+  /* ---------------- 開關 ---------------- */
+  function open() {
+    if (wrap) return;
+    wrap = document.createElement("div");
+    wrap.className = "slice-wrap";
+    wrap.innerHTML =
+      '<canvas class="slice-cv"></canvas>' +
+      '<div class="slice-hud" style="display:none">' +
+        '<div class="slice-row"><span class="slice-hearts"></span><span class="slice-score">0</span></div>' +
+        '<div class="slice-target"><small>劃開這個字的中文</small><b class="slice-tw"></b></div>' +
+        '<div class="slice-combo"></div>' +
+        '<div class="slice-topbtns"><button data-s="snd">🔊</button><button data-s="quit">✕</button></div>' +
+      '</div><div class="slice-ui"></div>';
+    document.body.appendChild(wrap);
+    cv = wrap.querySelector(".slice-cv"); ctx = cv.getContext("2d");
+    ui = wrap.querySelector(".slice-ui"); hud = wrap.querySelector(".slice-hud");
+    wrap.querySelector('[data-s="snd"]').onclick = function () { cfg.sound = !cfg.sound; this.textContent = cfg.sound ? "🔊" : "🔇"; };
+    wrap.querySelector('[data-s="quit"]').onclick = function () { stopGame(); home(); };
+    bindPointer();
+    resize();
+    window.addEventListener("resize", resize);
+    loadCand();
+    home();
+  }
+  function close() {
+    stopGame();
+    window.removeEventListener("resize", resize);
+    if (wrap) wrap.remove();
+    wrap = null;
+    try { WSTAT.flush(); } catch (e) {}
+    try { render(); } catch (e) {}
+  }
+  function resize() {
+    if (!wrap) return;
+    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+    W = window.innerWidth; H = window.innerHeight;
+    cv.width = W * DPR; cv.height = H * DPR;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  function stopGame() { cancelAnimationFrame(raf); raf = 0; if (g) g.over = true; g = null; if (hud) hud.style.display = "none"; if (ctx) ctx.clearRect(0, 0, W, H); }
+
+  /* ---------------- 開始畫面 ---------------- */
+  function home() {
+    stopGame();
+    var best = getBest();
+    ui.innerHTML =
+      '<div class="slice-screen">' +
+        '<h1>✂️ 單字切切樂</h1>' +
+        '<p class="slice-sub">上面出英文，下面拋出中文<br>劃開對的那一張</p>' +
+        (best ? '<div class="slice-bests">你的最高分 <b style="color:#C97F00">' + best + '</b></div>' : '') +
+        '<div class="slice-card"><h3>單字範圍</h3><div class="slice-seg">' +
+          [[0, "基礎"], [1, "進階 ×1.5"], [2, "混合"]].map(function (it) {
+            return '<button data-lv="' + it[0] + '" class="' + (cfg.level === it[0] ? "sel" : "") + '">' + it[1] + '</button>';
+          }).join("") + '</div></div>' +
+        '<div class="slice-card"><h3>玩法</h3><ol class="slice-how">' +
+          '<li>看上面的英文，用手指<b>劃過</b>（或點）對的中文字卡</li>' +
+          '<li>劃錯 −1 ❤️，對的字卡掉下去沒劃到也 −1 ❤️</li>' +
+          '<li>連續劃對有連擊加分；進階字得分 ×1.5</li>' +
+          '<li>3 顆心用完就結束，破紀錄會自動登上排行榜</li>' +
+        '</ol></div>' +
+        '<button class="slice-go" data-s="go">開始</button>' +
+        '<button class="slice-ghost" data-s="board">🏆 看排行榜</button>' +
+        '<button class="slice-link" data-s="exit">← 回到主畫面</button>' +
+      '</div>';
+    ui.querySelectorAll("[data-lv]").forEach(function (b) { b.onclick = function () { cfg.level = +b.getAttribute("data-lv"); home(); }; });
+    ui.querySelector('[data-s="go"]').onclick = function () {
+      try { if ("speechSynthesis" in window) speechSynthesis.speak(new SpeechSynthesisUtterance("")); } catch (e) {}
+      countdown();
+    };
+    ui.querySelector('[data-s="board"]').onclick = boardOnly;
+    ui.querySelector('[data-s="exit"]').onclick = close;
+  }
+
+  function boardOnly() {
+    var res = { board: null };
+    function draw(r) {
+      ui.innerHTML = '<div class="slice-screen">' + GB.html("slice", r) +
+        '<button class="slice-ghost" data-s="back">← 返回</button></div>';
+      ui.querySelector('[data-s="back"]').onclick = home;
+      GB.bind(ui, "slice", r, draw);
+    }
+    ui.innerHTML = '<div class="slice-screen"><div class="gb-empty">載入中…</div></div>';
+    GB.board("slice").then(function (b) { res.board = b; if (wrap) draw(res); }, function () { res.why = "offline"; if (wrap) draw(res); });
+  }
+
+  function countdown() {
+    var n = 3;
+    GB.start("slice");
+    (function tick() {
+      if (!wrap) return;
+      ui.innerHTML = '<div class="slice-cd">' + (n || "開始") + '</div>';
+      if (n === 0) { setTimeout(function () { if (wrap) start(); }, 450); return; }
+      n--; setTimeout(tick, 650);
+    })();
+  }
+
+  /* ---------------- 遊戲 ---------------- */
+  function start() {
+    ui.innerHTML = ""; hud.style.display = "";
+    g = { hearts: 3, score: 0, combo: 0, maxCombo: 0, cleared: 0, cards: [], bits: [], trail: [], pops: [],
+          used: {}, missed: [], wave: null, waitNext: 0, over: false, shake: 0, qCount: 0 };
+    updHud(); nextWave(0.2);
+    last = performance.now();
+    raf = requestAnimationFrame(loop);
+  }
+  function diff() {
+    var c = g.cleared;
+    return { n: c < 6 ? 3 : 4, speed: 0.9 + Math.min(c, 40) * 0.01 };
+  }
+  // 字卡顯示：超過 8 個字只放第一個意思
+  function disp(zh) {
+    if (zh.length <= 8) return zh;
+    var first = zh.split("；")[0];
+    return first.length ? first : zh;
+  }
+  function pickWord() {
+    var p = pool(), w = null;
+    g.qCount++;
+    if (g.qCount % 3 === 0 && CAND.length) {
+      var cands = CAND.map(function (i) { return WORDS[i]; }).filter(function (x) {
+        return (cfg.level === 2 || x[2] === cfg.level) && !g.used[x[0]];
+      });
+      if (cands.length) w = cands[Math.floor(Math.random() * cands.length)];
+    }
+    for (var t = 0; t < 60 && !w; t++) { var c0 = p[Math.floor(Math.random() * p.length)]; if (!g.used[c0[0]] || t === 59) w = c0; }
+    g.used[w[0]] = 1;
+    var usedZh = {}; usedZh[w[1]] = 1; usedZh["d:" + disp(w[1])] = 1;
+    var n = diff().n, opts = [w], cand = shuffle(p);
+    for (var i = 0; i < cand.length && opts.length < n; i++) {
+      var c = cand[i];
+      if (c[0] !== w[0] && !usedZh[c[1]] && !usedZh["d:" + disp(c[1])]) { opts.push(c); usedZh[c[1]] = 1; usedZh["d:" + disp(c[1])] = 1; }
+    }
+    return { w: w, opts: shuffle(opts) };
+  }
+  function nextWave(delay) {
+    var q = pickWord(), n = q.opts.length;
+    g.wave = { w: q.w, done: false, wrongOnce: false };
+    wrap.querySelector(".slice-tw").textContent = q.w[0];
+    say(q.w[0]);
+    var slots = [];
+    if (n <= 3) for (var k = 0; k < n; k++) slots.push({ cols: 3, col: k, row: 0 });
+    else slots = [{ cols: 2, col: 0, row: 0 }, { cols: 2, col: 1, row: 0 }, { cols: 2, col: 0, row: 1 }, { cols: 2, col: 1, row: 1 }];
+    slots = shuffle(slots);
+    q.opts.forEach(function (o, i) {
+      var sl = slots[i], cw = W / sl.cols, left = cw * sl.col, right = cw * (sl.col + 1);
+      var startY = H + 40 + (sl.row ? 130 : 0);
+      var peak = n <= 3 ? H * (0.30 + Math.random() * 0.14) : (sl.row ? H * (0.56 + Math.random() * 0.04) : H * (0.27 + Math.random() * 0.04));
+      g.cards.push({
+        zh: disp(o[1]), ok: o[0] === q.w[0], wave: g.wave, left: left, right: right,
+        x: (left + right) / 2, y: startY, vx: (Math.random() - 0.5) * 16,
+        vy: -Math.sqrt(2 * GRAV * (startY - peak)), g: GRAV, w: cw - 24, h: 64,
+        rot: (Math.random() - 0.5) * 0.12, vr: (Math.random() - 0.5) * 0.2,
+        delay: delay, alive: true, dead: false
+      });
+    });
+  }
+  function updHud() {
+    var h = ""; for (var i = 0; i < 3; i++) h += i < g.hearts ? "❤️" : "🤍";
+    wrap.querySelector(".slice-hearts").textContent = h;
+    wrap.querySelector(".slice-score").textContent = g.score;
+    wrap.querySelector(".slice-combo").textContent = g.combo >= 2 ? g.combo + " 連擊！" : "";
+  }
+  function loseHeart() {
+    g.hearts--; g.combo = 0; g.shake = 0.3;
+    if (navigator.vibrate) try { navigator.vibrate(80); } catch (e) {}
+    updHud();
+    if (g.hearts <= 0) { g.over = true; var gg = g; setTimeout(function () { if (g === gg) result(); }, 900); }
+  }
+  function sliceCard(c, unsure) {
+    if (!c.alive || c.wave.done || g.over) return;
+    c.alive = false; c.dead = true;
+    burst(c, c.ok ? "#2E9E5B" : "#D0442F");
+    var en = c.wave.w[0];
+    if (c.ok) {
+      c.wave.done = true;
+      if (!c.wave.wrongOnce && !unsure) WSTAT.hit(en, false, "slice");
+      g.combo++; g.maxCombo = Math.max(g.maxCombo, g.combo); g.cleared++;
+      var add = 10 + Math.min(g.combo - 1, 10) * 2, adv = c.wave.w[2] === 1;
+      if (adv) add = Math.round(add * ADV_MULT);
+      g.score += add;
+      g.pops.push({ x: c.x, y: c.y, t: 0, txt: "+" + add + (adv ? " 進階×1.5" : ""), col: "#2E9E5B" });
+      g.cards.forEach(function (o) { if (o.wave === c.wave && o.alive) { o.alive = false; o.fade = true; o.fadeT = 0; } });
+      updHud();
+      g.waitNext = 0.45;
+    } else {
+      if (!c.wave.wrongOnce) { c.wave.wrongOnce = true; WSTAT.hit(en, true, "slice"); g.missed.push(c.wave.w); }
+      g.pops.push({ x: c.x, y: c.y, t: 0, txt: "✗ " + en, col: "#D0442F" });
+      loseHeart();
+    }
+  }
+  function burst(c, col) {
+    for (var i = 0; i < 14; i++) {
+      var a = Math.random() * Math.PI * 2, s = 120 + Math.random() * 260;
+      g.bits.push({ x: c.x, y: c.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 120, t: 0, col: col, r: 3 + Math.random() * 4 });
+    }
+    g.bits.push({ half: 1, x: c.x, y: c.y, vx: -90 + c.vx * 0.3, vy: -160, t: 0, rot: c.rot, vr: -3, c: c });
+    g.bits.push({ half: 2, x: c.x, y: c.y, vx: 90 + c.vx * 0.3, vy: -160, t: 0, rot: c.rot, vr: 3, c: c });
+  }
+  function segHits(c, x1, y1, x2, y2, padX, padY) {
+    var steps = Math.max(2, Math.ceil(Math.hypot(x2 - x1, y2 - y1) / 8));
+    var cos = Math.cos(-c.rot), sin = Math.sin(-c.rot);
+    for (var i = 0; i <= steps; i++) {
+      var px = x1 + (x2 - x1) * i / steps - c.x, py = y1 + (y2 - y1) * i / steps - c.y;
+      var lx = px * cos - py * sin, ly = px * sin + py * cos;
+      if (Math.abs(lx) <= c.w / 2 + padX && Math.abs(ly) <= c.h / 2 + padY) return true;
+    }
+    return false;
+  }
+
+  /* ---------------- 手勢 ---------------- */
+  var down = false, px = 0, py = 0, stroke = null;
+  function bindPointer() {
+    cv.addEventListener("pointerdown", function (e) {
+      if (!g || g.over) return;
+      stroke = null; down = true; px = e.clientX; py = e.clientY;
+      g.trail.push({ x: px, y: py, t: 0 });
+      tryCut(px, py, px, py);
+    });
+    cv.addEventListener("pointermove", function (e) {
+      if (!down || !g || g.over) return;
+      var x = e.clientX, y = e.clientY;
+      tryCut(px, py, x, y);
+      g.trail.push({ x: x, y: y, t: 0 });
+      px = x; py = y;
+    });
+    ["pointerup", "pointercancel", "pointerleave"].forEach(function (ev) {
+      cv.addEventListener(ev, function () { down = false; if (g && !g.over) endStroke(); });
+    });
+  }
+  function tryCut(x1, y1, x2, y2) {
+    if (!stroke) stroke = { pend: [] };
+    var i, c;
+    for (i = 0; i < g.cards.length; i++) {
+      c = g.cards[i];
+      if (c.alive && c.ok && c.delay <= 0 && segHits(c, x1, y1, x2, y2, 6, 6)) {
+        var unsure = stroke.pend.length > 0;   // 路過錯卡才劃到對的：算對，但不寫進統計
+        stroke.pend = []; sliceCard(c, unsure); return;
+      }
+    }
+    for (i = 0; i < g.cards.length; i++) {
+      c = g.cards[i];
+      if (c.alive && !c.ok && c.delay <= 0 && stroke.pend.indexOf(c) < 0 && segHits(c, x1, y1, x2, y2, -WRONG_IN, -4)) stroke.pend.push(c);
+    }
+    if (stroke.pend.length >= 2) endStroke();
+  }
+  function endStroke() {
+    if (stroke && stroke.pend.length) {
+      var w = stroke.pend.filter(function (x) { return x.alive; })[0];
+      if (w) sliceCard(w);
+    }
+    stroke = null;
+  }
+
+  /* ---------------- 主迴圈 ---------------- */
+  function loop(now) {
+    if (!g || !wrap) return;
+    var dt = Math.min(0.033, (now - last) / 1000); last = now;
+    var sdt = dt * diff().speed;
+    g.cards.forEach(function (c) {
+      if (c.fade) { c.fadeT += dt; if (c.fadeT > 0.35) { c.dead = true; return; } }
+      if (c.delay > 0) { c.delay -= sdt; return; }
+      c.vy += c.g * sdt; c.x += c.vx * sdt; c.y += c.vy * sdt; c.rot += c.vr * sdt;
+      var lo = c.left + c.w / 2 + 4, hi = c.right - c.w / 2 - 4;
+      if (c.x < lo) { c.x = lo; c.vx = Math.abs(c.vx); }
+      if (c.x > hi) { c.x = hi; c.vx = -Math.abs(c.vx); }
+      if (c.y > H + 80 && c.vy > 0) {
+        if (c.alive && c.ok && !c.wave.done && !g.over) {
+          c.wave.done = true;
+          if (!c.wave.wrongOnce) { WSTAT.hit(c.wave.w[0], true, "slice"); g.missed.push(c.wave.w); }
+          g.pops.push({ x: c.x, y: H - 120, t: 0, txt: "漏了：" + c.zh, col: "#D0442F" });
+          g.cards.forEach(function (o) { if (o.wave === c.wave && o.alive) { o.alive = false; o.fade = true; o.fadeT = 0; } });
+          loseHeart();
+          g.waitNext = 0.5;
+        }
+        c.dead = true;
+      }
+    });
+    if (!g) return;
+    g.cards = g.cards.filter(function (c) { return !c.dead; });
+    if (g.waitNext > 0) { g.waitNext -= dt; if (g.waitNext <= 0 && !g.over) nextWave(0); }
+    g.bits.forEach(function (b) { b.t += dt; b.vy += 900 * dt; b.x += b.vx * dt; b.y += b.vy * dt; if (b.rot !== undefined) b.rot += b.vr * dt; });
+    g.bits = g.bits.filter(function (b) { return b.t < 1.2 && b.y < H + 100; });
+    g.trail.forEach(function (p) { p.t += dt; });
+    g.trail = g.trail.filter(function (p) { return p.t < 0.18; });
+    g.pops.forEach(function (p) { p.t += dt; });
+    g.pops = g.pops.filter(function (p) { return p.t < 0.9; });
+    if (g.shake > 0) g.shake -= dt;
+    draw();
+    raf = requestAnimationFrame(loop);
+  }
+
+  var FONT = "-apple-system, 'PingFang TC', 'Noto Sans TC', sans-serif";
+  function rr(x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  function drawText(t, maxW) {
+    ctx.font = "700 20px " + FONT;
+    if (ctx.measureText(t).width <= maxW) { ctx.fillText(t, 0, 1); return; }
+    var k = t.indexOf("；"), a, b;
+    if (k > 0) { a = t.slice(0, k + 1); b = t.slice(k + 1); } else { var m = Math.ceil(t.length / 2); a = t.slice(0, m); b = t.slice(m); }
+    var size = 17;
+    function wid() { ctx.font = "700 " + size + "px " + FONT; return Math.max(ctx.measureText(a).width, ctx.measureText(b).width); }
+    while (size > 11 && wid() > maxW) size--;
+    ctx.fillText(a, 0, -size * 0.58); ctx.fillText(b, 0, size * 0.62);
+  }
+  function drawCard(c, alpha, clip) {
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(c.x, c.y); ctx.rotate(c.rot);
+    if (clip) { ctx.beginPath(); if (clip === 1) ctx.rect(-c.w, -c.h, c.w, c.h * 2); else ctx.rect(0, -c.h, c.w, c.h * 2); ctx.clip(); }
+    ctx.shadowColor = "rgba(120,90,30,.25)"; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
+    rr(-c.w / 2, -c.h / 2, c.w, c.h, 14);
+    ctx.fillStyle = c.fade ? "#EDE6D6" : "#fff"; ctx.fill();
+    ctx.shadowColor = "transparent";
+    ctx.lineWidth = 2.5; ctx.strokeStyle = c.fade ? "#DDD3BE" : "#E3C98F"; ctx.stroke();
+    ctx.fillStyle = c.fade ? "#B4AC9B" : "#2B2A28";
+    ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    drawText(c.zh, c.w - 14);
+    ctx.restore();
+  }
+  function draw() {
+    ctx.save();
+    ctx.clearRect(0, 0, W, H);
+    if (g.shake > 0) ctx.translate((Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10);
+    ctx.fillStyle = "#F1E7D2";
+    for (var yy = 20; yy < H; yy += 34) for (var xx = 17; xx < W; xx += 34) { ctx.beginPath(); ctx.arc(xx, yy, 1.4, 0, 7); ctx.fill(); }
+    g.cards.forEach(function (c) { if (c.delay <= 0) drawCard(c, c.fade ? Math.max(0, 0.7 - c.fadeT * 2) : 1); });
+    g.bits.forEach(function (b) {
+      var a = Math.max(0, 1 - b.t / 1.2);
+      if (b.half) drawCard({ x: b.x, y: b.y, rot: b.rot, w: b.c.w, h: b.c.h, zh: b.c.zh }, a, b.half);
+      else { ctx.globalAlpha = a; ctx.fillStyle = b.col; ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, 7); ctx.fill(); ctx.globalAlpha = 1; }
+    });
+    if (g.trail.length > 1) {
+      ctx.lineCap = "round"; ctx.lineJoin = "round";
+      for (var i = 1; i < g.trail.length; i++) {
+        var p0 = g.trail[i - 1], p1 = g.trail[i], a2 = 1 - p1.t / 0.18;
+        ctx.strokeStyle = "rgba(201,127,0," + (0.85 * a2) + ")"; ctx.lineWidth = 2 + 8 * a2;
+        ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.stroke();
+      }
+    }
+    g.pops.forEach(function (p) {
+      ctx.globalAlpha = Math.max(0, 1 - p.t / 0.9);
+      ctx.fillStyle = p.col; ctx.textAlign = "center";
+      ctx.font = "900 24px " + FONT;
+      ctx.fillText(p.txt, Math.min(W - 70, Math.max(70, p.x)), p.y - 30 - p.t * 50);
+      ctx.globalAlpha = 1;
+    });
+    ctx.restore();
+  }
+
+  /* ---------------- 結果 ---------------- */
+  function result() {
+    if (!g || !wrap) return;
+    var G = g;
+    cancelAnimationFrame(raf); raf = 0; hud.style.display = "none";
+    try { WSTAT.flush(); } catch (e) {}
+    var best = getBest(), isBest = G.score > best;
+    if (isBest) setBest(G.score);
+    var R = { score: G.score, best: Math.max(best, G.score), isBest: isBest, cleared: G.cleared,
+              maxCombo: G.maxCombo, missed: G.missed };
+    g = null;
+    drawResult(R, null);
+    GB.finish("slice", { score: G.score, cleared: G.cleared }).then(function (res) { if (wrap && ui.querySelector("[data-s=again]")) drawResult(R, res); });
+  }
+  function drawResult(R, res) {
+    var b = res && res.board;
+    ui.innerHTML =
+      '<div class="slice-screen">' +
+        '<div class="slice-res"><div class="slice-lbl">這局得分</div><div class="slice-big">' + R.score + '</div>' +
+          (R.isBest ? '<span class="slice-newbest">🎉 新紀錄！' + (res && res.uploaded ? "已更新排行榜" : "") + '</span>'
+                    : '<div class="slice-lbl">你的最高分 ' + R.best + '</div>') + '</div>' +
+        '<div class="slice-stats">' +
+          '<div class="slice-stat"><b>' + R.cleared + '</b><span>劃對</span></div>' +
+          '<div class="slice-stat"><b>' + R.maxCombo + '</b><span>最長連擊</span></div>' +
+          '<div class="slice-stat"><b>' + (b && b.me && b.me.rank ? "#" + b.me.rank : "—") + '</b><span>排行榜名次</span></div>' +
+        '</div>' +
+        (res ? GB.html("slice", res) : '<div class="gb-empty">排行榜載入中…</div>') +
+        (R.missed.length ? '<div class="slice-card"><h3>這幾個字要再練</h3><div class="slice-missed">' +
+          R.missed.map(function (w) { return '<span data-say="' + esc2(w[0]) + '">🔊 ' + esc2(w[0]) + '<em>' + esc2(w[1]) + '</em></span>'; }).join("") + '</div></div>' : '') +
+        '<div class="slice-btns"><button class="slice-go" data-s="again">再玩一次</button><button class="slice-ghost" data-s="back">換範圍</button></div>' +
+      '</div>';
+    ui.querySelector('[data-s="again"]').onclick = countdown;
+    ui.querySelector('[data-s="back"]').onclick = home;
+    ui.querySelectorAll("[data-say]").forEach(function (el) { el.onclick = function () { try { speak(el.getAttribute("data-say")); } catch (e) {} }; });
+    if (res) GB.bind(ui, "slice", res, function (r2) { drawResult(R, r2); });
+  }
+
+  // 主程式「切切樂」頁面上的面板
+  function panelHtml() {
+    var best = getBest();
+    var h = '<div class="slice-intro">';
+    h += '<p>上面出英文，下面拋出中文字卡。<br>用手指劃開對的那一張，越後面越快。</p>';
+    if (best) h += '<div class="slice-best">🥇 最高分　' + best + '</div>';
+    h += '<button class="slice-start-btn" onclick="SLICE.open()">開始遊戲</button>';
+    h += '<p class="hint" style="margin-top:14px;">破紀錄會自動登上排行榜（可以在結算畫面選擇不公開）</p>';
+    h += '</div>';
+    return h;
+  }
+
+  return { open: open, close: close, panelHtml: panelHtml, isOpen: function () { return !!wrap; },
+           _g: function () { return g; } };
+})();
+</script>
+
+<!-- ==================================================================
      單字答錯率追蹤（新增）
      · 只回報單字本身與答對答錯，不含任何使用者資料
      · 在瀏覽器裡累積，切模式 / 離開頁面時整批送一次
@@ -6914,33 +7749,40 @@ setTimeout(function () { if (newsUnseen()) openNews(); }, 900);
 <script>
 var WSTAT = (function () {
   "use strict";
-  var buf = {};      // { 單字: [出現次數, 答錯次數] }
-  var n = 0;         // 累積了幾個不同的字
+  // v2026.11.01a：依模式分開累積（stage 闖關 / quiz 單字測驗 / chal 今日挑戰 / slice 切切樂），
+  // 送出時帶 &m=模式。後台用它把各模式的難度扣掉，再合併排名。
+  var buf = {};      // { 模式: { 單字: [出現次數, 答錯次數] } }
+  var n = 0;         // 累積了幾個不同的（模式, 字）
   var MAX = 60;      // 累積到這個量就先送一批，避免網址過長
 
-  function hit(en, wrong) {
+  function hit(en, wrong, mode) {
     if (typeof en !== "string" || !en) return;
-    if (!buf[en]) { buf[en] = [0, 0]; n++; }
-    buf[en][0]++;
-    if (wrong) buf[en][1]++;
+    mode = mode || "";
+    if (!buf[mode]) buf[mode] = {};
+    var b = buf[mode];
+    if (!b[en]) { b[en] = [0, 0]; n++; }
+    b[en][0]++;
+    if (wrong) b[en][1]++;
     if (n >= MAX) flush();
   }
 
   function flush() {
-    var keys = Object.keys(buf);
-    if (!keys.length) return;
-    var parts = [];
-    for (var i = 0; i < keys.length; i++) {
-      var v = buf[keys[i]];
-      parts.push(keys[i] + "*" + v[0] + "*" + v[1]);
-    }
+    var modes = Object.keys(buf);
+    if (!modes.length) return;
+    var all = buf;
     buf = {}; n = 0;
-    try {
-      if (location.protocol !== "https:" && location.protocol !== "http:") return;
-      var img = new Image();
-      img.onerror = function () {};
-      img.src = "/w?d=" + encodeURIComponent(parts.join("~")) + "&_=" + Date.now();
-    } catch (e) { /* 靜默 */ }
+    modes.forEach(function (mode) {
+      var b = all[mode], keys = Object.keys(b);
+      if (!keys.length) return;
+      var parts = [];
+      for (var i = 0; i < keys.length; i++) parts.push(keys[i] + "*" + b[keys[i]][0] + "*" + b[keys[i]][1]);
+      try {
+        if (location.protocol !== "https:" && location.protocol !== "http:") return;
+        var img = new Image();
+        img.onerror = function () {};
+        img.src = "/w?d=" + encodeURIComponent(parts.join("~")) + (mode ? "&m=" + mode : "") + "&_=" + Date.now();
+      } catch (e) { /* 靜默 */ }
+    });
   }
 
   // 離開頁面、切到背景時把還沒送的送出去
