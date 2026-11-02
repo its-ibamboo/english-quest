@@ -3802,7 +3802,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.11.02a";
+var BUILD = "v2026.11.02b";
 
 // ------------------------------------------------------------------
 // 每日一句（原「今日單字」改版）
@@ -7346,6 +7346,67 @@ var SLICE = (function () {
   var ADV_MULT = 1.5, GRAV = 650, WRONG_IN = 18;
   var cfg = { level: 0, sound: true };
   var wrap = null, cv, ctx, ui, hud, W = 0, H = 0, DPR = 1, g = null, raf = 0, last = 0;
+
+  // v2026.11.02b 音效：全部用 Web Audio 現場合成，沒有音效檔（沒有版權問題，也不增加下載量）
+  // 🔊 按鈕同時控制發音和音效
+  var SFX = (function () {
+    var A = null, noiseBuf = null;
+    function ac() {
+      try {
+        if (!A) A = new (window.AudioContext || window.webkitAudioContext)();
+        if (A.state === "suspended") A.resume();
+      } catch (e) { A = null; }
+      return A;
+    }
+    function noise() {
+      if (noiseBuf) return noiseBuf;
+      var n = Math.floor(A.sampleRate * 0.5), b = A.createBuffer(1, n, A.sampleRate), d = b.getChannelData(0);
+      for (var i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
+      return (noiseBuf = b);
+    }
+    // 一段濾波過的雜音：type 濾波種類，f0→f1 頻率滑動，dur 秒，vol 音量
+    function hiss(type, f0, f1, dur, vol, q) {
+      var a = ac(); if (!a || !cfg.sound) return;
+      try {
+        var t = a.currentTime, src = a.createBufferSource(), f = a.createBiquadFilter(), g2 = a.createGain();
+        src.buffer = noise(); f.type = type; f.Q.value = q || 1;
+        f.frequency.setValueAtTime(f0, t); f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+        g2.gain.setValueAtTime(0.0001, t); g2.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+        g2.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        src.connect(f); f.connect(g2); g2.connect(a.destination);
+        src.start(t); src.stop(t + dur + 0.02);
+      } catch (e) {}
+    }
+    function tone(type, f0, f1, dur, vol, delay) {
+      var a = ac(); if (!a || !cfg.sound) return;
+      try {
+        var t = a.currentTime + (delay || 0), o = a.createOscillator(), g2 = a.createGain();
+        o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+        g2.gain.setValueAtTime(0.0001, t); g2.gain.exponentialRampToValueAtTime(vol, t + 0.01);
+        g2.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g2); g2.connect(a.destination); o.start(t); o.stop(t + dur + 0.02);
+      } catch (e) {}
+    }
+    return {
+      unlock: function () { ac(); },
+      // 揮刀：咻
+      swoosh: function () { hiss("bandpass", 500, 2600, 0.22, 0.18, 0.9); },
+      // 切開：清脆的「唰」＋ 水果噴汁的「噗」＋ 依連擊升高的音
+      cut: function (combo) {
+        hiss("highpass", 2500, 6000, 0.09, 0.22);
+        hiss("lowpass", 1400, 300, 0.16, 0.28, 0.7);
+        tone("sine", 170, 60, 0.13, 0.35);
+        var k = Math.min(combo || 1, 12) - 1, f = 523 * Math.pow(2, k / 12);
+        tone("triangle", f, f * 1.01, 0.14, 0.12, 0.03);
+      },
+      // 切錯：悶悶的「噗嚕」
+      bad: function () { tone("square", 220, 90, 0.22, 0.12); hiss("lowpass", 600, 200, 0.18, 0.15); },
+      // 漏掉：往下掉的音
+      miss: function () { tone("sine", 420, 160, 0.3, 0.16); },
+      // 結束
+      over: function () { [392, 330, 262].forEach(function (f, i) { tone("triangle", f, f * 0.98, 0.28, 0.13, i * 0.16); }); }
+    };
+  })();
   var CAND = [];
 
   function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
@@ -7428,7 +7489,7 @@ var SLICE = (function () {
           }).join("") + '</div></div>' +
         '<div class="slice-card"><h3>玩法</h3><ol class="slice-how">' +
           '<li>看上面的英文，用手指<b>劃過</b>（或點）對的中文字卡</li>' +
-          '<li>劃錯 −1 ❤️，對的字卡掉下去沒劃到也 −1 ❤️</li>' +
+          '<li>劃錯 −1 ❤️，對的字卡掉下去沒劃到也 −1 ❤️（一題最多扣一顆）</li>' +
           '<li>連續劃對有連擊加分；進階字得分 ×1.5</li>' +
           '<li>3 顆心用完就結束，破紀錄會自動登上排行榜</li>' +
         '</ol></div>' +
@@ -7438,6 +7499,7 @@ var SLICE = (function () {
       '</div>';
     ui.querySelectorAll("[data-lv]").forEach(function (b) { b.onclick = function () { cfg.level = +b.getAttribute("data-lv"); home(); }; });
     ui.querySelector('[data-s="go"]').onclick = function () {
+      SFX.unlock();
       try { if ("speechSynthesis" in window) speechSynthesis.speak(new SpeechSynthesisUtterance("")); } catch (e) {}
       countdown();
     };
@@ -7538,7 +7600,7 @@ var SLICE = (function () {
     g.hearts--; g.combo = 0; g.shake = 0.3;
     if (navigator.vibrate) try { navigator.vibrate(80); } catch (e) {}
     updHud();
-    if (g.hearts <= 0) { g.over = true; var gg = g; setTimeout(function () { if (g === gg) result(); }, 900); }
+    if (g.hearts <= 0) { g.over = true; SFX.over(); var gg = g; setTimeout(function () { if (g === gg) result(); }, 900); }
   }
   function sliceCard(c, unsure) {
     if (!c.alive || c.wave.done || g.over) return;
@@ -7549,6 +7611,7 @@ var SLICE = (function () {
       c.wave.done = true;
       if (!c.wave.wrongOnce && !unsure) WSTAT.hit(en, false, "slice");
       g.combo++; g.maxCombo = Math.max(g.maxCombo, g.combo); g.cleared++;
+      SFX.cut(g.combo);
       var add = 10 + Math.min(g.combo - 1, 10) * 2, adv = c.wave.w[2] === 1;
       if (adv) add = Math.round(add * ADV_MULT);
       g.score += add;
@@ -7557,8 +7620,12 @@ var SLICE = (function () {
       updHud();
       g.waitNext = 0.45;
     } else {
-      if (!c.wave.wrongOnce) { c.wave.wrongOnce = true; WSTAT.hit(en, true, "slice"); g.missed.push(c.wave.w); }
+      // v2026.11.02b：一題最多錯一次。切錯一張後，同一題其他錯卡淡掉、不能再切，只留對的那張
+      if (c.wave.wrongOnce) return;
+      c.wave.wrongOnce = true; WSTAT.hit(en, true, "slice"); g.missed.push(c.wave.w);
+      g.cards.forEach(function (o) { if (o.wave === c.wave && o.alive && !o.ok) { o.alive = false; o.fade = true; o.fadeT = 0; } });
       g.pops.push({ x: c.x, y: c.y, t: 0, txt: "✗ " + en, col: "#D0442F" });
+      SFX.bad();
       loseHeart();
     }
   }
@@ -7582,17 +7649,20 @@ var SLICE = (function () {
   }
 
   /* ---------------- 手勢 ---------------- */
-  var down = false, px = 0, py = 0, stroke = null;
+  var down = false, px = 0, py = 0, stroke = null, swipeLen = 0, swooshed = false;
   function bindPointer() {
     cv.addEventListener("pointerdown", function (e) {
       if (!g || g.over) return;
       stroke = null; down = true; px = e.clientX; py = e.clientY;
+      swipeLen = 0; swooshed = false;
       g.trail.push({ x: px, y: py, t: 0 });
       tryCut(px, py, px, py);
     });
     cv.addEventListener("pointermove", function (e) {
       if (!down || !g || g.over) return;
       var x = e.clientX, y = e.clientY;
+      swipeLen += Math.abs(x - px) + Math.abs(y - py);
+      if (!swooshed && swipeLen > 45) { swooshed = true; SFX.swoosh(); }
       tryCut(px, py, x, y);
       g.trail.push({ x: x, y: y, t: 0 });
       px = x; py = y;
@@ -7640,10 +7710,15 @@ var SLICE = (function () {
       if (c.y > H + 80 && c.vy > 0) {
         if (c.alive && c.ok && !c.wave.done && !g.over) {
           c.wave.done = true;
-          if (!c.wave.wrongOnce) { WSTAT.hit(c.wave.w[0], true, "slice"); g.missed.push(c.wave.w); }
           g.pops.push({ x: c.x, y: H - 120, t: 0, txt: "漏了：" + c.zh, col: "#D0442F" });
           g.cards.forEach(function (o) { if (o.wave === c.wave && o.alive) { o.alive = false; o.fade = true; o.fadeT = 0; } });
-          loseHeart();
+          if (!c.wave.wrongOnce) {
+            WSTAT.hit(c.wave.w[0], true, "slice"); g.missed.push(c.wave.w);
+            SFX.miss();
+            loseHeart();            // 一題最多扣一顆心：已經切錯過就不再扣
+          } else {
+            g.combo = 0; updHud();
+          }
           g.waitNext = 0.5;
         }
         c.dead = true;
@@ -7754,7 +7829,7 @@ var SLICE = (function () {
           R.missed.map(function (w) { return '<span data-say="' + esc2(w[0]) + '">🔊 ' + esc2(w[0]) + '<em>' + esc2(w[1]) + '</em></span>'; }).join("") + '</div></div>' : '') +
         '<div class="slice-btns"><button class="slice-go" data-s="again">再玩一次</button><button class="slice-ghost" data-s="back">換範圍</button></div>' +
       '</div>';
-    ui.querySelector('[data-s="again"]').onclick = countdown;
+    ui.querySelector('[data-s="again"]').onclick = function () { SFX.unlock(); countdown(); };
     ui.querySelector('[data-s="back"]').onclick = home;
     ui.querySelectorAll("[data-say]").forEach(function (el) { el.onclick = function () { try { speak(el.getAttribute("data-say")); } catch (e) {} }; });
     if (res) GB.bind(ui, "slice", res, function (r2) { drawResult(R, r2); });
@@ -7774,7 +7849,7 @@ var SLICE = (function () {
   }
 
   return { open: open, close: close, panelHtml: panelHtml, isOpen: function () { return !!wrap; },
-           _g: function () { return g; } };
+           _g: function () { return g; }, _sfx: function () { return SFX; } };
 })();
 </script>
 
