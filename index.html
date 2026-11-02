@@ -3802,7 +3802,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.11.01a";
+var BUILD = "v2026.11.02a";
 
 // ------------------------------------------------------------------
 // 每日一句（原「今日單字」改版）
@@ -5631,6 +5631,7 @@ var BEE = (function () {
     h += '<div class="bee-note">' + t.note + '　' + pool.length + ' 字'
        + (best.coins ? '　\uD83E\uDE99 最佳 ' + best.coins : '') + '</div>';
     h += '<button class="bee-go" id="beeGo">開始</button>';
+    h += '<button class="bee-link" id="beeBoard">\uD83C\uDFC6 看排行榜</button>';
     h += '<button class="bee-link" id="beeTune">調整參數</button>';
     overlayEl.innerHTML = h;
     overlayEl.style.display = "flex";
@@ -5645,6 +5646,7 @@ var BEE = (function () {
     });
     overlayEl.querySelector("#beeGo").onclick = function () { ac(); startGame(); };
     overlayEl.querySelector("#beeTune").onclick = screenTuner;
+    overlayEl.querySelector("#beeBoard").onclick = function () { try { GB.showBoard("bee"); } catch (e) {} };
   }
 
   var SLIDERS = [
@@ -6325,6 +6327,7 @@ var BEE = (function () {
     });
     if (rows.length) h += '<div class="bee-best">\uD83E\uDD47 最佳成績　' + rows.join('\u3000') + '</div>';
     h += '<button class="bee-start-btn" onclick="BEE.open()">開始遊戲</button>';
+    h += '<div style="margin-top:12px"><button class="slice-board-btn" onclick="GB.showBoard(\'bee\')">\uD83C\uDFC6 看排行榜</button></div>';
     h += '<p class="hint" style="margin-top:14px;">單字取自本系統的 2000 字字庫，依「拼寫難度」分四層</p>';
     h += '</div>';
     return h;
@@ -6626,7 +6629,7 @@ function lbRandomNick() {
 }
 
 // 不擋髒話（中文諧音、注音、拆字擋不完，維護成本高又擋不住），
-// 靠「只顯示前 20 名」+ 後台改成匿名玩家。
+// 靠「只顯示前 10 名」+ 後台改成匿名玩家。
 // 這裡只擋一件事：把名字欄位當成聯絡方式廣播給未成年人。
 function lbCheckNick(v) {
   v = (v || "").trim();
@@ -6776,7 +6779,7 @@ function lbPanelHtml() {
     h += '<div class="lb-mine">';
     if (LB.rank) {
       h += '你目前第 <b>' + LB.rank + '</b> 名';
-      if (LB.rank > 20) h += '<br><span style="font-size:11.5px">前 20 名才會顯示在榜上</span>';
+      if (LB.rank > 10) h += '<br><span style="font-size:11.5px">前 10 名才會顯示在榜上</span>';
     } else {
       h += '榜上成績 <b>' + (LB.me.stars || 0) + '</b> \u2B50';
     }
@@ -7056,11 +7059,17 @@ setTimeout(function () { if (newsUnseen()) openNews(); }, 900);
 .gb-row.mine .gb-nm { font-weight: 800; color: #C97F00; }
 .gb-gap { text-align: center; color: #8C8577; letter-spacing: 4px; padding: 2px 0; }
 .gb-empty { text-align: center; color: #8C8577; font-size: 14px; padding: 12px 0; }
+.gb-modal { position: fixed; inset: 0; z-index: 9500; background: rgba(30,28,24,.45); display: flex; align-items: flex-end; justify-content: center; }
+.gb-sheet { background: #F7F5F0; width: 100%; max-width: 480px; max-height: 86vh; border-radius: 20px 20px 0 0; padding: 16px 14px calc(14px + env(safe-area-inset-bottom));
+  display: flex; flex-direction: column; gap: 10px; }
+.gb-sheet-body { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.gb-close { border: none; background: #C97F00; color: #fff; font-size: 16px; font-weight: 700; border-radius: 12px; padding: 12px; }
 
 /* ---------- 切切樂 ---------- */
 .slice-intro { text-align: center; padding: 6px 0 2px; }
 .slice-intro p { font-size: 13px; color: #6B7086; line-height: 1.7; margin: 0 0 14px; }
 .slice-intro .slice-best { font-family: monospace; font-size: 13px; color: #C97F00; margin-bottom: 14px; }
+.slice-board-btn { padding: 10px 26px; border-radius: 999px; border: 2px solid #E8DEC8; background: #fff; color: #2B2A28; font-size: 15px; font-weight: 600; }
 .slice-start-btn { padding: 13px 40px; border-radius: 999px; border: none; background: #C97F00; color: #fff; font-size: 16px; font-weight: 700; }
 .slice-wrap { position: fixed; inset: 0; z-index: 9000; background: #FBF5E8; color: #2B2A28; overflow: hidden;
   font-family: -apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
@@ -7185,6 +7194,8 @@ var GB = (function () {
   // 記住最近一次看到的名次，首頁遊戲卡顯示用（不用每次開首頁都連線）
   function remember(game, b) {
     if (!b || !b.top) return;
+    var m0 = load();
+    if (!m0 || !m0.nick) return;   // 還沒玩過的人只是看榜：不要因此自動取名
     ensureMe(); me.rank = me.rank || {};
     me.rank[game] = (b.me && b.me.rank) ? b.me.rank : null;
     save();
@@ -7210,8 +7221,10 @@ var GB = (function () {
   }
 
   // 結算畫面用的兩張卡：「你的名字」＋「排行榜」。res 是 finish() 的結果。
-  function html(game, res) {
-    ensureMe();
+  // opt.noMe：還沒玩過的人看榜時，不顯示「你的名字」卡（也不會因此自動取名）
+  function html(game, res, opt) {
+    opt = opt || {};
+    if (!opt.noMe) ensureMe();
     var b = res && res.board, h = "";
     var whyText = {
       notoken: "這局開始時沒有網路，成績沒有上傳",
@@ -7230,7 +7243,7 @@ var GB = (function () {
       h += '<div class="gb-chase">🏆 你是第 1 名！</div>';
     }
 
-    h += '<div class="gb-card" data-gb-me="1">' +
+    if (!opt.noMe) h += '<div class="gb-card" data-gb-me="1">' +
       '<div class="gb-me"><span class="gb-av">' + avSvg(me.ava) + '</span>' +
       '<span class="gb-nm">' + esc2(me.nick) + '<small>' + (me.auto ? "系統幫你取的名字" : "排行榜上的名字") +
         (b && b.me && b.me.rank ? "・第 " + b.me.rank + " 名" + (me.priv ? "（只有你看得到）" : "") : "") + '</small></span>' +
@@ -7283,7 +7296,30 @@ var GB = (function () {
     };
   }
 
-  return { start: start, finish: finish, board: board, html: html, bind: bind, me: ensureMe, rankOf: rankOf };
+  // v2026.11.02a：直接看排行榜（不用先玩一局）。蓋在最上層的視窗，關掉就回原畫面
+  function showBoard(game) {
+    var old = document.querySelector(".gb-modal");
+    if (old) old.remove();
+    var m = document.createElement("div");
+    m.className = "gb-modal";
+    m.innerHTML = '<div class="gb-sheet"><div class="gb-sheet-body"><div class="gb-empty">排行榜載入中\u2026</div></div>' +
+      '<button class="gb-close">關閉</button></div>';
+    document.body.appendChild(m);
+    var body = m.querySelector(".gb-sheet-body");
+    function close() { m.remove(); }
+    m.querySelector(".gb-close").onclick = close;
+    m.addEventListener("click", function (e) { if (e.target === m) close(); });
+    function draw(res) {
+      if (!m.isConnected) return;
+      var mine = load();
+      // 還沒玩過：不顯示「你的名字」那張卡，只看榜
+      body.innerHTML = html(game, res, { noMe: !(mine && mine.nick) });
+      if (mine && mine.nick) bind(body, game, res, draw);
+    }
+    board(game).then(function (b) { draw({ board: b }); }, function () { draw({ board: null, why: "offline" }); });
+  }
+
+  return { start: start, finish: finish, board: board, html: html, bind: bind, me: ensureMe, rankOf: rankOf, showBoard: showBoard };
 })();
 
 /* =====================================================================
@@ -7731,6 +7767,7 @@ var SLICE = (function () {
     h += '<p>上面出英文，下面拋出中文字卡。<br>用手指劃開對的那一張，越後面越快。</p>';
     if (best) h += '<div class="slice-best">🥇 最高分　' + best + '</div>';
     h += '<button class="slice-start-btn" onclick="SLICE.open()">開始遊戲</button>';
+    h += '<div style="margin-top:12px"><button class="slice-board-btn" onclick="GB.showBoard(\'slice\')">\uD83C\uDFC6 看排行榜</button></div>';
     h += '<p class="hint" style="margin-top:14px;">破紀錄會自動登上排行榜（可以在結算畫面選擇不公開）</p>';
     h += '</div>';
     return h;
@@ -7741,6 +7778,58 @@ var SLICE = (function () {
 })();
 </script>
 
+<!-- ==================================================================
+     新版本提示（v2026.11.02a）
+     · 打開時、從背景切回來時（最多 5 分鐘一次）問伺服器 /v 現在線上是哪一版
+     · 比手上這份新，就在畫面下方顯示「有新版本，點這裡更新」
+     · 點了會請 Service Worker 檢查更新，再重新整理
+     · 只有伺服器版本比較新才顯示（避免退版時一直跳）
+     ================================================================== -->
+<style>
+.upd-bar { position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 8500;
+  background: #0E8F82; color: #fff; border: none; border-radius: 999px; padding: 11px 18px; font-size: 14.5px; font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0,0,0,.18); white-space: nowrap; font-family: inherit; cursor: pointer; }
+.upd-bar small { font-weight: 400; opacity: .85; margin-left: 6px; }
+</style>
+<script>
+var UPD = (function () {
+  "use strict";
+  var last = 0, shown = false;
+  function newer(a, b) { return /^v20\d\d\./.test(a) && /^v20\d\d\./.test(b) && a > b; }
+  function check(force) {
+    if (shown) return;
+    if (location.protocol !== "https:" && location.protocol !== "http:") return;
+    var now = Date.now();
+    if (!force && now - last < 5 * 60 * 1000) return;
+    last = now;
+    fetch("/v?_=" + now, { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (j) {
+      if (j && newer(j.v, BUILD)) show(j.v);
+    }).catch(function () {});
+  }
+  function show(v) {
+    if (shown) return;
+    shown = true;
+    var b = document.createElement("button");
+    b.className = "upd-bar";
+    b.innerHTML = "\uD83C\uDD95 有新版本，點這裡更新<small>" + v + "</small>";
+    b.onclick = function () {
+      b.textContent = "更新中\u2026";
+      var done = function () { location.reload(); };
+      try {
+        if (navigator.serviceWorker && navigator.serviceWorker.getRegistration) {
+          navigator.serviceWorker.getRegistration().then(function (r) { return r && r.update(); }).then(done, done);
+          return;
+        }
+      } catch (e) {}
+      done();
+    };
+    document.body.appendChild(b);
+  }
+  setTimeout(function () { check(true); }, 3000);
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") check(false); });
+  return { check: check };
+})();
+</script>
 <!-- ==================================================================
      單字答錯率追蹤（新增）
      · 只回報單字本身與答對答錯，不含任何使用者資料

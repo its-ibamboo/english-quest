@@ -9,7 +9,7 @@
  * 隱私：只存匿名隨機 ID、模式、時間。不存 IP、不存 UA、不存任何個人資訊。
  */
 
-const BUILD = "v2026.11.01a";            // 跟 index.html 的版本號一起往上帶
+const BUILD = "v2026.11.02a";            // 跟 index.html 的版本號一起往上帶
 const TZ_OFFSET = 8 * 60 * 60 * 1000;   // 台北時間
 
 export default {
@@ -131,7 +131,8 @@ export default {
         const sqlMap = {
           "g-anon": "UPDATE game_board SET nick = '匿名玩家', ava = '' WHERE game = ? AND aid = ?",
           "g-hide": "UPDATE game_board SET hidden = 1 WHERE game = ? AND aid = ?",
-          "g-ok":   "UPDATE game_board SET hidden = 3 WHERE game = ? AND aid = ?"
+          "g-ok":   "UPDATE game_board SET hidden = 3 WHERE game = ? AND aid = ?",
+          "g-del":  "DELETE FROM game_board WHERE game = ? AND aid = ?"
         };
         if (sqlMap[act]) await env.DB.prepare(sqlMap[act]).bind(gm, id).run();
         return Response.redirect(url.origin + "/board/admin#g-" + gm, 302);
@@ -142,6 +143,9 @@ export default {
           await env.DB.prepare("UPDATE board SET nick = '匿名玩家', ava = '' WHERE aid = ?").bind(id).run();
         } else if (act === "hide") {
           await env.DB.prepare("UPDATE board SET hidden = 1 WHERE aid = ?").bind(id).run();
+        } else if (act === "del") {
+          // v2026.11.02a：整筆刪掉。對方如果再按「更新成績」會重新上傳；要擋住請用「隱藏」
+          await env.DB.prepare("DELETE FROM board WHERE aid = ?").bind(id).run();
         } else if (act === "show" || act === "ok") {
           // 放行 = 3：之後重新上傳也不會再被自動擋
           await env.DB.prepare("UPDATE board SET hidden = 3 WHERE aid = ?").bind(id).run();
@@ -194,6 +198,14 @@ export default {
     if (url.pathname === "/lb") {
       if (!env.DB) return json({ top: [], rank: null });
       return json(await leaderboard(env, url.searchParams));
+    }
+
+    // ---------- 1.9 目前線上版本（v2026.11.02a）----------
+    // 前端拿自己的 BUILD 來比，不一樣就在畫面下方顯示「有新版本」。
+    if (url.pathname === "/v") {
+      return new Response(JSON.stringify({ v: BUILD }), {
+        headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store, no-cache, must-revalidate" }
+      });
     }
 
     // ---------- 1.8 小遊戲排行榜（v2026.11.01a）----------
@@ -552,7 +564,8 @@ function gameAdminHtml(gl) {
         <td>${esc(r.nick)}${tag}${pv}<div style="font-size:11px;opacity:.5">${esc(r.aid)}</div></td>
         <td style="text-align:right">${r.score}</td>
         <td style="text-align:right">${r.cleared} / ${r.secs}s</td>
-        <td style="text-align:right;white-space:nowrap"><a href="${base}g-anon" style="color:#D9A441">改匿名</a>　${btn}</td></tr>`;
+        <td style="text-align:right;white-space:nowrap"><a href="${base}g-anon" style="color:#D9A441">改匿名</a>　${btn}　
+          <a href="${base}g-del" style="color:#E06A55" onclick="return confirm('刪除這筆成績？不能復原。\n（對方破紀錄會重新上傳；要擋住請用「隱藏」）')">刪除</a></td></tr>`;
     }).join("");
     return `<h2 id="g-${g}" style="font-size:18px;margin-top:30px">${NAME[g] || g}排行榜（${list.length} 人${pend ? `，<span style="color:#E8C14A">${pend} 筆待審</span>` : ""}）</h2>
 <p style="font-size:13px;opacity:.6">成績是自動上傳的。「待審」＝分數超過題數上限、題數超過時間允許的量、或宣稱的遊戲時間比實際經過的還長。「題數/秒」可以自己判斷合不合理。</p>
@@ -581,7 +594,8 @@ function boardAdminPage(list, gl) {
       <td style="text-align:right">${r.cleared}</td>
       <td style="text-align:right">${r.adv} / ${r.opens}</td>
       <td style="text-align:right;white-space:nowrap">
-        <a href="/board/admin?act=anon&aid=${id}" style="color:#D9A441">改匿名</a>　${btn}
+        <a href="/board/admin?act=anon&aid=${id}" style="color:#D9A441">改匿名</a>　${btn}　
+        <a href="/board/admin?act=del&aid=${id}" style="color:#E06A55" onclick="return confirm('刪除這筆闖關榜紀錄？不能復原。\n（對方再上傳會重新出現；要擋住請用「隱藏」）')">刪除</a>
       </td></tr>`;
   }).join("");
   return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8">
@@ -591,6 +605,7 @@ function boardAdminPage(list, gl) {
 <h1 style="font-size:20px">闖關榜管理（${list.length} 人${pending ? `，<span style="color:#E8C14A">${pending} 筆待審</span>` : ""}）</h1>
 <p style="font-size:13px;opacity:.6">「待審」= 通關數跟實際進闖關地圖的次數對不上，系統自動先不上榜。「闖關/開啟」是後台記到的次數：通關很多、闖關卻是 0，多半是改了瀏覽器資料。真的玩的人（例如擋廣告外掛把統計擋掉）按「放行」，之後不會再被擋。</p>
 <p style="font-size:13px;opacity:.6">學生端沒有撤下鍵。有人要求移除時，用「隱藏」；名字不妥時用「改匿名」。隱藏之後不列入排名，也不佔名次。</p>
+<p style="font-size:13px;opacity:.6">「刪除」會把整筆紀錄刪掉，但對方下次上傳會重新出現。<b>作弊的人請用「隱藏」</b>：隱藏是永久的，他之後再上傳也一樣不會上榜。</p>
 <table style="width:100%;border-collapse:collapse;font-size:14px">
 <tr style="opacity:.6;font-size:12px"><th style="text-align:left">暱稱</th><th style="text-align:right">星</th><th style="text-align:right">通關</th><th style="text-align:right">闖關/開啟</th><th></th></tr>
 ${rows || '<tr><td colspan="5" style="opacity:.6;padding:14px 0">還沒有人上榜。</td></tr>'}
@@ -716,10 +731,10 @@ async function leaderboard(env, q) {
     }
   }
 
-  // 前 20 名。隱藏(1)和待審(2)都不列入，也不佔名次。
+  // 前 10 名（v2026.11.02a，原本 20 名，後面分數太低）。隱藏(1)和待審(2)都不列入，也不佔名次。
   const top = await env.DB.prepare(
     `SELECT nick, ava, stars, cleared, badges FROM board
-      WHERE ${LB_SHOWN} ORDER BY stars DESC, cleared DESC, t ASC LIMIT 20`
+      WHERE ${LB_SHOWN} ORDER BY stars DESC, cleared DESC, t ASC LIMIT 10`
   ).all();
 
   // 自己的名次：算出「分數比我高的人數 + 1」，不必把整張榜撈下來。
@@ -915,6 +930,7 @@ async function stats(env) {
          FROM word_stats`
     ).bind(HARD_MIN).first() || {};
     wordTotal.ready = rk.ready;
+    wordTotal.growing = rk.growing;
   } catch (e) { hardWords = []; wordTotal = {}; }
 
   // 未處理的回報筆數。只給數字，內容要密碼才看得到。
@@ -956,7 +972,8 @@ async function stats(env) {
 
 // ---------- 最常錯的字：排序與來源標記 ----------
 const HARD_TOP = 50;   // 榜單取前幾名
-const HARD_MIN = 10;   // 至少出現幾次才列入計算（只擋雜訊）
+const HARD_MIN = 50;   // 後台「最常錯的字」：至少出現 50 次才上榜（v2026.11.02a，原本 10 次參考量太低）
+const CAND_MIN = 10;   // 待確認名單：10 次以上就可以進來（就是要靠它把次數補到 50）
 const CHAL_START = "2026-09-03";   // 今日挑戰上線日
 const CHAL_ROT_START = "2026-11-02";   // 今日挑戰改輪播的日期（同 index.html）
 const CHAL_ROT_SEED = 20261102;
@@ -1057,7 +1074,8 @@ const MODE_MIN = 300;
 const logit = function (p) { return Math.log(p / (1 - p)); };
 const sigm = function (x) { return 1 / (1 + Math.exp(-x)); };
 
-async function rankWords(env, meta) {
+async function rankWords(env, meta, minN) {
+  minN = minN || HARD_MIN;
   const legacy = await env.DB.prepare("SELECT en, shown, wrong FROM word_stats").all();
   let byMode = { results: [] };
   try { byMode = await env.DB.prepare("SELECT en, mode, shown, wrong FROM word_stats_m").all(); } catch (e) {}
@@ -1101,19 +1119,19 @@ async function rankWords(env, meta) {
   });
 
   const rows = [];
-  let ready = 0;
+  let ready = 0, growing = 0;
   Object.keys(W).forEach(function (en) {
     if (isHell(en)) return;
     let n = 0, w = 0, offSum = 0;
     MODES.forEach(function (m) { n += W[en][m][0]; w += W[en][m][1]; offSum += W[en][m][0] * off[m]; });
-    if (n < HARD_MIN) return;
+    if (n < minN) { if (n > 0) growing++; return; }
     ready++;
     const est = logit((w + 0.5) / (n + 1)) - offSum / n;
     const se = Math.sqrt(1 / (w + 0.5) + 1 / (n - w + 0.5));
     rows.push({ en: en, n: n, w: w, slice: W[en].slice[0], est: sigm(est), score: est - 1.96 * se });
   });
   rows.sort(function (a, b) { return b.score - a.score || b.n - a.n; });
-  return { rows: rows, modes: modesOut, ready: ready };
+  return { rows: rows, modes: modesOut, ready: ready, growing: growing };
 }
 
 // =====================================================================
@@ -1277,7 +1295,7 @@ async function candWords(env) {
   if (CAND_CACHE && CAND_CACHE.day === eqToday()) return CAND_CACHE.words;
   let words = [];
   try {
-    const rk = await rankWords(env, await wordOrigins(env));
+    const rk = await rankWords(env, await wordOrigins(env), CAND_MIN);
     const pick = {};
     rk.rows.slice(29, 90).forEach(function (r) { pick[r.en] = 1; });
     rk.rows.slice(0, 300).forEach(function (r) { if (r.n < 30) pick[r.en] = 1; });
@@ -1513,7 +1531,7 @@ fetch("/admin/data").then(function(r){return r.json()}).then(function(d){
   /* --- 最常錯的字 --- */
   h+='<h2>最常錯的字</h2>';
   var wt=d.wordTotal||{};
-  h+='<p class="hint">闖關、單字測驗、今日挑戰、切切樂全部算進來。切切樂有時間壓力，同一個字在那邊比較容易錯，所以先換算成同一把尺：「換算答錯率」＝這個字在闖關大概會錯幾 %。排序用換算後的 95% 下限，次數太少的字會自動往後排。「原始」是全部直接加總的答錯率，給你參考。出現不到 10 次、還有地獄字（不在國中小 2000 字內）不列入。「原第 N 關」是舊玩家看到的關卡編號；10/31 之後的新玩家，同難度內的關卡順序是打亂的。</p>';
+  h+='<p class="hint">闖關、單字測驗、今日挑戰、切切樂全部算進來。切切樂有時間壓力，同一個字在那邊比較容易錯，所以先換算成同一把尺：「換算答錯率」＝這個字在闖關大概會錯幾 %。排序用換算後的 95% 下限，次數太少的字會自動往後排。「原始」是全部直接加總的答錯率，給你參考。出現不到 50 次（參考量太低）、還有地獄字（不在國中小 2000 字內）不列入。「原第 N 關」是舊玩家看到的關卡編號；10/31 之後的新玩家，同難度內的關卡順序是打亂的。</p>';
   if(d.wordModes&&d.wordModes.length){
     var MN={old:"舊資料（分模式前）",stage:"闖關",quiz:"單字測驗",chal:"今日挑戰",slice:"切切樂"};
     h+='<div class="wrap"><table><tr><th>模式</th><th>出現</th><th>答錯率</th><th>校正</th></tr>';
@@ -1525,7 +1543,7 @@ fetch("/admin/data").then(function(r){return r.json()}).then(function(d){
   if(wt.words){
     h+='<div class="cards">'
       + card(nz(wt.words),"已收集單字","有紀錄的字數（滿 2122 就是全部）","")
-      + card(nz(wt.ready),"列入排名","出現滿 10 次、參與排名的字","")
+      + card(nz(wt.ready),"列入排名","出現滿 50 次、參與排名的字",(wt.growing?nz(wt.growing)+" 字累積中":""))
       + card(wt.shown?pct(wt.wrong||0,wt.shown):"—","整體答錯率","全部答錯 ÷ 全部出現",(wt.wrong||0)+" 錯 / "+(wt.shown||0)+" 次")
       + '</div>';
   }
@@ -1542,7 +1560,7 @@ fetch("/admin/data").then(function(r){return r.json()}).then(function(d){
     });
     h+='</table></div>';
   }else{
-    h+='<p class="hint">還沒有單字出現滿 10 次。</p>';
+    h+='<p class="hint">還沒有單字出現滿 50 次。切切樂的「待確認名單」會優先把快到門檻的字補上來。</p>';
   }
 
   /* --- 複製偵測 --- */
