@@ -3802,7 +3802,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.11.02b";
+var BUILD = "v2026.11.07a";
 
 // ------------------------------------------------------------------
 // 每日一句（原「今日單字」改版）
@@ -7021,7 +7021,7 @@ setTimeout(function () { if (newsUnseen()) openNews(); }, 900);
 <!-- ==================================================================
      小遊戲排行榜（GB）＋ 單字切切樂（SLICE）  v2026.11.01a
      · 兩個獨立 IIFE，CSS 全部 gb- / slice- 開頭，不影響原有樣式
-     · 新增 localStorage key：eq_gb（遊戲榜的名字與設定）、eq_slice_best、eq_slice_cand
+     · 新增 localStorage key：eq_gb（遊戲榜的名字與設定）、eq_slice_best（eq_slice_cand 在 v2026.11.07a 起不再使用）
        原本的 eq_lb（闖關榜）完全不碰；第一次玩時，如果闖關榜已經有名字，就複製過來用
      · 遊戲畫面掛在 body 上（render() 會重建 #root，掛裡面會被洗掉）
      ================================================================== -->
@@ -7331,7 +7331,7 @@ var GB = (function () {
      同一刀後來有劃到對的就算對（不記進統計）；手指放開都沒劃到對的才算錯；
      同一刀劃進 2 張以上錯卡直接算錯（防亂掃）
    · 進階字劃對 ×1.5 分
-   · 統計：WSTAT 模式 "slice"。每 3 題有 1 題從伺服器的「待確認名單」抽
+   · 統計：WSTAT 模式 "slice"。出題純隨機（同一局內不重複）
    ===================================================================== */
 var SLICE = (function () {
   "use strict";
@@ -7342,7 +7342,7 @@ var SLICE = (function () {
       if ((w.level === "basic" || w.level === "advanced") && w.zh) WORDS.push([w.en, w.zh, w.level === "basic" ? 0 : 1]);
     }
   })();
-  var BEST_KEY = "eq_slice_best", CAND_KEY = "eq_slice_cand";
+  var BEST_KEY = "eq_slice_best";
   var ADV_MULT = 1.5, GRAV = 650, WRONG_IN = 18;
   var cfg = { level: 0, sound: true };
   var wrap = null, cv, ctx, ui, hud, W = 0, H = 0, DPR = 1, g = null, raf = 0, last = 0;
@@ -7407,7 +7407,6 @@ var SLICE = (function () {
       over: function () { [392, 330, 262].forEach(function (f, i) { tone("triangle", f, f * 0.98, 0.28, 0.13, i * 0.16); }); }
     };
   })();
-  var CAND = [];
 
   function shuffle(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
   function esc2(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
@@ -7416,22 +7415,6 @@ var SLICE = (function () {
   function getBest() { try { return +localStorage.getItem(BEST_KEY) || 0; } catch (e) { return 0; } }
   function setBest(v) { try { localStorage.setItem(BEST_KEY, String(v)); } catch (e) {} }
   function today() { return new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10); }
-
-  // 待確認名單：一天抓一次，存在這支手機
-  function loadCand() {
-    var byEn = {};
-    WORDS.forEach(function (w, i) { byEn[w[0]] = i; });
-    function use(list) { CAND = (list || []).map(function (en) { return byEn[en]; }).filter(function (i) { return i !== undefined; }); }
-    try {
-      var c = JSON.parse(localStorage.getItem(CAND_KEY) || "null");
-      if (c && c.d === today()) { use(c.w); return; }
-      if (c) use(c.w);   // 先用舊的，等新的回來
-    } catch (e) {}
-    if (location.protocol !== "https:" && location.protocol !== "http:") return;
-    fetch("/gs/cand?_=" + Date.now()).then(function (r) { return r.json(); }).then(function (j) {
-      if (j && j.words) { use(j.words); try { localStorage.setItem(CAND_KEY, JSON.stringify({ d: today(), w: j.words })); } catch (e) {} }
-    }).catch(function () {});
-  }
 
   /* ---------------- 開關 ---------------- */
   function open() {
@@ -7454,7 +7437,6 @@ var SLICE = (function () {
     bindPointer();
     resize();
     window.addEventListener("resize", resize);
-    loadCand();
     home();
   }
   function close() {
@@ -7550,14 +7532,10 @@ var SLICE = (function () {
     return first.length ? first : zh;
   }
   function pickWord() {
+    // v2026.11.07a：改回純隨機（拿掉「每 3 題 1 題從待確認名單抽」，那份名單太小，容易一直遇到同一批字）
+    // 同一局內不重複；不同局之間不記，隨機就好
     var p = pool(), w = null;
     g.qCount++;
-    if (g.qCount % 3 === 0 && CAND.length) {
-      var cands = CAND.map(function (i) { return WORDS[i]; }).filter(function (x) {
-        return (cfg.level === 2 || x[2] === cfg.level) && !g.used[x[0]];
-      });
-      if (cands.length) w = cands[Math.floor(Math.random() * cands.length)];
-    }
     for (var t = 0; t < 60 && !w; t++) { var c0 = p[Math.floor(Math.random() * p.length)]; if (!g.used[c0[0]] || t === 59) w = c0; }
     g.used[w[0]] = 1;
     var usedZh = {}; usedZh[w[1]] = 1; usedZh["d:" + disp(w[1])] = 1;
