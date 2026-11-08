@@ -1,5 +1,34 @@
 # 英文任務系統 · 更新紀錄
 
+## v2026.11.08a
+
+`index.html`、`worker.js`、`sw.js` 有改（worker、sw 只是版本號）；`wrangler.toml`、`schema.sql` 沒變。
+
+### 一鍵安裝
+後台數據：裝成 App 的人回來 2 天以上約 58%，沒裝的約 15%。所以在首頁「每日一句」下面加了一張安裝卡。
+
+依手機情況給不同做法：
+- **Android Chrome**：按「一鍵安裝」直接跳出系統的安裝視窗。
+- **iPhone（Safari 或 Chrome）**：蘋果不開放一鍵安裝，按「怎麼裝」顯示三步驟：分享 → 加入主畫面 → 加入。
+- **在 Threads、IG、FB、LINE 裡面開的**：這些 App 內的瀏覽器沒辦法安裝，先帶他到外部瀏覽器。
+  - LINE：按鈕直接用外部瀏覽器開。
+  - Android 的 Threads／IG：按鈕直接用 Chrome 開。
+  - iPhone 的 Threads／IG：沒辦法自動跳，教他點 ⋯ →「在 Safari 中開啟」，另外有「複製網址」可以自己貼。
+- **其他 Android 瀏覽器**：教他從選單「安裝應用程式／加到主畫面」。
+
+不顯示的情況：已經是從桌面 App 開的、電腦、按過 ✕（7 天內不再出現）。
+
+新增 localStorage key：`eq_inst_hide`（按 ✕ 的時間）。
+
+### 驗證
+- 真的瀏覽器模擬 Android Chrome、iPhone Safari、iPhone／Android 的 Threads、LINE、電腦、已安裝、按過 ✕，共 12 項全部通過。
+- 前幾版的完整流程、排行榜、新版本提示、切切樂規則與音效、題庫與舊玩家關卡比對，全部重跑通過，沒有 JavaScript 錯誤。
+
+### 部署後檢查
+1. `/ping` → v2026.11.08a
+2. 用 Chrome 開（不是已安裝的 App）→ 首頁有安裝卡
+3. 後台「裝到主畫面」的安裝率，接下來一兩週看有沒有往上
+
 ## v2026.11.07a
 
 `index.html`、`worker.js`、`sw.js` 有改（主要是 index.html，另外兩個只是版本號）；`wrangler.toml`、`schema.sql` 沒變。

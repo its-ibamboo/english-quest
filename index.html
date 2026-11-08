@@ -3802,7 +3802,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.11.07a";
+var BUILD = "v2026.11.08a";
 
 // ------------------------------------------------------------------
 // 每日一句（原「今日單字」改版）
@@ -4168,6 +4168,8 @@ function homePanelHtml() {
     { m: "slice",     ic: "\u2702\uFE0F",       lb: "單字切切樂", sb: gameSub("slice", sliceBest ? "最高 " + sliceBest : "劃開中文"), isNew: !sliceBest }
   ];
 
+  // v2026.11.08a：一鍵安裝卡（已安裝、電腦、或按過「之後再說」就不顯示）
+  if (typeof INST !== "undefined") html += INST.cardHtml();
   html += '<div class="home-sec"><b>\uD83D\uDCDA 學習</b><span>背單字、練文法</span></div>';
   html += '<div class="home-grid home-learn">';
   learn.forEach(function (c) {
@@ -7882,6 +7884,192 @@ var UPD = (function () {
   document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") check(false); });
   return { check: check };
 })();
+</script>
+<!-- ==================================================================
+     一鍵安裝（v2026.11.08a）
+     · 後台數據：裝成 App 的人回來 2 天以上的比例約 58%，沒裝的約 15%
+     · 依手機情況給不同做法：
+         Android Chrome（有 beforeinstallprompt）→ 按一下跳出系統安裝視窗
+         iPhone Safari／Chrome → 圖解「分享 → 加入主畫面」
+         Threads、IG、FB、LINE 裡面開的 → 沒辦法安裝，先帶去外部瀏覽器
+         其他 Android 瀏覽器 → 「選單 → 安裝／加到主畫面」
+     · 已經是 App 開的、電腦、按過「之後再說」（7 天內）→ 不顯示
+     · 新增 localStorage key：eq_inst_hide（按「之後再說」的日期）
+     ================================================================== -->
+<style>
+.inst-card { width: 100%; display: flex; align-items: center; gap: 12px; background: #E8F5F2; border: 1px solid #B5E0DA;
+  border-radius: 16px; padding: 12px 12px 12px 14px; margin: 0 0 18px; position: relative; text-align: left; }
+.inst-card .ic { font-size: 28px; flex: none; }
+.inst-card .tx { flex: 1; min-width: 0; }
+.inst-card b { display: block; font-size: 15px; color: #0E6B62; }
+.inst-card small { display: block; font-size: 12px; color: #4D6B66; line-height: 1.5; margin-top: 2px; }
+.inst-go { flex: none; border: none; background: #0E8F82; color: #fff; font-weight: 800; font-size: 14px; border-radius: 999px; padding: 10px 14px; font-family: inherit; }
+.inst-x { position: absolute; top: 2px; right: 6px; background: none; border: none; color: #8AA9A4; font-size: 15px; padding: 4px; font-family: inherit; }
+.inst-modal { position: fixed; inset: 0; z-index: 9600; background: rgba(30,28,24,.45); display: flex; align-items: flex-end; justify-content: center; }
+.inst-sheet { background: #F7F5F0; width: 100%; max-width: 480px; border-radius: 20px 20px 0 0; padding: 20px 18px calc(16px + env(safe-area-inset-bottom));
+  font-family: inherit; color: #2A2A33; }
+.inst-sheet h3 { margin: 0 0 6px; font-size: 18px; }
+.inst-sheet p { margin: 0 0 12px; font-size: 13.5px; color: #6B7086; line-height: 1.6; }
+.inst-steps { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.inst-steps li { display: flex; align-items: center; gap: 12px; background: #fff; border: 1px solid #E7E5DE; border-radius: 12px; padding: 10px 12px; font-size: 15px; line-height: 1.45; }
+.inst-steps li .n { flex: none; width: 26px; height: 26px; border-radius: 50%; background: #0E8F82; color: #fff; font-weight: 800; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; }
+.inst-steps li .k { display: inline-block; border: 1px solid #CFCBC0; border-radius: 6px; padding: 0 6px; background: #F7F5F0; font-weight: 700; }
+.inst-btn { width: 100%; border: none; background: #0E8F82; color: #fff; font-size: 16px; font-weight: 800; border-radius: 12px; padding: 13px; margin-bottom: 8px; font-family: inherit; }
+.inst-btn.ghost { background: #fff; color: #2A2A33; border: 1px solid #E7E5DE; font-weight: 600; }
+.inst-ok { color: #0E8F82; font-size: 13px; text-align: center; min-height: 18px; margin: -2px 0 6px; }
+</style>
+<script>
+var INST = (function () {
+  "use strict";
+  var HIDE_KEY = "eq_inst_hide";
+  var deferred = null;            // Android Chrome 給的安裝事件
+  var ua = navigator.userAgent || "";
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  var isAndroid = /Android/i.test(ua);
+  var inApp = /Instagram|FBAN|FBAV|FB_IAB|Line\/|Barcelona|Threads|KAKAOTALK|MicroMessenger/i.test(ua);
+  var isLine = /Line\//i.test(ua);
+
+  function standalone() {
+    try {
+      if (window.matchMedia && (window.matchMedia("(display-mode: standalone)").matches ||
+          window.matchMedia("(display-mode: fullscreen)").matches || window.matchMedia("(display-mode: minimal-ui)").matches)) return true;
+      if (navigator.standalone === true) return true;
+    } catch (e) {}
+    return false;
+  }
+  function hiddenByUser() {
+    try {
+      var d = localStorage.getItem(HIDE_KEY);
+      return d && (Date.now() - (+d)) < 7 * 86400000;
+    } catch (e) { return false; }
+  }
+  function shouldShow() {
+    if (standalone()) return false;
+    if (!isIOS && !isAndroid) return false;       // 電腦不顯示
+    if (hiddenByUser()) return false;
+    return true;
+  }
+  function refresh() { try { if (state.mode === "home") render(); } catch (e) {} }
+
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault();            // 先不要讓 Chrome 自己跳，改由我們的按鈕觸發
+    deferred = e;
+    refresh();
+  });
+  window.addEventListener("appinstalled", function () { deferred = null; closeSheet(); refresh(); });
+
+  function cardHtml() {
+    if (!shouldShow()) return "";
+    var oneTap = !!deferred && !inApp;
+    var h = '<div class="inst-card">';
+    h += '<span class="ic">📲</span>';
+    h += '<span class="tx"><b>裝到手機桌面</b><small>下次一點就開，進度比較不會不見</small></span>';
+    h += '<button class="inst-go" onclick="INST.go()">' + (oneTap ? "一鍵安裝" : "怎麼裝") + '</button>';
+    h += '<button class="inst-x" onclick="INST.later()" aria-label="之後再說">✕</button>';
+    h += '</div>';
+    return h;
+  }
+
+  function go() {
+    if (deferred && !inApp) {
+      var ev = deferred;
+      deferred = null;
+      try {
+        ev.prompt();
+        ev.userChoice.then(function (c) { if (c && c.outcome !== "accepted") { /* 按了取消：下次再給機會 */ } refresh(); }, refresh);
+      } catch (e) { sheet(); }
+      return;
+    }
+    sheet();
+  }
+
+  function later() {
+    try { localStorage.setItem(HIDE_KEY, String(Date.now())); } catch (e) {}
+    refresh();
+  }
+
+  function closeSheet() { var m = document.querySelector(".inst-modal"); if (m) m.remove(); }
+
+  function copyLink(btn) {
+    var url = location.origin + "/";
+    var ok = function () { var o = document.querySelector(".inst-ok"); if (o) o.textContent = "已複製網址 ✔️"; };
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(url).then(ok, function () { fallbackCopy(url); ok(); }); return; }
+    } catch (e) {}
+    fallbackCopy(url); ok();
+  }
+  function fallbackCopy(t) {
+    try { var a = document.createElement("textarea"); a.value = t; a.style.cssText = "position:fixed;opacity:0"; document.body.appendChild(a); a.select(); document.execCommand("copy"); a.remove(); } catch (e) {}
+  }
+  function openOutside() {
+    var url = location.origin + "/";
+    if (isLine) { location.href = url + "?openExternalBrowser=1"; return; }      // LINE 支援這個參數
+    if (isAndroid) {                                                              // 大部分 Android App 內瀏覽器吃 intent
+      location.href = "intent://" + location.host + "/#Intent;scheme=https;package=com.android.chrome;end";
+      return;
+    }
+  }
+
+  function step(n, html) { return '<li><span class="n">' + n + '</span><span>' + html + '</span></li>'; }
+
+  function sheet() {
+    closeSheet();
+    var h = '<div class="inst-sheet">';
+    if (inApp) {
+      h += '<h3>📲 先換到瀏覽器開</h3>';
+      h += '<p>你現在是在 Threads／IG／LINE 裡面開的，這裡沒辦法安裝。換到' + (isIOS ? ' Safari ' : ' Chrome ') + '開，就能裝到桌面。</p>';
+      if (isLine || isAndroid) h += '<button class="inst-btn" data-i="out">用' + (isIOS ? ' Safari ' : ' Chrome ') + '開啟</button>';
+      h += '<ol class="inst-steps">';
+      if (isIOS) {
+        h += step(1, '點右上角 <span class="k">⋯</span>（或右下角）');
+        h += step(2, '選「<b>在 Safari 中開啟</b>」或「<b>用外部瀏覽器開啟</b>」');
+        h += step(3, '在 Safari 打開後，再按一次這個「怎麼裝」');
+      } else {
+        h += step(1, '點右上角 <span class="k">⋮</span>');
+        h += step(2, '選「<b>在 Chrome 中開啟</b>」或「<b>用瀏覽器開啟</b>」');
+        h += step(3, '在 Chrome 打開後，再按一次「一鍵安裝」');
+      }
+      h += '</ol>';
+      h += '<button class="inst-btn ghost" data-i="copy">找不到？複製網址，自己貼到瀏覽器</button><div class="inst-ok"></div>';
+    } else if (isIOS) {
+      h += '<h3>📲 加到 iPhone 主畫面</h3>';
+      h += '<p>iPhone 沒有一鍵安裝，照著做三步就好：</p>';
+      h += '<ol class="inst-steps">';
+      h += step(1, '點<b>分享</b>按鈕 <span class="k">⬆️</span><br><small style="color:#6B7086">Safari 在畫面下方；Chrome 在網址列右邊</small>');
+      h += step(2, '往下滑，點「<b>加入主畫面</b>」');
+      h += step(3, '右上角點「<b>加入</b>」，桌面就會出現圖示');
+      h += '</ol>';
+    } else {
+      h += '<h3>📲 裝到手機桌面</h3>';
+      h += '<p>你的瀏覽器沒有給一鍵安裝，用選單裝也一樣：</p>';
+      h += '<ol class="inst-steps">';
+      h += step(1, '點右上角（或右下角）的選單 <span class="k">⋮</span>');
+      h += step(2, '點「<b>安裝應用程式</b>」或「<b>加到主畫面</b>」');
+      h += step(3, '按「安裝」，桌面就會出現圖示');
+      h += '</ol>';
+    }
+    h += '<button class="inst-btn ghost" data-i="close">關閉</button>';
+    h += '</div>';
+    var m = document.createElement("div");
+    m.className = "inst-modal";
+    m.innerHTML = h;
+    document.body.appendChild(m);
+    m.addEventListener("click", function (e) { if (e.target === m) closeSheet(); });
+    m.querySelectorAll("[data-i]").forEach(function (b) {
+      b.onclick = function () {
+        var k = b.getAttribute("data-i");
+        if (k === "close") closeSheet();
+        else if (k === "copy") copyLink(b);
+        else if (k === "out") openOutside();
+      };
+    });
+  }
+
+  return { cardHtml: cardHtml, go: go, later: later, _env: function () { return { isIOS: isIOS, isAndroid: isAndroid, inApp: inApp, deferred: !!deferred }; } };
+})();
+// 首頁第一次畫的時候 INST 還沒載入，這裡補畫一次讓安裝卡出現（要在 INST 指定完之後才呼叫）
+try { if (state.mode === "home") render(); } catch (e) {}
 </script>
 <!-- ==================================================================
      單字答錯率追蹤（新增）
