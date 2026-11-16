@@ -3802,7 +3802,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.11.08a";
+var BUILD = "v2026.11.16a";
 
 // ------------------------------------------------------------------
 // 每日一句（原「今日單字」改版）
@@ -4291,6 +4291,45 @@ if ("speechSynthesis" in window) {
 var PRONOUNCE_OVERRIDES = {
   "i": "eye"
 };
+// v2026.11.16a：iPhone 發音失敗（error = canceled）修正
+// 1) 原本每次都先 cancel() 再 speak()，iOS Safari 有已知問題：cancel 之後馬上排進去的那句會被一起取消
+//    → 只有真的在唸的時候才 cancel，並在 cancel 後稍等一下再唸
+// 2) 原本挑「第一個 en 開頭的聲音」，iPhone 上常挑到沒下載的聲音或特效聲音（Bells、Boing…）
+//    → 只挑本機的 en-US 預設／一般聲音，挑不到就不指定，讓系統自己用 lang 決定
+// 3) 失敗時不指定聲音再自動重試一次，還是失敗才提示，提示依 iPhone／Android 給不同設定路徑
+var IS_IOS_SPEECH = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+  (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+var NOVELTY_VOICES = /albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|deranged|hysterical|pipe organ|eddy|flo|grandma|grandpa|reed|rocko|sandy|shelley/i;
+function pickEnVoice() {
+  if (!cachedVoices.length) cachedVoices = window.speechSynthesis.getVoices();
+  var en = cachedVoices.filter(function (v) {
+    var l = (v.lang || "").replace("_", "-").toLowerCase();
+    return l === "en-us" && v.localService !== false && !NOVELTY_VOICES.test(v.name || "");
+  });
+  if (!en.length) return null;
+  var d = en.find(function (v) { return v.default; });
+  if (d) return d;
+  var good = en.find(function (v) { return /samantha|google us english|english united states/i.test(v.name || ""); });
+  return good || en[0];
+}
+function speakCore(text, rate, useVoice, onFail) {
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US";
+  u.rate = rate;
+  if (useVoice) { var v = pickEnVoice(); if (v) u.voice = v; }
+  u.onerror = function (e) { onFail(e && e.error ? e.error : "unknown"); };
+  var ss = window.speechSynthesis;
+  var busy = ss.speaking || ss.pending;
+  if (busy) ss.cancel();
+  var go = function () { ss.speak(u); try { ss.resume(); } catch (er) {} };
+  if (busy) setTimeout(go, 80); else go();
+}
+function speakFailMsg(reason) {
+  if (IS_IOS_SPEECH) {
+    return "發音失敗（" + reason + "）\n請檢查：\n1. 手機側邊的靜音開關／控制中心的靜音是否打開，並把音量調大\n2. 「設定 > 輔助使用 > 朗讀內容 > 聲音 > 英文」裡至少下載一個英文聲音（例如 Samantha）\n3. 用 Safari 開，不要在 Threads／IG／LINE 裡面開";
+  }
+  return "發音失敗（" + reason + "）\n手機可能沒有安裝英文語音包，請到「設定 > 一般管理 > 語言與輸入法 > 文字轉語音輸出」檢查。";
+}
 function speak(text) {
   if (!("speechSynthesis" in window)) {
     alert("這個瀏覽器不支援語音朗讀");
@@ -4300,17 +4339,18 @@ function speak(text) {
     var speakText = text;
     var override = PRONOUNCE_OVERRIDES[text.trim().toLowerCase()];
     if (override) speakText = override;
-    var u = new SpeechSynthesisUtterance(speakText);
-    u.lang = "en-US";
-    u.rate = 0.9;
-    if (!cachedVoices.length) cachedVoices = window.speechSynthesis.getVoices();
-    var enVoice = cachedVoices.find(function (v) { return v.lang && v.lang.indexOf("en") === 0; });
-    if (enVoice) u.voice = enVoice;
-    u.onerror = function (e) {
-      alert("發音失敗，原因：" + (e && e.error ? e.error : "未知") + "\n手機可能沒有安裝英文語音包，請到「設定 > 一般管理 > 語言與輸入法 > 文字轉語音輸出」檢查。");
-    };
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(u);
+    speakCore(speakText, 0.9, true, function (reason) {
+      if (reason === "interrupted") return;           // 使用者連點，下一個字把上一個打斷，正常
+      // 第一次失敗：不指定聲音再試一次
+      setTimeout(function () {
+        try {
+          speakCore(speakText, 0.9, false, function (r2) {
+            if (r2 === "interrupted") return;
+            alert(speakFailMsg(r2));
+          });
+        } catch (e2) { alert("發音發生錯誤：" + e2.message); }
+      }, 150);
+    });
   } catch (e) {
     alert("發音發生錯誤：" + e.message);
   }
@@ -5397,16 +5437,10 @@ var BEE = (function () {
       var ov = (typeof PRONOUNCE_OVERRIDES !== "undefined")
              ? PRONOUNCE_OVERRIDES[String(text).trim().toLowerCase()] : null;
       if (ov) t = ov;
-      var u = new SpeechSynthesisUtterance(t);
-      u.lang = "en-US";
-      u.rate = 0.95;
-      if (cachedVoices && cachedVoices.length) {
-        var v = cachedVoices.find(function (x) { return x.lang && x.lang.indexOf("en") === 0; });
-        if (v) u.voice = v;
-      }
-      u.onerror = function () {};
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
+      speakCore(t, 0.95, true, function (r) {
+        if (r === "interrupted") return;
+        try { speakCore(t, 0.95, false, function () {}); } catch (e2) {}
+      });
     } catch (e) {}
   }
 

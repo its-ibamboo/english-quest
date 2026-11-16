@@ -1,5 +1,24 @@
 # 英文任務系統 · 更新紀錄
 
+## v2026.11.16a
+
+`index.html` 有改；`worker.js`、`sw.js` 只是版本號；`wrangler.toml`、`schema.sql` 沒變。
+
+### iPhone 發音失敗（canceled）修正
+使用者回報（Threads）：iPhone 按發音跳「發音失敗，原因：canceled」，換瀏覽器也一樣。
+
+原因與修正：
+- 每次發音都先 `cancel()` 再 `speak()`。iOS Safari 有已知問題（WebKit bug 238189）：cancel 後立刻排進去的那句也會被取消。→ 只有正在唸的時候才 cancel，cancel 後等 80ms 再唸。
+- 原本挑「第一個 en 開頭的聲音」，iPhone 上可能挑到沒下載的或特效聲音（Bells、Boing…）。→ 只挑本機 en-US 一般聲音（優先系統預設、Samantha），挑不到就不指定。
+- 失敗時不指定聲音自動重試一次，還是失敗才跳提示；`interrupted`（連點打斷）不跳提示。
+- 提示依手機分開：iPhone 教靜音開關／音量、「設定 > 輔助使用 > 朗讀內容 > 聲音 > 英文」；Android 維持原本路徑。
+- 拼字蜂遊戲內朗讀（beeSpeak）共用同一套邏輯。
+
+### 部署後檢查
+1. `/ping` → v2026.11.16a
+2. Android 按閃卡發音正常
+3. 請回報的 iPhone 使用者更新後再試
+
 ## v2026.11.08a
 
 `index.html`、`worker.js`、`sw.js` 有改（worker、sw 只是版本號）；`wrangler.toml`、`schema.sql` 沒變。
