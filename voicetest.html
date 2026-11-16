@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>發音測試 · 英文任務系統</title>
+<style>
+  body{font-family:-apple-system,"PingFang TC","Noto Sans TC",sans-serif;margin:0;padding:16px;background:#f6f3ec;color:#222;line-height:1.5}
+  h1{font-size:20px;margin:0 0 4px}
+  p.sub{margin:0 0 14px;color:#666;font-size:14px}
+  .step{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .step b{display:block;margin-bottom:6px}
+  button{font-size:16px;padding:10px 14px;border-radius:10px;border:1px solid #1f6f5c;background:#1f6f5c;color:#fff;margin:4px 6px 4px 0}
+  button.alt{background:#fff;color:#1f6f5c}
+  button.send{background:#c98a1a;border-color:#c98a1a;width:100%;font-size:18px;padding:14px}
+  #log{background:#111;color:#9f9;font:12px/1.45 ui-monospace,Menlo,monospace;padding:10px;border-radius:10px;white-space:pre-wrap;word-break:break-all;max-height:320px;overflow:auto}
+  .ok{color:#1f6f5c}.bad{color:#b33}
+  #voices button{font-size:13px;padding:6px 8px}
+</style>
+</head>
+<body>
+<h1>🔊 發音測試</h1>
+<p class="sub">請依序按下面的按鈕，每按一個聽聽看有沒有聲音，最後按「送出結果」。</p>
+
+<div class="step"><b>1. 嗶聲（確認音量／靜音）</b>
+  <button onclick="beep()">播放嗶聲</button></div>
+
+<div class="step"><b>2. 中文朗讀</b>
+  <button onclick="t('zh','你好，這是測試',{lang:'zh-TW'})">唸中文</button></div>
+
+<div class="step"><b>3. 英文朗讀（三種方式）</b>
+  <button onclick="t('A','hello apple',{})">方式 A</button>
+  <button onclick="t('B','hello apple',{lang:'en-US'})">方式 B</button>
+  <button onclick="t('C','hello apple',{lang:'en-US',rate:0.9,cancelFirst:true})">方式 C</button></div>
+
+<div class="step"><b>4. 指定英文聲音（可略過）</b>
+  <div id="voices">讀取中…</div></div>
+
+<div class="step"><b>5. 哪幾個有聲音？</b>
+  <label><input type="checkbox" id="h_beep"> 嗶聲</label>
+  <label><input type="checkbox" id="h_zh"> 中文</label>
+  <label><input type="checkbox" id="h_A"> A</label>
+  <label><input type="checkbox" id="h_B"> B</label>
+  <label><input type="checkbox" id="h_C"> C</label>
+</div>
+
+<button class="send" onclick="send(this)">送出結果</button>
+<p id="msg" class="sub"></p>
+
+<div id="log"></div>
+
+<script>
+var LOG = [], VLOG = [];
+function log(s){ var line = new Date().toTimeString().slice(0,8)+" "+s; LOG.push(line);
+  var el=document.getElementById("log"); el.textContent = LOG.join("\n"); el.scrollTop = 1e9; }
+var ss = window.speechSynthesis;
+
+log("UA: " + navigator.userAgent);
+log("standalone(主畫面App): " + (!!navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches)));
+log("speechSynthesis: " + (ss ? "有" : "沒有"));
+
+var voices = [];
+function loadVoices(){
+  if (!ss) return;
+  voices = ss.getVoices();
+  var en = voices.filter(function(v){ return /^en/i.test(v.lang||""); });
+  log("聲音總數 " + voices.length + "，英文 " + en.length);
+  VLOG = en.slice(0,40).map(function(v,i){ return "["+i+"] "+v.name+"|"+v.lang+"|L="+v.localService+"|D="+v.default; });
+  var box = document.getElementById("voices");
+  if (!en.length) { box.textContent = "沒有找到英文聲音"; return; }
+  box.innerHTML = "";
+  en.slice(0,12).forEach(function(v){
+    var b=document.createElement("button"); b.className="alt"; b.textContent=v.name+" ("+v.lang+")";
+    b.onclick=function(){ t("V:"+v.name,"hello apple",{lang:v.lang,voice:v}); };
+    box.appendChild(b);
+  });
+}
+if (ss) { loadVoices(); ss.onvoiceschanged = loadVoices; setTimeout(loadVoices, 1500); }
+
+function t(tag, text, o){
+  if (!ss) { log(tag+" ✗ 不支援 speechSynthesis"); return; }
+  try {
+    log(tag+" ▶ 開始 speaking="+ss.speaking+" pending="+ss.pending+" paused="+ss.paused);
+    if (o.cancelFirst) ss.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    if (o.lang) u.lang = o.lang;
+    if (o.rate) u.rate = o.rate;
+    if (o.voice) u.voice = o.voice;
+    var started = false;
+    u.onstart = function(){ started = true; log(tag+" ✓ onstart"); };
+    u.onend   = function(){ log(tag+" ✓ onend"); };
+    u.onerror = function(e){ log(tag+" ✗ onerror: "+(e && e.error)); };
+    ss.speak(u);
+    try { if (ss.paused) ss.resume(); } catch(e){}
+    setTimeout(function(){ if(!started) log(tag+" … 3 秒內沒有 onstart  speaking="+ss.speaking+" pending="+ss.pending); }, 3000);
+  } catch(e) { log(tag+" ✗ 例外: "+e.message); }
+}
+
+var AC=null;
+function beep(){
+  try {
+    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    if (AC.state==="suspended") AC.resume();
+    var o=AC.createOscillator(), g=AC.createGain();
+    o.frequency.value=660; g.gain.value=0.2; o.connect(g); g.connect(AC.destination);
+    o.start(); o.stop(AC.currentTime+0.4);
+    log("beep ▶ AudioContext state="+AC.state);
+  } catch(e){ log("beep ✗ "+e.message); }
+}
+
+function send(btn){
+  var heard = ["beep","zh","A","B","C"].filter(function(k){ return document.getElementById("h_"+k).checked; });
+  btn.disabled = true; btn.textContent = "送出中…";
+  fetch("/report", { method:"POST", headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({ text: "【發音測試】有聲音：" + (heard.join(", ") || "全部沒有"), diag: (LOG.join("\n") + "\n--- 英文聲音 ---\n" + VLOG.join("\n")).slice(0, 3990), img: "" })
+  }).then(function(r){ return r.json(); }).then(function(j){
+    btn.textContent = j && j.ok ? "已送出，謝謝！" : "送出失敗";
+    document.getElementById("msg").textContent = j && j.ok ? "" : "送出失敗，請直接截圖下面的黑色框框給我們";
+  }).catch(function(){
+    btn.textContent = "送出失敗"; btn.disabled = false;
+    document.getElementById("msg").textContent = "送出失敗，請直接截圖下面的黑色框框給我們";
+  });
+}
+</script>
+</body>
+</html>

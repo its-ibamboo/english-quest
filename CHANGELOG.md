@@ -14,8 +14,14 @@
 - 提示依手機分開：iPhone 教靜音開關／音量、「設定 > 輔助使用 > 朗讀內容 > 聲音 > 英文」；Android 維持原本路徑。
 - 拼字蜂遊戲內朗讀（beeSpeak）共用同一套邏輯。
 
+### 發音測試頁（新增 `voicetest.html`）
+iPhone 使用者更新後仍然失敗，拿不到她手機的實際狀況，所以加了一個獨立測試頁 `/voicetest.html`：
+嗶聲、中文、三種英文朗讀方式、逐一指定英文聲音，每一步的 onstart／onend／onerror 都記下來，按「送出結果」直接進 `/reports`（不用截圖）。
+不讀寫任何 localStorage，不影響主程式。
+
 ### 部署後檢查
 1. `/ping` → v2026.11.16a
+2. 打開 `/voicetest.html` 能看到測試頁
 2. Android 按閃卡發音正常
 3. 請回報的 iPhone 使用者更新後再試
 
