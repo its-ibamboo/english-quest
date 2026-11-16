@@ -1,5 +1,21 @@
 # 英文任務系統 · 更新紀錄
 
+## v2026.11.16b
+
+`index.html`、`voicetest.html` 有改；`worker.js`、`sw.js` 只是版本號。
+
+### iPhone 沒聲音：真正原因是靜音模式
+回報者（iPhone 17 Pro，iOS 27.2）用 `/voicetest.html` 測了兩次：
+- 在 Threads 內建瀏覽器：中文、英文都有聲音，只有嗶聲沒有。
+- 在 Safari：全部沒聲音，但 `onstart`／`onend` 都正常觸發，代表 Safari 以為自己有在唸。
+- 她第一次回報的截圖狀態列有靜音鈴鐺。
+
+結論：iPhone 開靜音模式時，Safari 網頁聲音預設是 ambient，會被靜音（朗讀和 Web Audio 都一樣）。Threads 內建瀏覽器用的是 playback，所以不受影響。之前的 `canceled` 是連點時互相取消造成的，不是主因。
+
+修正：每次朗讀前設定 `navigator.audioSession.type = "playback"`（iOS 17 起支援，其他瀏覽器沒有這個 API 就略過）。
+副作用：設定之後，同一頁的遊戲音效在靜音模式下也會有聲音。
+voicetest 新增「方式 D」，用來確認這招在她手機上是否也能讓朗讀出聲（Web Audio 確定有效，朗讀待確認）。
+
 ## v2026.11.16a
 
 `index.html` 有改；`worker.js`、`sw.js` 只是版本號；`wrangler.toml`、`schema.sql` 沒變。

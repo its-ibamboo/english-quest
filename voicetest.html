@@ -20,10 +20,10 @@
 </head>
 <body>
 <h1>🔊 發音測試</h1>
-<p class="sub">請依序按下面的按鈕，每按一個聽聽看有沒有聲音，最後按「送出結果」。</p>
+<p class="sub">請用 <b>Safari</b> 開，<b>靜音模式保持打開</b>（不要關）。<br>每按一個按鈕，等它唸完再按下一個，最後按「送出結果」。</p>
 
 <div class="step"><b>1. 嗶聲（確認音量／靜音）</b>
-  <button onclick="beep()">播放嗶聲</button></div>
+  <button onclick="beep('beep')">播放嗶聲</button></div>
 
 <div class="step"><b>2. 中文朗讀</b>
   <button onclick="t('zh','你好，這是測試',{lang:'zh-TW'})">唸中文</button></div>
@@ -32,6 +32,10 @@
   <button onclick="t('A','hello apple',{})">方式 A</button>
   <button onclick="t('B','hello apple',{lang:'en-US'})">方式 B</button>
   <button onclick="t('C','hello apple',{lang:'en-US',rate:0.9,cancelFirst:true})">方式 C</button></div>
+
+<div class="step"><b>3-2. 新方法（最重要）</b>
+  <button onclick="fixD()">方式 D</button>
+  <button onclick="beep('beepD')">D 之後的嗶聲</button></div>
 
 <div class="step"><b>4. 指定英文聲音（可略過）</b>
   <div id="voices">讀取中…</div></div>
@@ -42,6 +46,8 @@
   <label><input type="checkbox" id="h_A"> A</label>
   <label><input type="checkbox" id="h_B"> B</label>
   <label><input type="checkbox" id="h_C"> C</label>
+  <label><input type="checkbox" id="h_D"> D</label>
+  <label><input type="checkbox" id="h_beepD"> D 之後的嗶聲</label>
 </div>
 
 <button class="send" onclick="send(this)">送出結果</button>
@@ -56,6 +62,7 @@ function log(s){ var line = new Date().toTimeString().slice(0,8)+" "+s; LOG.push
 var ss = window.speechSynthesis;
 
 log("UA: " + navigator.userAgent);
+log("audioSession: " + (navigator.audioSession ? navigator.audioSession.type : "無"));
 log("standalone(主畫面App): " + (!!navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches)));
 log("speechSynthesis: " + (ss ? "有" : "沒有"));
 
@@ -96,20 +103,27 @@ function t(tag, text, o){
   } catch(e) { log(tag+" ✗ 例外: "+e.message); }
 }
 
+function fixD(){
+  try {
+    if (navigator.audioSession) { navigator.audioSession.type = "playback"; log("D audioSession → " + navigator.audioSession.type); }
+    else log("D 這台沒有 navigator.audioSession");
+  } catch(e){ log("D audioSession 例外: "+e.message); }
+  t("D","hello apple",{lang:"en-US"});
+}
 var AC=null;
-function beep(){
+function beep(tag){ tag = tag || "beep";
   try {
     AC = AC || new (window.AudioContext||window.webkitAudioContext)();
     if (AC.state==="suspended") AC.resume();
     var o=AC.createOscillator(), g=AC.createGain();
     o.frequency.value=660; g.gain.value=0.2; o.connect(g); g.connect(AC.destination);
     o.start(); o.stop(AC.currentTime+0.4);
-    log("beep ▶ AudioContext state="+AC.state);
+    log(tag+" ▶ AudioContext state="+AC.state+" audioSession="+(navigator.audioSession ? navigator.audioSession.type : "無"));
   } catch(e){ log("beep ✗ "+e.message); }
 }
 
 function send(btn){
-  var heard = ["beep","zh","A","B","C"].filter(function(k){ return document.getElementById("h_"+k).checked; });
+  var heard = ["beep","zh","A","B","C","D","beepD"].filter(function(k){ return document.getElementById("h_"+k).checked; });
   btn.disabled = true; btn.textContent = "送出中…";
   fetch("/report", { method:"POST", headers:{"Content-Type":"application/json"},
     body: JSON.stringify({ text: "【發音測試】有聲音：" + (heard.join(", ") || "全部沒有"), diag: (LOG.join("\n") + "\n--- 英文聲音 ---\n" + VLOG.join("\n")).slice(0, 3990), img: "" })

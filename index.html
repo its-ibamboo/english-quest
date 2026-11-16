@@ -3802,7 +3802,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.11.16a";
+var BUILD = "v2026.11.16b";
 
 // ------------------------------------------------------------------
 // 每日一句（原「今日單字」改版）
@@ -4312,7 +4312,13 @@ function pickEnVoice() {
   var good = en.find(function (v) { return /samantha|google us english|english united states/i.test(v.name || ""); });
   return good || en[0];
 }
+// v2026.11.16b：iPhone 開靜音模式時，Safari 的網頁聲音預設是 ambient，會被靜音（事件照常 onstart/onend，但聽不到）。
+// 改成 playback，跟影片一樣不受靜音模式影響。Threads 內建瀏覽器本來就是這樣，所以在脆裡面有聲音。
+function iosPlaybackSession() {
+  try { if (navigator.audioSession && navigator.audioSession.type !== "playback") navigator.audioSession.type = "playback"; } catch (e) {}
+}
 function speakCore(text, rate, useVoice, onFail) {
+  iosPlaybackSession();
   var u = new SpeechSynthesisUtterance(text);
   u.lang = "en-US";
   u.rate = rate;
