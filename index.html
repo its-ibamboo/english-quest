@@ -3802,7 +3802,7 @@ var DIFFICULTIES = [
   { key: "all", label: "全部" }
 ];
 // 版本號：改版時記得往上帶（日期 + 當天序號）
-var BUILD = "v2026.11.16b";
+var BUILD = "v2026.11.17a";
 
 // ------------------------------------------------------------------
 // 每日一句（原「今日單字」改版）
@@ -4314,8 +4314,24 @@ function pickEnVoice() {
 }
 // v2026.11.16b：iPhone 開靜音模式時，Safari 的網頁聲音預設是 ambient，會被靜音（事件照常 onstart/onend，但聽不到）。
 // 改成 playback，跟影片一樣不受靜音模式影響。Threads 內建瀏覽器本來就是這樣，所以在脆裡面有聲音。
+// v2026.11.17a：只在唸的時候用 playback，唸完 400ms 後切回 auto，遊戲音效維持原本行為（靜音模式下照樣安靜）
+var _ttsActive = 0, _ttsRestoreT = null;
 function iosPlaybackSession() {
-  try { if (navigator.audioSession && navigator.audioSession.type !== "playback") navigator.audioSession.type = "playback"; } catch (e) {}
+  try {
+    if (!navigator.audioSession) return;
+    clearTimeout(_ttsRestoreT);
+    if (navigator.audioSession.type !== "playback") navigator.audioSession.type = "playback";
+  } catch (e) {}
+}
+function iosRestoreSession() {
+  try {
+    if (!navigator.audioSession) return;
+    clearTimeout(_ttsRestoreT);
+    _ttsRestoreT = setTimeout(function () {
+      if (_ttsActive > 0) return;
+      try { navigator.audioSession.type = "auto"; } catch (e) {}
+    }, 400);
+  } catch (e) {}
 }
 function speakCore(text, rate, useVoice, onFail) {
   iosPlaybackSession();
@@ -4323,7 +4339,12 @@ function speakCore(text, rate, useVoice, onFail) {
   u.lang = "en-US";
   u.rate = rate;
   if (useVoice) { var v = pickEnVoice(); if (v) u.voice = v; }
-  u.onerror = function (e) { onFail(e && e.error ? e.error : "unknown"); };
+  _ttsActive++;
+  var done = false;
+  var finish = function () { if (done) return; done = true; _ttsActive = Math.max(0, _ttsActive - 1); iosRestoreSession(); };
+  setTimeout(finish, 15000);   // 保險：iOS 偶爾不發 onend
+  u.onend = finish;
+  u.onerror = function (e) { finish(); onFail(e && e.error ? e.error : "unknown"); };
   var ss = window.speechSynthesis;
   var busy = ss.speaking || ss.pending;
   if (busy) ss.cancel();
@@ -5393,7 +5414,7 @@ var BEE = (function () {
   // ---------------- 音效（Web Audio 合成，不需外部檔案）----------------
   function ac() {
     if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC = null; } }
-    if (AC && AC.state === "suspended") { try { AC.resume(); } catch (e2) {} }
+    if (AC && AC.state !== "running") { try { AC.resume(); } catch (e2) {} }   // iOS 朗讀後會變 interrupted
     return AC;
   }
   function tone(freq, dur, type, vol, slideTo) {
@@ -7396,7 +7417,7 @@ var SLICE = (function () {
     function ac() {
       try {
         if (!A) A = new (window.AudioContext || window.webkitAudioContext)();
-        if (A.state === "suspended") A.resume();
+        if (A.state !== "running") A.resume();   // iOS 朗讀後會變 interrupted
       } catch (e) { A = null; }
       return A;
     }

@@ -1,5 +1,26 @@
 # 英文任務系統 · 更新紀錄
 
+## v2026.11.17a
+
+`index.html` 有改；`worker.js`、`sw.js` 只是版本號。
+
+### 確認：靜音模式修正有效
+回報者用 Safari、靜音模式打開，測「方式 D」（audioSession = playback）→ 朗讀有聲音。設定後連 A、B、C 也有聲音。
+
+### 唸完切回原本模式
+- 唸之前切到 `playback`，唸完 400ms 後切回 `auto`。連續唸好幾個字只會在最後一個唸完才切回。
+- 效果：靜音模式下發音有聲音，遊戲音效維持原本行為（靜音時安靜），背景音樂只在唸的那一下被打斷。
+- 保險：iOS 偶爾不發 onend，15 秒後也會自動切回。
+
+### 遊戲音效在朗讀後失效
+同一份測試記錄看到：朗讀後 Web Audio 的狀態會變成 `interrupted`（不是 `suspended`），原本只處理 `suspended`，所以 iPhone 上朗讀過後，拼字蜂和切切樂的音效可能會整個沒聲音。
+→ 改成只要不是 `running` 就 `resume()`。
+
+### 部署後檢查
+1. `/ping` → v2026.11.17a
+2. iPhone 開靜音、用 Safari：閃卡發音有聲音
+3. iPhone 不開靜音：切切樂一邊發音一邊有音效
+
 ## v2026.11.16b
 
 `index.html`、`voicetest.html` 有改；`worker.js`、`sw.js` 只是版本號。
